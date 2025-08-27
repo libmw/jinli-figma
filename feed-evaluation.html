@@ -1,0 +1,2648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>饲料分析对比 - 管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="../static/font-awesome@4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <script src="../static/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <!-- Tailwind 配置 - 管理系统配色 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#165DFF", // 专业蓝 - 主色调
+              secondary: "#36CFC9", // 青绿 - 辅助色
+              success: "#52C41A", // 成功绿
+              warning: "#FAAD14", // 警告黄
+              danger: "#FF4D4F", // 危险红
+              info: "#40A9FF", // 信息蓝
+              "neutral-100": "#F5F7FA", // 最浅灰
+              "neutral-200": "#E5E6EB", // 浅灰
+              "neutral-300": "#C9CDD4", // 中浅灰
+              "neutral-400": "#86909C", // 中灰
+              "neutral-500": "#4E5969", // 深灰
+              "neutral-600": "#1D2129", // 最深灰
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .sidebar-item {
+          @apply flex items-center gap-3 px-4 py-3 text-neutral-500 hover:bg-primary/5 hover:text-primary rounded-lg transition-all duration-200;
+        }
+        .sidebar-item.active {
+          @apply bg-primary/10 text-primary font-medium border-r-4 border-primary;
+        }
+        .stat-card {
+          @apply bg-white rounded-lg shadow-sm p-4 border border-neutral-200 transition-all duration-200 hover:shadow-md;
+        }
+        .chart-container {
+          @apply bg-white rounded-lg shadow-sm p-4 md:p-6 border border-neutral-200;
+        }
+        .table-row-hover {
+          @apply hover:bg-neutral-100 transition-colors duration-150;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="bg-neutral-100 text-neutral-600 flex h-screen overflow-hidden">
+    <!-- 侧边导航 -->
+    <aside
+      class="w-64 bg-white border-r border-neutral-200 h-full flex-shrink-0 hidden md:block overflow-y-auto"
+    >
+      <div class="p-4 border-b border-neutral-200">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-8 h-8 bg-primary rounded-md flex items-center justify-center"
+          >
+            <i class="fa fa-leaf text-white"></i>
+          </div>
+          <h1 class="text-lg font-bold text-neutral-600">饲料管理系统</h1>
+        </div>
+      </div>
+
+      <nav class="p-3">
+        <p class="text-xs text-neutral-400 uppercase px-4 py-2">主菜单</p>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-tachometer w-5 text-center"></i>
+          <span>仪表盘</span>
+        </a>
+        <a href="#" class="sidebar-item active">
+          <i class="fa fa-balance-scale w-5 text-center"></i>
+          <span>饲料分析对比</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-shopping-cart w-5 text-center"></i>
+          <span>采购管理</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-cutlery w-5 text-center"></i>
+          <span>饲喂管理</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-bar-chart w-5 text-center"></i>
+          <span>养殖绩效</span>
+        </a>
+
+        <p class="text-xs text-neutral-400 uppercase px-4 py-2 mt-4">
+          系统设置
+        </p>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-cog w-5 text-center"></i>
+          <span>系统配置</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-users w-5 text-center"></i>
+          <span>用户管理</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fa fa-history w-5 text-center"></i>
+          <span>操作日志</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <!-- 顶部导航栏 -->
+      <header
+        class="h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-4 md:px-6"
+      >
+        <div class="flex items-center gap-4">
+          <button class="md:hidden text-neutral-500">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-semibold">饲料分析对比</h2>
+            <span
+              class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full"
+              >实时分析</span
+            >
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- 日期范围选择器 -->
+          <div class="relative">
+            <button
+              class="flex items-center gap-2 text-sm border border-neutral-200 rounded-md px-3 py-1.5 hover:border-primary transition-colors"
+            >
+              <i class="fa fa-calendar text-neutral-400"></i>
+              <span>近30天</span>
+              <i class="fa fa-chevron-down text-xs text-neutral-400"></i>
+            </button>
+          </div>
+
+          <!-- 搜索框 -->
+          <div class="hidden md:block relative">
+            <input
+              type="text"
+              placeholder="搜索..."
+              class="pl-8 pr-3 py-1.5 text-sm border border-neutral-200 rounded-md focus:outline-none focus:border-primary w-48"
+            />
+            <i
+              class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm"
+            ></i>
+          </div>
+
+          <!-- 通知图标 -->
+          <button
+            class="relative text-neutral-500 hover:text-primary transition-colors"
+          >
+            <i class="fa fa-bell text-xl"></i>
+            <span
+              class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-white text-xs flex items-center justify-center"
+              >3</span
+            >
+          </button>
+
+          <!-- 用户头像 -->
+          <div class="flex items-center gap-2">
+            <img
+              src="https://picsum.photos/id/1005/200/200"
+              alt="用户头像"
+              class="w-8 h-8 rounded-full object-cover border border-neutral-200"
+            />
+            <span class="text-sm font-medium hidden md:inline-block"
+              >管理员</span
+            >
+          </div>
+        </div>
+      </header>
+
+      <!-- 页面内容滚动区 -->
+      <main class="flex-1 overflow-y-auto p-4 md:p-6">
+        <!-- 快捷操作栏 -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div class="flex items-center gap-3">
+            <button
+              class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <i class="fa fa-download"></i>
+              <span>导出报告</span>
+            </button>
+            <button
+              class="flex items-center gap-2 bg-white border border-neutral-200 text-neutral-500 px-4 py-2 rounded-md text-sm font-medium hover:border-primary hover:text-primary transition-colors"
+            >
+              <i class="fa fa-refresh"></i>
+              <span>刷新数据</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <label class="text-sm text-neutral-500">饲料类型:</label>
+              <select
+                class="text-sm border border-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-primary"
+              >
+                <option>全部类型</option>
+                <option>水产饲料</option>
+                <option>禽畜饲料</option>
+                <option>特种饲料</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="text-sm text-neutral-500">对比维度:</label>
+              <select
+                class="text-sm border border-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-primary"
+              >
+                <option>综合评估</option>
+                <option>成本效益</option>
+                <option>养殖效果</option>
+                <option>环境影响</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 饲料选择和权重设置面板 -->
+        <div
+          class="bg-white rounded-lg shadow-sm border border-neutral-200 p-4 mb-6"
+        >
+          <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4"
+          >
+            <h3 class="font-semibold mb-2 md:mb-0">饲料选择与权重设置</h3>
+            <div class="flex gap-2">
+              <button
+                id="selectAllFeeds"
+                class="text-xs px-3 py-1.5 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+              >
+                全选
+              </button>
+              <button
+                id="deselectAllFeeds"
+                class="text-xs px-3 py-1.5 bg-white border border-neutral-200 text-neutral-500 rounded hover:border-primary hover:text-primary transition-colors"
+              >
+                取消全选
+              </button>
+              <button
+                id="resetWeights"
+                class="text-xs px-3 py-1.5 bg-white border border-neutral-200 text-neutral-500 rounded hover:border-primary hover:text-primary transition-colors"
+              >
+                重置权重
+              </button>
+            </div>
+          </div>
+
+          <!-- 饲料选择 -->
+          <div class="mb-4">
+            <h4 class="text-sm font-medium text-neutral-500 mb-2">
+              选择需要对比的饲料型号：
+            </h4>
+            <div id="feedSelection" class="flex flex-wrap gap-2">
+              <!-- 动态生成的饲料选择复选框 -->
+            </div>
+          </div>
+
+          <!-- 权重设置 -->
+          <div>
+            <h4 class="text-sm font-medium text-neutral-500 mb-2">
+              设置评估指标权重：
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="flex items-center gap-2">
+                <label class="text-sm w-32">价格权重:</label>
+                <input
+                  type="range"
+                  id="priceWeight"
+                  min="0"
+                  max="100"
+                  value="20"
+                  class="flex-1 accent-primary"
+                />
+                <span id="priceWeightValue" class="text-sm w-10 text-right"
+                  >20%</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm w-32">运输效率权重:</label>
+                <input
+                  type="range"
+                  id="transportWeight"
+                  min="0"
+                  max="100"
+                  value="10"
+                  class="flex-1 accent-primary"
+                />
+                <span id="transportWeightValue" class="text-sm w-10 text-right"
+                  >10%</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm w-32">饵料系数权重:</label>
+                <input
+                  type="range"
+                  id="fcrWeight"
+                  min="0"
+                  max="100"
+                  value="20"
+                  class="flex-1 accent-primary"
+                />
+                <span id="fcrWeightValue" class="text-sm w-10 text-right"
+                  >20%</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm w-32">死亡率权重:</label>
+                <input
+                  type="range"
+                  id="mortalityWeight"
+                  min="0"
+                  max="100"
+                  value="15"
+                  class="flex-1 accent-primary"
+                />
+                <span id="mortalityWeightValue" class="text-sm w-10 text-right"
+                  >15%</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm w-32">日增重权重:</label>
+                <input
+                  type="range"
+                  id="growthWeight"
+                  min="0"
+                  max="100"
+                  value="20"
+                  class="flex-1 accent-primary"
+                />
+                <span id="growthWeightValue" class="text-sm w-10 text-right"
+                  >20%</span
+                >
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm w-32">排污效率权重:</label>
+                <input
+                  type="range"
+                  id="wasteWeight"
+                  min="0"
+                  max="100"
+                  value="15"
+                  class="flex-1 accent-primary"
+                />
+                <span id="wasteWeightValue" class="text-sm w-10 text-right"
+                  >15%</span
+                >
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-neutral-400">
+              注：所有权重总和将自动调整为100%
+            </div>
+          </div>
+        </div>
+
+        <!-- 关键指标卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <p class="text-neutral-400 text-sm">参与对比品牌</p>
+                <h3 class="text-2xl font-bold mt-1">5</h3>
+              </div>
+              <div
+                class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary"
+              >
+                <i class="fa fa-tags"></i>
+              </div>
+            </div>
+            <div class="flex items-center text-sm">
+              <span class="text-success flex items-center">
+                <i class="fa fa-arrow-up mr-1"></i> 2
+              </span>
+              <span class="text-neutral-400 ml-2">较上月新增</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <p class="text-neutral-400 text-sm">平均饵料系数</p>
+                <h3 class="text-2xl font-bold mt-1">1.52</h3>
+              </div>
+              <div
+                class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success"
+              >
+                <i class="fa fa-balance-scale"></i>
+              </div>
+            </div>
+            <div class="flex items-center text-sm">
+              <span class="text-success flex items-center">
+                <i class="fa fa-arrow-down mr-1"></i> 3.2%
+              </span>
+              <span class="text-neutral-400 ml-2">较上月优化</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <p class="text-neutral-400 text-sm">平均日增重</p>
+                <h3 class="text-2xl font-bold mt-1">54.4g</h3>
+              </div>
+              <div
+                class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning"
+              >
+                <i class="fa fa-line-chart"></i>
+              </div>
+            </div>
+            <div class="flex items-center text-sm">
+              <span class="text-success flex items-center">
+                <i class="fa fa-arrow-up mr-1"></i> 5.7%
+              </span>
+              <span class="text-neutral-400 ml-2">较上月提升</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <p class="text-neutral-400 text-sm">平均死亡率</p>
+                <h3 class="text-2xl font-bold mt-1">1.58%</h3>
+              </div>
+              <div
+                class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger"
+              >
+                <i class="fa fa-exclamation-triangle"></i>
+              </div>
+            </div>
+            <div class="flex items-center text-sm">
+              <span class="text-danger flex items-center">
+                <i class="fa fa-arrow-up mr-1"></i> 0.3%
+              </span>
+              <span class="text-neutral-400 ml-2">较上月上升</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <!-- 总得分对比图 -->
+          <div class="chart-container">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold">饲料综合得分对比</h3>
+              <div class="flex gap-2">
+                <button
+                  id="refreshScores"
+                  class="text-xs px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors"
+                >
+                  <i class="fa fa-refresh mr-1"></i>刷新评分
+                </button>
+              </div>
+            </div>
+            <div class="h-72">
+              <canvas id="totalScoreChart"></canvas>
+            </div>
+          </div>
+
+          <!-- 分项得分对比图 -->
+          <div class="chart-container">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold">分项得分对比</h3>
+              <div class="flex gap-2">
+                <select
+                  id="scoreMetricSelector"
+                  class="text-xs border border-neutral-200 rounded px-2 py-1 focus:outline-none focus:border-primary"
+                >
+                  <option value="all">所有指标</option>
+                  <option value="price">价格</option>
+                  <option value="transport">运输效率</option>
+                  <option value="fcr">饵料系数</option>
+                  <option value="mortality">死亡率</option>
+                  <option value="growth">日增重</option>
+                  <option value="waste">排污效率</option>
+                </select>
+              </div>
+            </div>
+            <div class="h-72">
+              <canvas id="detailedScoreChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 原始数据图表区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="chart-container">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold">生长性能对比</h3>
+              <div class="flex gap-2">
+                <button
+                  class="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
+                >
+                  日增重
+                </button>
+                <button
+                  class="text-xs px-2 py-1 bg-neutral-100 text-neutral-500 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  周增重
+                </button>
+                <button
+                  class="text-xs px-2 py-1 bg-neutral-100 text-neutral-500 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  月增重
+                </button>
+              </div>
+            </div>
+            <div class="h-72">
+              <canvas id="growthRateChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold">成本效益分析</h3>
+              <div class="flex gap-2">
+                <button
+                  class="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
+                >
+                  每吨成本
+                </button>
+                <button
+                  class="text-xs px-2 py-1 bg-neutral-100 text-neutral-500 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  每公斤增重成本
+                </button>
+              </div>
+            </div>
+            <div class="h-72">
+              <canvas id="costChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 雷达图 - 核心对比 -->
+        <div class="chart-container mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold">饲料综合性能评估</h3>
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-neutral-500">显示指标:</span>
+              <div class="flex flex-wrap gap-2">
+                <label class="inline-flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked
+                    class="rounded text-primary focus:ring-primary"
+                  />
+                  <span>成本</span>
+                </label>
+                <label class="inline-flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked
+                    class="rounded text-primary focus:ring-primary"
+                  />
+                  <span>生长</span>
+                </label>
+                <label class="inline-flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked
+                    class="rounded text-primary focus:ring-primary"
+                  />
+                  <span>健康</span>
+                </label>
+                <label class="inline-flex items-center gap-1 text-xs">
+                  <input
+                    type="checkbox"
+                    checked
+                    class="rounded text-primary focus:ring-primary"
+                  />
+                  <span>环境</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="h-80 md:h-96">
+            <canvas id="radarChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 详细数据表格 -->
+        <div
+          class="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden mb-6"
+        >
+          <div
+            class="flex items-center justify-between p-4 border-b border-neutral-200"
+          >
+            <h3 class="font-semibold">饲料详细参数对比</h3>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="搜索品牌..."
+                  class="pl-8 pr-3 py-1.5 text-sm border border-neutral-200 rounded-md focus:outline-none focus:border-primary w-48"
+                />
+                <i
+                  class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm"
+                ></i>
+              </div>
+              <button
+                class="text-neutral-500 hover:text-primary transition-colors"
+              >
+                <i class="fa fa-filter"></i>
+              </button>
+              <button
+                class="text-neutral-500 hover:text-primary transition-colors"
+              >
+                <i class="fa fa-ellipsis-v"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-neutral-200">
+              <thead class="bg-neutral-100">
+                <tr>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider w-12"
+                  >
+                    <input
+                      type="checkbox"
+                      class="rounded text-primary focus:ring-primary"
+                    />
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    饲料品牌
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    价格(元/吨)
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    运输效率(分)
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    饵料系数
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    死亡率(%)
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    平均日增重(g)
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    微滤机清洗(次/天)
+                  </th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    综合评分
+                  </th>
+                  <th
+                    class="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                  >
+                    操作
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-neutral-200">
+                <tr class="table-row-hover">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      class="rounded text-primary focus:ring-primary"
+                    />
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-2"
+                      >
+                        <i class="fa fa-leaf"></i>
+                      </div>
+                      <span class="font-medium">绿源饲料</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">2,450</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">92</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    1.4
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    1.2
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    58
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    6
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 text-xs rounded-full bg-success/10 text-success font-medium"
+                      >92</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                    <button class="text-primary hover:text-primary/80 mr-3">
+                      详情
+                    </button>
+                    <button class="text-neutral-500 hover:text-neutral-600">
+                      <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table-row-hover">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      class="rounded text-primary focus:ring-primary"
+                    />
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-info/10 flex items-center justify-center text-info mr-2"
+                      >
+                        <i class="fa fa-leaf"></i>
+                      </div>
+                      <span class="font-medium">海丰养殖</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">2,800</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">88</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    1.3
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    0.9
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    62
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm text-success">
+                    7
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 text-xs rounded-full bg-success/10 text-success font-medium"
+                      >94</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                    <button class="text-primary hover:text-primary/80 mr-3">
+                      详情
+                    </button>
+                    <button class="text-neutral-500 hover:text-neutral-600">
+                      <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table-row-hover">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      class="rounded text-primary focus:ring-primary"
+                    />
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center text-warning mr-2"
+                      >
+                        <i class="fa fa-leaf"></i>
+                      </div>
+                      <span class="font-medium">正大集团</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">2,650</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">95</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">1.6</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">1.8</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">52</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">9</td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 text-xs rounded-full bg-warning/10 text-warning font-medium"
+                      >76</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                    <button class="text-primary hover:text-primary/80 mr-3">
+                      详情
+                    </button>
+                    <button class="text-neutral-500 hover:text-neutral-600">
+                      <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table-row-hover">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      class="rounded text-primary focus:ring-primary"
+                    />
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center text-danger mr-2"
+                      >
+                        <i class="fa fa-leaf"></i>
+                      </div>
+                      <span class="font-medium">通威股份</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">2,200</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">85</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">1.8</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">2.5</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">45</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">12</td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 text-xs rounded-full bg-danger/10 text-danger font-medium"
+                      >62</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                    <button class="text-primary hover:text-primary/80 mr-3">
+                      详情
+                    </button>
+                    <button class="text-neutral-500 hover:text-neutral-600">
+                      <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr class="table-row-hover">
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      class="rounded text-primary focus:ring-primary"
+                    />
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div
+                        class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mr-2"
+                      >
+                        <i class="fa fa-leaf"></i>
+                      </div>
+                      <span class="font-medium">新希望</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">2,350</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">90</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">1.5</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">1.5</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">55</td>
+                  <td class="px-4 py-3 whitespace-nowrap text-sm">8</td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="px-2 py-1 text-xs rounded-full bg-success/10 text-success font-medium"
+                      >85</span
+                    >
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                    <button class="text-primary hover:text-primary/80 mr-3">
+                      详情
+                    </button>
+                    <button class="text-neutral-500 hover:text-neutral-600">
+                      <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div
+            class="px-4 py-3 flex items-center justify-between border-t border-neutral-200"
+          >
+            <div class="flex items-center gap-2 text-sm text-neutral-500">
+              <span>显示 1 至 5 条，共 5 条</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-400 cursor-not-allowed"
+              >
+                <i class="fa fa-chevron-left text-xs"></i>
+              </button>
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white"
+              >
+                1
+              </button>
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors"
+              >
+                <i class="fa fa-chevron-right text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // 模拟数据
+      const feedBrands = [
+        "绿源饲料",
+        "海丰养殖",
+        "正大集团",
+        "通威股份",
+        "新希望",
+      ];
+      const priceData = [2450, 2800, 2650, 2200, 2350];
+      const transportEfficiency = [92, 88, 95, 85, 90];
+      const feedConversionRatio = [1.4, 1.3, 1.6, 1.8, 1.5];
+      const mortalityRate = [1.2, 0.9, 1.8, 2.5, 1.5];
+      const dailyGain = [58, 62, 52, 45, 55];
+      const filterCleaning = [223, 240, 252, 212, 208];
+
+      // 管理系统配色方案
+      const chartColors = [
+        "rgba(22, 93, 255, 0.7)", // 专业蓝
+        "rgba(64, 169, 255, 0.7)", // 信息蓝
+        "rgba(250, 173, 20, 0.7)", // 警告黄
+        "rgba(255, 77, 79, 0.7)", // 危险红
+        "rgba(54, 207, 201, 0.7)", // 青绿
+      ];
+
+      const chartBorderColors = [
+        "rgba(22, 93, 255, 1)", // 专业蓝
+        "rgba(64, 169, 255, 1)", // 信息蓝
+        "rgba(250, 173, 20, 1)", // 警告黄
+        "rgba(255, 77, 79, 1)", // 危险红
+        "rgba(54, 207, 201, 1)", // 青绿
+      ];
+
+      // 默认权重设置
+      let weights = {
+        price: 20,
+        transport: 10,
+        fcr: 20,
+        mortality: 15,
+        growth: 20,
+        waste: 15,
+      };
+
+      // 选中的饲料品牌
+      let selectedFeeds = [...feedBrands]; // 默认全选
+
+      // 图表实例
+      let totalScoreChart = null;
+      let detailedScoreChart = null;
+      let growthRateChart = null;
+      let costChart = null;
+      let radarChart = null;
+
+      // 图表配置
+      document.addEventListener("DOMContentLoaded", function () {
+        // 初始化饲料选择复选框
+        initFeedSelection();
+
+        // 初始化权重滑块事件
+        initWeightSliders();
+
+        // 初始化按钮事件
+        initButtonEvents();
+
+        // 初始化所有图表
+        initCharts();
+      });
+
+      // 初始化饲料选择复选框
+      function initFeedSelection() {
+        const feedSelectionContainer = document.getElementById("feedSelection");
+        feedSelectionContainer.innerHTML = "";
+
+        feedBrands.forEach((brand, index) => {
+          const brandColor = chartBorderColors[index];
+          const checkboxId = `feed-${index}`;
+
+          const checkboxLabel = document.createElement("label");
+          checkboxLabel.className =
+            "inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm";
+          checkboxLabel.style.borderColor = brandColor;
+          checkboxLabel.style.color = brandColor;
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = checkboxId;
+          checkbox.className = "rounded text-primary focus:ring-primary";
+          checkbox.checked = selectedFeeds.includes(brand);
+          checkbox.dataset.brand = brand;
+          checkbox.addEventListener("change", updateSelectedFeeds);
+
+          const span = document.createElement("span");
+          span.textContent = brand;
+
+          checkboxLabel.appendChild(checkbox);
+          checkboxLabel.appendChild(span);
+          feedSelectionContainer.appendChild(checkboxLabel);
+        });
+      }
+
+      // 更新选中的饲料
+      function updateSelectedFeeds() {
+        selectedFeeds = [];
+        document
+          .querySelectorAll('#feedSelection input[type="checkbox"]:checked')
+          .forEach((checkbox) => {
+            selectedFeeds.push(checkbox.dataset.brand);
+          });
+
+        // 更新图表
+        updateCharts();
+      }
+
+      // 初始化权重滑块事件
+      function initWeightSliders() {
+        // 为每个滑块添加事件监听
+        document
+          .getElementById("priceWeight")
+          .addEventListener("input", updateWeights);
+        document
+          .getElementById("transportWeight")
+          .addEventListener("input", updateWeights);
+        document
+          .getElementById("fcrWeight")
+          .addEventListener("input", updateWeights);
+        document
+          .getElementById("mortalityWeight")
+          .addEventListener("input", updateWeights);
+        document
+          .getElementById("growthWeight")
+          .addEventListener("input", updateWeights);
+        document
+          .getElementById("wasteWeight")
+          .addEventListener("input", updateWeights);
+
+        // 初始化显示值
+        updateWeightDisplays();
+      }
+
+      // 更新权重值
+      function updateWeights() {
+        // 获取所有滑块的值
+        const priceWeight = parseInt(
+          document.getElementById("priceWeight").value
+        );
+        const transportWeight = parseInt(
+          document.getElementById("transportWeight").value
+        );
+        const fcrWeight = parseInt(document.getElementById("fcrWeight").value);
+        const mortalityWeight = parseInt(
+          document.getElementById("mortalityWeight").value
+        );
+        const growthWeight = parseInt(
+          document.getElementById("growthWeight").value
+        );
+        const wasteWeight = parseInt(
+          document.getElementById("wasteWeight").value
+        );
+
+        // 计算总权重
+        const totalWeight =
+          priceWeight +
+          transportWeight +
+          fcrWeight +
+          mortalityWeight +
+          growthWeight +
+          wasteWeight;
+
+        // 如果总权重为0，则平均分配
+        if (totalWeight === 0) {
+          weights = {
+            price: 16.67,
+            transport: 16.67,
+            fcr: 16.67,
+            mortality: 16.67,
+            growth: 16.67,
+            waste: 16.67,
+          };
+        } else {
+          // 否则按比例计算
+          weights = {
+            price: ((priceWeight / totalWeight) * 100).toFixed(1),
+            transport: ((transportWeight / totalWeight) * 100).toFixed(1),
+            fcr: ((fcrWeight / totalWeight) * 100).toFixed(1),
+            mortality: ((mortalityWeight / totalWeight) * 100).toFixed(1),
+            growth: ((growthWeight / totalWeight) * 100).toFixed(1),
+            waste: ((wasteWeight / totalWeight) * 100).toFixed(1),
+          };
+        }
+
+        // 更新显示值
+        updateWeightDisplays();
+
+        // 更新图表
+        updateCharts();
+      }
+
+      // 更新权重显示值
+      function updateWeightDisplays() {
+        document.getElementById("priceWeightValue").textContent =
+          weights.price + "%";
+        document.getElementById("transportWeightValue").textContent =
+          weights.transport + "%";
+        document.getElementById("fcrWeightValue").textContent =
+          weights.fcr + "%";
+        document.getElementById("mortalityWeightValue").textContent =
+          weights.mortality + "%";
+        document.getElementById("growthWeightValue").textContent =
+          weights.growth + "%";
+        document.getElementById("wasteWeightValue").textContent =
+          weights.waste + "%";
+      }
+
+      // 初始化按钮事件
+      function initButtonEvents() {
+        // 全选按钮
+        document
+          .getElementById("selectAllFeeds")
+          .addEventListener("click", () => {
+            document
+              .querySelectorAll('#feedSelection input[type="checkbox"]')
+              .forEach((checkbox) => {
+                checkbox.checked = true;
+              });
+            updateSelectedFeeds();
+          });
+
+        // 取消全选按钮
+        document
+          .getElementById("deselectAllFeeds")
+          .addEventListener("click", () => {
+            document
+              .querySelectorAll('#feedSelection input[type="checkbox"]')
+              .forEach((checkbox) => {
+                checkbox.checked = false;
+              });
+            updateSelectedFeeds();
+          });
+
+        // 重置权重按钮
+        document
+          .getElementById("resetWeights")
+          .addEventListener("click", () => {
+            document.getElementById("priceWeight").value = 20;
+            document.getElementById("transportWeight").value = 10;
+            document.getElementById("fcrWeight").value = 20;
+            document.getElementById("mortalityWeight").value = 15;
+            document.getElementById("growthWeight").value = 20;
+            document.getElementById("wasteWeight").value = 15;
+
+            weights = {
+              price: 20,
+              transport: 10,
+              fcr: 20,
+              mortality: 15,
+              growth: 20,
+              waste: 15,
+            };
+
+            updateWeightDisplays();
+            updateCharts();
+          });
+
+        // 刷新评分按钮
+        document
+          .getElementById("refreshScores")
+          .addEventListener("click", updateCharts);
+
+        // 分项得分选择器
+        document
+          .getElementById("scoreMetricSelector")
+          .addEventListener("change", updateDetailedScoreChart);
+      }
+
+      // 计算饲料得分
+      function calculateFeedScores() {
+        const scores = {};
+
+        // 对每个饲料品牌计算得分
+        feedBrands.forEach((brand, index) => {
+          // 计算各项指标的得分（0-100分）
+          // 注意：对于价格、饵料系数、死亡率、微滤机清洗次数，值越低越好，所以需要反向计算
+          // 调整后的评分公式 - 提高基准分数
+          // 价格评分：调整基准值为2900，缩小范围使得分数更高
+          const priceScore = Math.min(100, 100 - ((priceData[index] - 1900) / 1500) * 100);
+          // 运输效率：直接使用原始值，但确保不低于80分
+          const transportScore = Math.max(80, transportEfficiency[index]);
+          // 饵料系数：调整基准值为0.8，使得分数更高
+          const fcrScore = Math.min(100, 100 - ((feedConversionRatio[index] - 0.8) / 1.5) * 100);
+          // 死亡率：调整基准值为0，缩小范围使得分数更高
+          const mortalityScore = Math.min(100, 100 - ((mortalityRate[index] - 0) / 4) * 100);
+          // 日增重：调整基准值为35，扩大范围使得分数更高
+          const growthScore = Math.min(100, ((dailyGain[index] - 35) / 20) * 100);
+          // 微滤机清洗：调整基准值为0，缩小范围使得分数更高
+          const wasteScore = Math.min(100, 100 - ((filterCleaning[index] - 0) / 2500) * 100);
+
+          // 计算加权总分
+          const totalScore = (
+            (priceScore * weights.price) / 100 +
+            (transportScore * weights.transport) / 100 +
+            (fcrScore * weights.fcr) / 100 +
+            (mortalityScore * weights.mortality) / 100 +
+            (growthScore * weights.growth) / 100 +
+            (wasteScore * weights.waste) / 100
+          ).toFixed(1);
+
+          scores[brand] = {
+            total: totalScore,
+            price: priceScore.toFixed(1),
+            transport: transportScore.toFixed(1),
+            fcr: fcrScore.toFixed(1),
+            mortality: mortalityScore.toFixed(1),
+            growth: growthScore.toFixed(1),
+            waste: wasteScore.toFixed(1),
+          };
+        });
+
+        return scores;
+      }
+
+      // 初始化所有图表
+      function initCharts() {
+        // 生长率对比图
+        const growthRateCtx = document
+          .getElementById("growthRateChart")
+          .getContext("2d");
+        growthRateChart = new Chart(growthRateCtx, {
+          type: "bar",
+          data: {
+            labels: feedBrands,
+            datasets: [
+              {
+                label: "平均日增重 (g)",
+                data: dailyGain,
+                backgroundColor: chartColors,
+                borderColor: chartBorderColors,
+                borderWidth: 1,
+              },
+              {
+                label: "行业平均 (g)",
+                data: [50, 50, 50, 50, 50],
+                type: "line",
+                fill: false,
+                borderColor: "rgba(134, 144, 156, 0.7)",
+                borderDash: [5, 5],
+                pointRadius: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  boxWidth: 12,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                },
+              },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: 40,
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+
+        // 成本效益图
+        const costCtx = document.getElementById("costChart").getContext("2d");
+        costChart = new Chart(costCtx, {
+          type: "bar",
+          data: {
+            labels: feedBrands,
+            datasets: [
+              {
+                label: "价格 (元/吨)",
+                data: priceData,
+                backgroundColor: chartColors,
+                borderColor: chartBorderColors,
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  boxWidth: 12,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: 2000,
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+
+        // 雷达图 - 综合评估
+        const radarCtx = document.getElementById("radarChart").getContext("2d");
+        radarChart = new Chart(radarCtx, {
+          type: "radar",
+          data: {
+            labels: [
+              "价格(反向)",
+              "运输效率",
+              "饵料系数(反向)",
+              "死亡率(反向)",
+              "平均日增重",
+              "排污效率(反向)",
+            ],
+            datasets: feedBrands.map((brand, index) => {
+              return {
+                label: brand,
+                data: [
+                  100 - ((priceData[index] - 2000) / 1000) * 100, // 价格反向
+                  transportEfficiency[index],
+                  100 - ((feedConversionRatio[index] - 1) / 1) * 100, // 饵料系数反向
+                  100 - ((mortalityRate[index] - 0) / 3) * 100, // 死亡率反向
+                  ((dailyGain[index] - 40) / 25) * 100, // 平均日增重
+                  100 - ((filterCleaning[index] - 5) / 10) * 100, // 排污效率反向
+                ],
+                backgroundColor: chartColors[index],
+                borderColor: chartBorderColors[index],
+                pointBackgroundColor: chartBorderColors[index],
+                pointBorderColor: "#fff",
+                pointHoverBackgroundColor: "#fff",
+                pointHoverBorderColor: chartBorderColors[index],
+                pointRadius: 4,
+                pointHoverRadius: 6,
+              };
+            }),
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+              line: {
+                borderWidth: 2,
+                tension: 0.2,
+              },
+            },
+            scales: {
+              r: {
+                angleLines: {
+                  display: true,
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+                pointLabels: {
+                  font: {
+                    size: 12,
+                  },
+                },
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks: {
+                  display: false,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  boxWidth: 12,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  padding: 20,
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const label = context.dataset.label || "";
+                    const index = context.dataIndex;
+
+                    // 显示原始值而非标准化值
+                    let rawValue;
+                    switch (index) {
+                      case 0:
+                        rawValue =
+                          priceData[feedBrands.indexOf(label)] + "元/吨";
+                        break;
+                      case 1:
+                        rawValue =
+                          transportEfficiency[feedBrands.indexOf(label)] + "分";
+                        break;
+                      case 2:
+                        rawValue =
+                          feedConversionRatio[feedBrands.indexOf(label)];
+                        break;
+                      case 3:
+                        rawValue =
+                          mortalityRate[feedBrands.indexOf(label)] + "%";
+                        break;
+                      case 4:
+                        rawValue = dailyGain[feedBrands.indexOf(label)] + "g";
+                        break;
+                      case 5:
+                        rawValue =
+                          filterCleaning[feedBrands.indexOf(label)] + "次/天";
+                        break;
+                    }
+
+                    return `${label}: ${rawValue}`;
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // 初始化总得分对比图
+        initTotalScoreChart();
+
+        // 初始化分项得分对比图
+        initDetailedScoreChart();
+      }
+
+      // 初始化总得分对比图
+      function initTotalScoreChart() {
+        const totalScoreCtx = document
+          .getElementById("totalScoreChart")
+          .getContext("2d");
+
+        // 计算得分
+        const scores = calculateFeedScores();
+
+        // 准备数据
+        const labels = selectedFeeds.length > 0 ? selectedFeeds : feedBrands;
+        const data = labels.map((brand) => scores[brand].total);
+
+        // 创建图表
+        totalScoreChart = new Chart(totalScoreCtx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "综合得分",
+                data: data,
+                backgroundColor: labels.map(
+                  (brand) => chartColors[feedBrands.indexOf(brand)]
+                ),
+                borderColor: labels.map(
+                  (brand) => chartBorderColors[feedBrands.indexOf(brand)]
+                ),
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    const brand = context.label;
+                    const score = context.raw;
+                    return `${brand}: ${score}分`;
+                  },
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: 50,
+                max: 100,
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+                title: {
+                  display: true,
+                  text: "得分",
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // 初始化分项得分对比图
+      function initDetailedScoreChart() {
+        const detailedScoreCtx = document
+          .getElementById("detailedScoreChart")
+          .getContext("2d");
+
+        // 计算得分
+        const scores = calculateFeedScores();
+
+        // 准备数据
+        const labels = selectedFeeds.length > 0 ? selectedFeeds : feedBrands;
+
+        // 创建图表
+        detailedScoreChart = new Chart(detailedScoreCtx, {
+          type: "radar",
+          data: {
+            labels: [
+              "价格",
+              "运输效率",
+              "饵料系数",
+              "死亡率",
+              "日增重",
+              "排污效率",
+            ],
+            datasets: labels.map((brand) => {
+              const index = feedBrands.indexOf(brand);
+              return {
+                label: brand,
+                data: [
+                  scores[brand].price,
+                  scores[brand].transport,
+                  scores[brand].fcr,
+                  scores[brand].mortality,
+                  scores[brand].growth,
+                  scores[brand].waste,
+                ],
+                backgroundColor: chartColors[index],
+                borderColor: chartBorderColors[index],
+                pointBackgroundColor: chartBorderColors[index],
+                pointBorderColor: "#fff",
+                pointHoverBackgroundColor: "#fff",
+                pointHoverBorderColor: chartBorderColors[index],
+                pointRadius: 4,
+                pointHoverRadius: 6,
+              };
+            }),
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+              line: {
+                borderWidth: 2,
+                tension: 0.2,
+              },
+            },
+            scales: {
+              r: {
+                angleLines: {
+                  display: true,
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                },
+                pointLabels: {
+                  font: {
+                    size: 12,
+                  },
+                },
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks: {
+                  display: false,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                position: "top",
+                align: "end",
+                labels: {
+                  boxWidth: 12,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                  padding: 20,
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // 更新分项得分对比图
+      function updateDetailedScoreChart() {
+        if (!detailedScoreChart) return;
+
+        const metric = document.getElementById("scoreMetricSelector").value;
+        const scores = calculateFeedScores();
+        const labels = selectedFeeds.length > 0 ? selectedFeeds : feedBrands;
+
+        if (metric === "all") {
+          // 显示雷达图
+          detailedScoreChart.config.type = "radar";
+          detailedScoreChart.data.labels = [
+            "价格",
+            "运输效率",
+            "饵料系数",
+            "死亡率",
+            "日增重",
+            "排污效率",
+          ];
+          detailedScoreChart.data.datasets = labels.map((brand) => {
+            const index = feedBrands.indexOf(brand);
+            return {
+              label: brand,
+              data: [
+                scores[brand].price,
+                scores[brand].transport,
+                scores[brand].fcr,
+                scores[brand].mortality,
+                scores[brand].growth,
+                scores[brand].waste,
+              ],
+              backgroundColor: chartColors[index],
+              borderColor: chartBorderColors[index],
+              pointBackgroundColor: chartBorderColors[index],
+              pointBorderColor: "#fff",
+              pointHoverBackgroundColor: "#fff",
+              pointHoverBorderColor: chartBorderColors[index],
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            };
+          });
+        } else {
+          // 显示柱状图
+          detailedScoreChart.config.type = "bar";
+          detailedScoreChart.data.labels = labels;
+
+          let metricName = "";
+          let data = [];
+
+          switch (metric) {
+            case "price":
+              metricName = "价格得分";
+              data = labels.map((brand) => scores[brand].price);
+              break;
+            case "transport":
+              metricName = "运输效率得分";
+              data = labels.map((brand) => scores[brand].transport);
+              break;
+            case "fcr":
+              metricName = "饵料系数得分";
+              data = labels.map((brand) => scores[brand].fcr);
+              break;
+            case "mortality":
+              metricName = "死亡率得分";
+              data = labels.map((brand) => scores[brand].mortality);
+              break;
+            case "growth":
+              metricName = "日增重得分";
+              data = labels.map((brand) => scores[brand].growth);
+              break;
+            case "waste":
+              metricName = "排污效率得分";
+              data = labels.map((brand) => scores[brand].waste);
+              break;
+          }
+
+          detailedScoreChart.data.datasets = [
+            {
+              label: metricName,
+              data: data,
+              backgroundColor: labels.map(
+                (brand) => chartColors[feedBrands.indexOf(brand)]
+              ),
+              borderColor: labels.map(
+                (brand) => chartBorderColors[feedBrands.indexOf(brand)]
+              ),
+              borderWidth: 1,
+            },
+          ];
+        }
+
+        detailedScoreChart.update();
+      }
+
+      // 更新所有图表
+      function updateCharts() {
+        // 更新雷达图
+        if (radarChart) {
+          radarChart.data.datasets = selectedFeeds.map((brand, index) => {
+            const brandIndex = feedBrands.indexOf(brand);
+            return {
+              label: brand,
+              data: [
+                100 - ((priceData[brandIndex] - 2000) / 1000) * 100, // 价格反向
+                transportEfficiency[brandIndex],
+                100 - ((feedConversionRatio[brandIndex] - 1) / 1) * 100, // 饵料系数反向
+                100 - ((mortalityRate[brandIndex] - 0) / 3) * 100, // 死亡率反向
+                ((dailyGain[brandIndex] - 40) / 25) * 100, // 平均日增重
+                100 - ((filterCleaning[brandIndex] - 5) / 10) * 100, // 排污效率反向
+              ],
+              backgroundColor: chartColors[brandIndex],
+              borderColor: chartBorderColors[brandIndex],
+              pointBackgroundColor: chartBorderColors[brandIndex],
+              pointBorderColor: "#fff",
+              pointHoverBackgroundColor: "#fff",
+              pointHoverBorderColor: chartBorderColors[brandIndex],
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            };
+          });
+          radarChart.update();
+        }
+
+        // 更新生长率图表
+        if (growthRateChart) {
+          const filteredLabels = selectedFeeds;
+          const filteredData = selectedFeeds.map(
+            (brand) => dailyGain[feedBrands.indexOf(brand)]
+          );
+
+          growthRateChart.data.labels = filteredLabels;
+          growthRateChart.data.datasets[0].data = filteredData;
+          growthRateChart.data.datasets[0].backgroundColor = filteredLabels.map(
+            (brand) => chartColors[feedBrands.indexOf(brand)]
+          );
+          growthRateChart.data.datasets[0].borderColor = filteredLabels.map(
+            (brand) => chartBorderColors[feedBrands.indexOf(brand)]
+          );
+          growthRateChart.data.datasets[1].data = Array(
+            filteredLabels.length
+          ).fill(50);
+          growthRateChart.update();
+        }
+
+        // 更新成本图表
+        if (costChart) {
+          const filteredLabels = selectedFeeds;
+          const filteredData = selectedFeeds.map(
+            (brand) => priceData[feedBrands.indexOf(brand)]
+          );
+
+          costChart.data.labels = filteredLabels;
+          costChart.data.datasets[0].data = filteredData;
+          costChart.data.datasets[0].backgroundColor = filteredLabels.map(
+            (brand) => chartColors[feedBrands.indexOf(brand)]
+          );
+          costChart.data.datasets[0].borderColor = filteredLabels.map(
+            (brand) => chartBorderColors[feedBrands.indexOf(brand)]
+          );
+          costChart.update();
+        }
+
+        // 更新总得分图表
+        if (totalScoreChart) {
+          const scores = calculateFeedScores();
+          const filteredLabels = selectedFeeds;
+          const filteredData = filteredLabels.map(
+            (brand) => scores[brand].total
+          );
+
+          totalScoreChart.data.labels = filteredLabels;
+          totalScoreChart.data.datasets[0].data = filteredData;
+          totalScoreChart.data.datasets[0].backgroundColor = filteredLabels.map(
+            (brand) => chartColors[feedBrands.indexOf(brand)]
+          );
+          totalScoreChart.data.datasets[0].borderColor = filteredLabels.map(
+            (brand) => chartBorderColors[feedBrands.indexOf(brand)]
+          );
+          totalScoreChart.update();
+        }
+
+        // 更新分项得分图表
+        updateDetailedScoreChart();
+
+        // 更新表格中的综合评分
+        updateTableScores(calculateFeedScores());
+      }
+
+      // 更新表格中的综合评分
+      function updateTableScores(scores) {
+        const rows = document.querySelectorAll("tbody tr");
+
+        rows.forEach((row, index) => {
+          const brand = feedBrands[index];
+          const scoreCell = row.querySelector("td:nth-last-child(2)");
+          const scoreSpan = scoreCell.querySelector("span");
+
+          const score = parseInt(scores[brand].total);
+          scoreSpan.textContent = score;
+
+          // 更新评分颜色
+          scoreSpan.className = "";
+          if (score >= 85) {
+            scoreSpan.className =
+              "px-2 py-1 text-xs rounded-full bg-success/10 text-success font-medium";
+          } else if (score >= 75) {
+            scoreSpan.className =
+              "px-2 py-1 text-xs rounded-full bg-warning/10 text-warning font-medium";
+          } else {
+            scoreSpan.className =
+              "px-2 py-1 text-xs rounded-full bg-danger/10 text-danger font-medium";
+          }
+        });
+      }
+
+      // 移动端侧边栏切换
+      document
+        .querySelector("button.md\\:hidden")
+        .addEventListener("click", function () {
+          const sidebar = document.querySelector("aside");
+          sidebar.classList.toggle("hidden");
+          sidebar.classList.toggle("absolute");
+          sidebar.classList.toggle("z-50");
+          sidebar.classList.toggle("h-full");
+          sidebar.classList.toggle("w-64");
+        });
+    </script>
+
+    <!-- 饲料详情模态框 -->
+    <div
+      id="feedDetailModal"
+      class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center overflow-y-auto"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
+      >
+        <!-- 模态框头部 -->
+        <div
+          class="flex items-center justify-between p-4 border-b border-neutral-200"
+        >
+          <h3 class="font-semibold text-lg" id="modalFeedTitle">饲料详情</h3>
+          <button
+            id="closeDetailModal"
+            class="text-neutral-500 hover:text-neutral-700 transition-colors"
+          >
+            <i class="fa fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <!-- 模态框内容 -->
+        <div class="flex-1 overflow-y-auto p-4">
+          <!-- 时间范围选择 -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <h4 class="font-medium">历史数据趋势</h4>
+              <span
+                id="modalFeedBrand"
+                class="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary font-medium"
+              ></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="text-sm text-neutral-500">时间范围:</label>
+              <select
+                id="timeRangeSelector"
+                class="text-sm border border-neutral-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-primary"
+              >
+                <option value="7">近7天</option>
+                <option value="30" selected>近30天</option>
+                <option value="90">近90天</option>
+                <option value="180">近半年</option>
+                <option value="365">近一年</option>
+              </select>
+              <button
+                id="applyTimeRange"
+                class="flex items-center gap-1 text-xs px-3 py-1.5 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
+              >
+                <i class="fa fa-search"></i>
+                <span>查询</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 当前值卡片 -->
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6"
+          >
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-3"
+            >
+              <p class="text-neutral-500 text-xs mb-1">价格(元/吨)</p>
+              <h4 id="detailPrice" class="text-xl font-bold">-</h4>
+              <div class="flex items-center text-xs mt-1">
+                <span id="detailPriceChange" class="flex items-center"></span>
+                <span class="text-neutral-400 ml-1">较上月</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-3"
+            >
+              <p class="text-neutral-500 text-xs mb-1">运输效率(分)</p>
+              <h4 id="detailTransport" class="text-xl font-bold">-</h4>
+              <div class="flex items-center text-xs mt-1">
+                <span
+                  id="detailTransportChange"
+                  class="flex items-center"
+                ></span>
+                <span class="text-neutral-400 ml-1">较上月</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-3"
+            >
+              <p class="text-neutral-500 text-xs mb-1">饵料系数</p>
+              <h4 id="detailFcr" class="text-xl font-bold">-</h4>
+              <div class="flex items-center text-xs mt-1">
+                <span id="detailFcrChange" class="flex items-center"></span>
+                <span class="text-neutral-400 ml-1">较上月</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-3"
+            >
+              <p class="text-neutral-500 text-xs mb-1">死亡率(%)</p>
+              <h4 id="detailMortality" class="text-xl font-bold">-</h4>
+              <div class="flex items-center text-xs mt-1">
+                <span
+                  id="detailMortalityChange"
+                  class="flex items-center"
+                ></span>
+                <span class="text-neutral-400 ml-1">较上月</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-3"
+            >
+              <p class="text-neutral-500 text-xs mb-1">平均日增重(g)</p>
+              <h4 id="detailGrowth" class="text-xl font-bold">-</h4>
+              <div class="flex items-center text-xs mt-1">
+                <span id="detailGrowthChange" class="flex items-center"></span>
+                <span class="text-neutral-400 ml-1">较上月</span>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-3"
+            >
+              <p class="text-neutral-500 text-xs mb-1">微滤机清洗(次/天)</p>
+              <h4 id="detailWaste" class="text-xl font-bold">-</h4>
+              <div class="flex items-center text-xs mt-1">
+                <span id="detailWasteChange" class="flex items-center"></span>
+                <span class="text-neutral-400 ml-1">较上月</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 历史趋势图表 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-4"
+            >
+              <h4 class="font-medium mb-3">价格与运输效率趋势</h4>
+              <div class="h-64">
+                <canvas id="priceTransportChart"></canvas>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-4"
+            >
+              <h4 class="font-medium mb-3">饵料系数与死亡率趋势</h4>
+              <div class="h-64">
+                <canvas id="fcrMortalityChart"></canvas>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-4"
+            >
+              <h4 class="font-medium mb-3">日增重趋势</h4>
+              <div class="h-64">
+                <canvas id="growthChart"></canvas>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-lg shadow-sm border border-neutral-200 p-4"
+            >
+              <h4 class="font-medium mb-3">微滤机清洗频率趋势</h4>
+              <div class="h-64">
+                <canvas id="wasteChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 历史数据表格 -->
+          <div
+            class="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden"
+          >
+            <div
+              class="flex items-center justify-between p-4 border-b border-neutral-200"
+            >
+              <h4 class="font-medium">历史数据记录</h4>
+              <button
+                id="exportHistoryData"
+                class="flex items-center gap-1 text-xs px-3 py-1.5 bg-white border border-neutral-200 text-neutral-500 rounded hover:border-primary hover:text-primary transition-colors"
+              >
+                <i class="fa fa-download"></i>
+                <span>导出数据</span>
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-neutral-200">
+                <thead class="bg-neutral-100">
+                  <tr>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      日期
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      价格(元/吨)
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      运输效率(分)
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      饵料系数
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      死亡率(%)
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      平均日增重(g)
+                    </th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider"
+                    >
+                      微滤机清洗(次/天)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="historyDataTable"
+                  class="bg-white divide-y divide-neutral-200"
+                >
+                  <!-- 历史数据将通过JavaScript动态填充 -->
+                </tbody>
+              </table>
+            </div>
+
+            <div
+              class="px-4 py-3 flex items-center justify-between border-t border-neutral-200"
+            >
+              <div class="flex items-center gap-2 text-sm text-neutral-500">
+                <span id="historyDataCount">显示 0 条记录</span>
+              </div>
+              <div class="flex items-center gap-1" id="historyPagination">
+                <!-- 分页控件将通过JavaScript动态填充 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 为详情按钮添加点击事件
+      document.addEventListener("DOMContentLoaded", function () {
+        // 获取所有详情按钮
+        const detailButtons = document.querySelectorAll(
+          "button.text-primary.hover\\:text-primary\\/80"
+        );
+
+        // 为每个按钮添加点击事件
+        detailButtons.forEach((button, index) => {
+          button.addEventListener("click", () => {
+            openFeedDetail(index);
+          });
+        });
+
+        // 关闭模态框按钮
+        document
+          .getElementById("closeDetailModal")
+          .addEventListener("click", () => {
+            document.getElementById("feedDetailModal").classList.add("hidden");
+          });
+
+        // 应用时间范围按钮
+        document
+          .getElementById("applyTimeRange")
+          .addEventListener("click", () => {
+            const currentFeedIndex = parseInt(
+              document.getElementById("feedDetailModal").dataset.feedIndex
+            );
+            updateFeedDetailData(currentFeedIndex);
+          });
+
+        // 导出数据按钮
+        document
+          .getElementById("exportHistoryData")
+          .addEventListener("click", () => {
+            exportHistoryData();
+          });
+      });
+
+      // 模拟历史数据生成函数
+      function generateHistoryData(feedIndex, days) {
+        const data = [];
+        const today = new Date();
+        const brand = feedBrands[feedIndex];
+
+        // 基础值
+        const basePrice = priceData[feedIndex];
+        const baseTransport = transportEfficiency[feedIndex];
+        const baseFcr = feedConversionRatio[feedIndex];
+        const baseMortality = mortalityRate[feedIndex];
+        const baseGrowth = dailyGain[feedIndex];
+        const baseWaste = filterCleaning[feedIndex];
+
+        // 生成历史数据
+        for (let i = 0; i < days; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() - i);
+
+          // 添加一些随机波动
+          const randomFactor =
+            Math.sin(i * 0.1) * 0.1 + (Math.random() - 0.5) * 0.05;
+          console.log("randomFactor: ", baseMortality, randomFactor,);
+
+          data.push({
+            date: date.toISOString().split("T")[0],
+            price: Math.round(basePrice * (1 + randomFactor * 0.002)),
+            transport: Math.max(
+              0,
+              Math.min(100, Math.round(baseTransport * (1 + randomFactor* 0.002)))
+            ),
+            fcr: parseFloat((baseFcr * (1 + randomFactor * 0.3)).toFixed(2)),
+            mortality: parseFloat(
+              (baseMortality * (1 + randomFactor * 2)).toFixed(2)
+            ),
+            growth: Math.round(baseGrowth * (1 + randomFactor * 2)),
+            waste: Math.round(baseWaste * (1 + randomFactor * 5)),
+          });
+        }
+
+        // 按日期排序（从新到旧）
+        return data.sort((a, b) => new Date(b.date) - new Date(a.date));
+      }
+
+      // 打开饲料详情模态框
+      function openFeedDetail(feedIndex) {
+        const modal = document.getElementById("feedDetailModal");
+        const brand = feedBrands[feedIndex];
+
+        // 设置当前饲料索引
+        modal.dataset.feedIndex = feedIndex;
+
+        // 更新模态框标题
+        document.getElementById(
+          "modalFeedTitle"
+        ).textContent = `${brand} - 详细参数`;
+        document.getElementById("modalFeedBrand").textContent = brand;
+
+        // 更新详情数据
+        updateFeedDetailData(feedIndex);
+
+        // 显示模态框
+        modal.classList.remove("hidden");
+      }
+
+      // 更新饲料详情数据
+      function updateFeedDetailData(feedIndex) {
+        const days = parseInt(
+          document.getElementById("timeRangeSelector").value
+        );
+        const historyData = generateHistoryData(feedIndex, days);
+
+        // 更新当前值卡片
+        const currentData = historyData[0];
+        const previousMonthData =
+          historyData.find((d) => {
+            const date = new Date(d.date);
+            const today = new Date();
+            return date.getMonth() !== today.getMonth();
+          }) || historyData[historyData.length - 1];
+
+        // 价格
+        document.getElementById("detailPrice").textContent =
+          currentData.price.toLocaleString();
+        updateChangeIndicator(
+          "detailPriceChange",
+          currentData.price,
+          previousMonthData.price,
+          true
+        );
+
+        // 运输效率
+        document.getElementById("detailTransport").textContent =
+          currentData.transport;
+        updateChangeIndicator(
+          "detailTransportChange",
+          currentData.transport,
+          previousMonthData.transport
+        );
+
+        // 饵料系数
+        document.getElementById("detailFcr").textContent = currentData.fcr;
+        updateChangeIndicator(
+          "detailFcrChange",
+          currentData.fcr,
+          previousMonthData.fcr,
+          true
+        );
+
+        // 死亡率
+        document.getElementById("detailMortality").textContent =
+          currentData.mortality;
+        updateChangeIndicator(
+          "detailMortalityChange",
+          currentData.mortality,
+          previousMonthData.mortality,
+          true
+        );
+
+        // 日增重
+        document.getElementById("detailGrowth").textContent =
+          currentData.growth;
+        updateChangeIndicator(
+          "detailGrowthChange",
+          currentData.growth,
+          previousMonthData.growth
+        );
+
+        // 微滤机清洗
+        document.getElementById("detailWaste").textContent = currentData.waste;
+        updateChangeIndicator(
+          "detailWasteChange",
+          currentData.waste,
+          previousMonthData.waste,
+          true
+        );
+
+        // 更新历史趋势图表
+        updateHistoryCharts(historyData);
+
+        // 更新历史数据表格
+        updateHistoryTable(historyData);
+      }
+
+      // 更新变化指示器
+      function updateChangeIndicator(
+        elementId,
+        currentValue,
+        previousValue,
+        isLowerBetter = false
+      ) {
+        const element = document.getElementById(elementId);
+        const change = (
+          ((currentValue - previousValue) / previousValue) *
+          100
+        ).toFixed(1);
+        const isPositive = currentValue > previousValue;
+
+        let className = "";
+        let icon = "";
+
+        if (isLowerBetter) {
+          // 对于值越低越好的指标（价格、饵料系数、死亡率、微滤机清洗）
+          className = isPositive ? "text-danger" : "text-success";
+          icon = isPositive ? "fa-arrow-up" : "fa-arrow-down";
+        } else {
+          // 对于值越高越好的指标（运输效率、日增重）
+          className = isPositive ? "text-success" : "text-danger";
+          icon = isPositive ? "fa-arrow-up" : "fa-arrow-down";
+        }
+
+        element.className = `flex items-center ${className}`;
+        element.innerHTML = `<i class="fa ${icon} mr-1"></i> ${Math.abs(
+          change
+        )}%`;
+      }
+
+      // 更新历史趋势图表
+      function updateHistoryCharts(historyData) {
+        // 反转数据以便按时间顺序显示（从旧到新）
+        const chartData = [...historyData].reverse();
+        const dates = chartData.map((d) => d.date);
+
+        // 价格与运输效率趋势图
+        updateOrCreateChart(
+          "priceTransportChart",
+          {
+            labels: dates,
+            datasets: [
+              {
+                label: "价格(元/吨)",
+                data: chartData.map((d) => d.price),
+                borderColor: chartBorderColors[0],
+                backgroundColor: "transparent",
+                yAxisID: "y",
+              },
+              {
+                label: "运输效率(分)",
+                data: chartData.map((d) => d.transport),
+                borderColor: chartBorderColors[1],
+                backgroundColor: "transparent",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          {
+            scales: {
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+                title: {
+                  display: true,
+                  text: "价格(元/吨)",
+                },
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                title: {
+                  display: true,
+                  text: "运输效率(分)",
+                },
+                grid: {
+                  drawOnChartArea: false,
+                },
+              },
+            },
+          }
+        );
+
+        // 饵料系数与死亡率趋势图
+        updateOrCreateChart(
+          "fcrMortalityChart",
+          {
+            labels: dates,
+            datasets: [
+              {
+                label: "饵料系数",
+                data: chartData.map((d) => d.fcr),
+                borderColor: chartBorderColors[2],
+                backgroundColor: "transparent",
+                yAxisID: "y",
+              },
+              {
+                label: "死亡率(%)",
+                data: chartData.map((d) => d.mortality),
+                borderColor: chartBorderColors[3],
+                backgroundColor: "transparent",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          {
+            scales: {
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+                title: {
+                  display: true,
+                  text: "饵料系数",
+                },
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                title: {
+                  display: true,
+                  text: "死亡率(%)",
+                },
+                grid: {
+                  drawOnChartArea: false,
+                },
+              },
+            },
+          }
+        );
+
+        // 日增重趋势图
+        updateOrCreateChart("growthChart", {
+          labels: dates,
+          datasets: [
+            {
+              label: "平均日增重(g)",
+              data: chartData.map((d) => d.growth),
+              borderColor: chartBorderColors[4],
+              backgroundColor: chartColors[4],
+              fill: true,
+            },
+          ],
+        });
+
+        // 微滤机清洗频率趋势图
+        updateOrCreateChart("wasteChart", {
+          labels: dates,
+          datasets: [
+            {
+              label: "微滤机清洗(次/天)",
+              data: chartData.map((d) => d.waste),
+              borderColor: chartBorderColors[0],
+              backgroundColor: chartColors[0],
+              fill: true,
+            },
+          ],
+        });
+      }
+
+      // 更新或创建图表 - 修复了update方法的错误
+      function updateOrCreateChart(chartId, data, additionalOptions = {}) {
+        const ctx = document.getElementById(chartId).getContext("2d");
+
+        // 检查图表是否已存在
+        if (window[chartId]) {
+          // 修复：直接更新数据和选项，然后调用Chart实例的update方法
+          const chart = window[chartId];
+
+          // 更新数据
+          chart.data = data;
+
+          // 合并选项
+          if (additionalOptions) {
+            Object.keys(additionalOptions).forEach((key) => {
+              if (!chart.options) chart.options = {};
+              chart.options[key] = additionalOptions[key];
+            });
+          }
+
+          // 确保chart是Chart.js实例并且有update方法
+          if (chart && typeof chart.update === "function") {
+            chart.update();
+          } else {
+            console.error(
+              "Chart update failed: chart.update is not a function",
+              chartId
+            );
+            // 如果update方法不存在，则销毁旧图表并创建新图表
+            if (chart && typeof chart.destroy === "function") {
+              chart.destroy();
+            }
+            window[chartId] = new Chart(ctx, {
+              type: "line",
+              data: data,
+              options: additionalOptions,
+            });
+          }
+        } else {
+          // 创建新图表
+          window[chartId] = new Chart(ctx, {
+            type: "line",
+            data: data,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              elements: {
+                line: {
+                  tension: 0.3,
+                },
+                point: {
+                  radius: 2,
+                },
+              },
+              plugins: {
+                legend: {
+                  position: "top",
+                  align: "end",
+                  labels: {
+                    boxWidth: 12,
+                    usePointStyle: true,
+                    pointStyle: "circle",
+                  },
+                },
+                tooltip: {
+                  mode: "index",
+                  intersect: false,
+                },
+              },
+              scales: {
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                },
+                y: {
+                  grid: {
+                    color: "rgba(0, 0, 0, 0.05)",
+                  },
+                },
+              },
+              ...additionalOptions,
+            },
+          });
+        }
+      }
+
+      // 更新历史数据表格
+      function updateHistoryTable(historyData) {
+        const tableBody = document.getElementById("historyDataTable");
+        const paginationContainer =
+          document.getElementById("historyPagination");
+        const countDisplay = document.getElementById("historyDataCount");
+
+        // 清空表格
+        tableBody.innerHTML = "";
+
+        // 更新数据计数
+        countDisplay.textContent = `显示 ${historyData.length} 条记录`;
+
+        // 添加数据行
+        historyData.forEach((item) => {
+          const row = document.createElement("tr");
+          row.className = "table-row-hover";
+
+          row.innerHTML = `
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.date}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.price.toLocaleString()}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.transport}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.fcr}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.mortality}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.growth}</td>
+          <td class="px-4 py-3 whitespace-nowrap text-sm">${item.waste}</td>
+        `;
+
+          tableBody.appendChild(row);
+        });
+
+        // 简单分页（仅作为UI示例）
+        paginationContainer.innerHTML = `
+        <button class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-400 cursor-not-allowed">
+          <i class="fa fa-chevron-left text-xs"></i>
+        </button>
+        <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
+        <button class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-500 hover:border-primary hover:text-primary transition-colors">
+          <i class="fa fa-chevron-right text-xs"></i>
+        </button>
+      `;
+      }
+
+      // 导出历史数据
+      function exportHistoryData() {
+        const feedIndex = parseInt(
+          document.getElementById("feedDetailModal").dataset.feedIndex
+        );
+        const days = parseInt(
+          document.getElementById("timeRangeSelector").value
+        );
+        const historyData = generateHistoryData(feedIndex, days);
+        const brand = feedBrands[feedIndex];
+
+        // 创建CSV内容
+        let csvContent =
+          "日期,价格(元/吨),运输效率(分),饵料系数,死亡率(%),平均日增重(g),微滤机清洗(次/天)\n";
+
+        historyData.forEach((item) => {
+          csvContent += `${item.date},${item.price},${item.transport},${item.fcr},${item.mortality},${item.growth},${item.waste}\n`;
+        });
+
+        // 创建下载链接
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute(
+          "download",
+          `${brand}_历史数据_${new Date().toISOString().split("T")[0]}.csv`
+        );
+        link.style.visibility = "hidden";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    </script>
+  </body>
+</html>

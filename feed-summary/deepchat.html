@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小鲤助手 - 智能养殖对话助手</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #0f766e;
+        --primary-light: #14b8a6;
+        --primary-dark: #0d9488;
+      }
+      .text-primary {
+        color: var(--primary);
+      }
+      .bg-primary {
+        background-color: var(--primary);
+      }
+      .border-primary {
+        border-color: var(--primary);
+      }
+      .hover\:bg-primary-dark:hover {
+        background-color: var(--primary-dark);
+      }
+      .chat-container {
+        height: calc(100vh - 240px);
+        overflow-y: auto;
+      }
+      .typing-indicator span {
+        animation: blink 1.4s infinite both;
+      }
+      .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes blink {
+        0% {
+          opacity: 0.1;
+        }
+        20% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.1;
+        }
+      }
+      
+      /* 新增样式 */
+      .chat-history-item {
+        transition: all 0.2s ease;
+      }
+      .chat-history-item.active {
+        background-color: #e6fffa;
+        border-left: 3px solid var(--primary);
+      }
+      .chat-history-item:hover {
+        background-color: #f0fdfa;
+      }
+      .task-card {
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        border-left: 4px solid var(--primary);
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      }
+      .task-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+      }
+      .new-chat-btn {
+        background-color: var(--primary);
+        transition: all 0.2s ease;
+      }
+      .new-chat-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+      <!-- 左侧聊天历史面板 -->
+      <div class="w-64 bg-white shadow-md flex flex-col h-full border-r border-gray-200">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="font-bold text-lg text-teal-600"><i class="fas fa-fish mr-2"></i>小鲤助手</h2>
+          <a href="index.html" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-home"></i>
+          </a>
+        </div>
+        
+        <!-- 新建聊天按钮 -->
+        <div class="p-4">
+          <button class="w-full bg-teal-500 text-white rounded-lg py-2 px-4 flex items-center justify-center hover:bg-teal-600 transition-all duration-300 shadow-sm new-chat-btn">
+            <i class="fas fa-plus mr-2"></i>
+            <span>新建聊天</span>
+          </button>
+        </div>
+        
+        <!-- 聊天历史列表 -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="p-2">
+            <h3 class="text-xs font-medium text-gray-500 mb-2 px-2">最近对话</h3>
+            <div class="space-y-1">
+              <div class="chat-history-item active p-2 rounded-lg flex items-center">
+                <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center mr-2">
+                  <i class="fas fa-comments text-teal-600 text-sm"></i>
+                </div>
+                <div class="flex-1 truncate">
+                  <div class="text-sm font-medium truncate">养殖任务计划</div>
+                  <div class="text-xs text-gray-500 truncate">5天养殖计划安排</div>
+                </div>
+              </div>
+              
+              <div class="chat-history-item p-2 rounded-lg flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                  <i class="fas fa-comments text-blue-600 text-sm"></i>
+                </div>
+                <div class="flex-1 truncate">
+                  <div class="text-sm font-medium truncate">水质问题咨询</div>
+                  <div class="text-xs text-gray-500 truncate">pH值异常处理方法</div>
+                </div>
+              </div>
+              
+              <div class="chat-history-item p-2 rounded-lg flex items-center">
+                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-2">
+                  <i class="fas fa-comments text-purple-600 text-sm"></i>
+                </div>
+                <div class="flex-1 truncate">
+                  <div class="text-sm font-medium truncate">设备维护指南</div>
+                  <div class="text-xs text-gray-500 truncate">增氧机保养周期</div>
+                </div>
+              </div>
+              
+              <div class="chat-history-item p-2 rounded-lg flex items-center">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                  <i class="fas fa-comments text-green-600 text-sm"></i>
+                </div>
+                <div class="flex-1 truncate">
+                  <div class="text-sm font-medium truncate">饲料配方优化</div>
+                  <div class="text-xs text-gray-500 truncate">提高生长速度的配方</div>
+                </div>
+              </div>
+              
+              <div class="chat-history-item p-2 rounded-lg flex items-center">
+                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
+                  <i class="fas fa-comments text-yellow-600 text-sm"></i>
+                </div>
+                <div class="flex-1 truncate">
+                  <div class="text-sm font-medium truncate">疾病防治咨询</div>
+                  <div class="text-xs text-gray-500 truncate">鱼类常见病预防</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 用户信息 -->
+        <div class="p-3 border-t border-gray-200 flex items-center">
+          <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white mr-2">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-medium">养殖管理员</div>
+            <div class="text-xs text-gray-500">专业版用户</div>
+          </div>
+          <button class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 右侧聊天内容区域 -->
+      <div class="flex-1 flex flex-col h-full overflow-hidden">
+        <!-- 顶部导航 -->
+        <div class="bg-white shadow-sm p-4 flex items-center justify-between">
+          <div class="flex items-center">
+            <h1 class="text-xl font-bold text-teal-600">
+              养殖任务计划
+            </h1>
+            <span class="ml-3 bg-teal-100 text-teal-600 text-xs px-2 py-1 rounded-full">进行中</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i class="fas fa-search"></i>
+            </button>
+            <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i class="fas fa-bell"></i>
+            </button>
+            <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i class="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 聊天界面 -->
+        <div class="flex-1 overflow-hidden flex flex-col bg-gray-50">
+          <!-- 聊天记录 -->
+          <div class="p-4 flex-1 overflow-y-auto chat-container">
+            <!-- 系统欢迎消息 -->
+            <div class="flex items-start mb-4">
+              <div
+                class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center mr-3 flex-shrink-0"
+              >
+                <i class="fas fa-robot text-teal-600 text-sm"></i>
+              </div>
+              <div class="bg-gray-100 rounded-lg p-3 max-w-3xl">
+                <p class="text-gray-800">
+                  您好！我是小鲤助手智能养殖助手，可以帮助您解决养殖过程中的各种问题，包括任务规划、环境监测、饲料管理等。请问有什么可以帮助您的吗？
+                </p>
+              </div>
+            </div>
+
+            <!-- 用户消息 -->
+            <div class="flex items-start mb-4 justify-end">
+              <div class="bg-teal-100 rounded-lg p-3 max-w-3xl">
+                <p class="text-gray-800">帮我安排最近5天的养殖生产任务</p>
+              </div>
+              <div
+                class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center ml-3 flex-shrink-0"
+              >
+                <i class="fas fa-user text-gray-600 text-sm"></i>
+              </div>
+            </div>
+
+            <!-- AI思考中 -->
+            <div class="flex items-start mb-4">
+              <div
+                class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center mr-3 flex-shrink-0"
+              >
+                <i class="fas fa-robot text-teal-600 text-sm"></i>
+              </div>
+              <div class="bg-gray-100 rounded-lg p-3 max-w-3xl">
+                <p class="text-gray-600 italic text-sm mb-2">思考中...</p>
+                <p class="text-gray-800 text-sm">
+                  为了安排接下来5天的养殖生产任务，我需要考虑以下几个方面：
+                </p>
+                <ul class="list-disc pl-5 text-sm text-gray-700 mt-1 space-y-1">
+                  <li>当前鱼塘的水质状况和鱼类生长阶段</li>
+                  <li>近期天气预报和温度变化</li>
+                  <li>饲料库存和投喂计划</li>
+                  <li>设备维护和检查需求</li>
+                  <li>人员排班和工作分配</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- AI回复 -->
+            <div class="flex items-start mb-4">
+              <div
+                class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mr-3 flex-shrink-0"
+              >
+                <i class="fas fa-robot text-teal-600"></i>
+              </div>
+              <div class="bg-white rounded-lg p-4 max-w-3xl shadow-sm">
+                <p class="text-gray-800 mb-3">
+                  根据您的养殖场当前情况，我为您制定了未来5天的养殖生产任务安排：
+                </p>
+                
+                <!-- 任务卡片容器 -->
+                <div class="space-y-4 my-4">
+                  <!-- 任务计划卡片头部 -->
+                  <div class="task-card p-4 border-l-4 border-teal-500 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center mr-3">
+                          <i class="fas fa-tasks text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold">5天养殖任务计划</h3>
+                      </div>
+                      <div class="flex space-x-2">
+                        <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors duration-200">
+                          <i class="fas fa-download mr-1"></i>下载计划
+                        </button>
+                        <button class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors duration-200">
+                          <i class="fas fa-edit mr-1"></i>整体调整
+                        </button>
+                        <button class="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors duration-200">
+                          <i class="fas fa-share-alt mr-1"></i>分享
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 第1天任务卡片 -->
+                  <div class="task-card p-4 border-l-4 border-teal-500 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center mb-2">
+                      <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-vial text-white"></i>
+                      </div>
+                      <h3 class="text-lg font-semibold">第1天：水质检测与调整</h3>
+                    </div>
+                    <div class="ml-11 space-y-3 text-gray-700">
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-flask text-teal-500 mr-2"></i>
+                            <span class="font-medium">上午：全面水质检测</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-teal-100 text-teal-800 text-xs px-2 py-0.5 rounded-full">高优先级</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">检测项目：pH值、溶解氧、氨氮、亚硝酸盐</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：08:00-10:30</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：张水质</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-sliders-h text-blue-500 mr-2"></i>
+                            <span class="font-medium">中午：调整增氧设备</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">设备维护</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">根据水质检测结果调整增氧设备运行参数</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：11:30-12:30</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：李设备</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-utensils text-green-500 mr-2"></i>
+                            <span class="font-medium">下午：投喂饲料</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">日常任务</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">按鱼体重3%比例投喂，记录摄食情况</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：14:00-15:30</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：王饲料</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-moon text-purple-500 mr-2"></i>
+                            <span class="font-medium">晚上：夜间设备检查</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">安全检查</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">检查夜间增氧设备，设置自动监测警报</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：18:00-19:30</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：李设备</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-3 ml-11 flex space-x-2">
+                      <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i>调整计划
+                      </button>
+                      <button class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors duration-200">
+                        <i class="fas fa-bell mr-1"></i>设置提醒
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- 第2天任务卡片 -->
+                  <div class="task-card p-4 border-l-4 border-blue-500 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center mb-2">
+                      <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-fish text-white"></i>
+                      </div>
+                      <h3 class="text-lg font-semibold">第2天：饲料管理与鱼类观察</h3>
+                    </div>
+                    <div class="ml-11 space-y-3 text-gray-700">
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-warehouse text-orange-500 mr-2"></i>
+                            <span class="font-medium">上午：检查饲料库存</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full">物资管理</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">检查现有库存，必要时补充订购</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：09:00-10:00</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：赵库存</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-utensils text-green-500 mr-2"></i>
+                            <span class="font-medium">中午：投喂饲料</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">日常任务</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">投喂饲料，观察鱼类活动状态</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：11:30-12:30</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：王饲料</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-ruler-combined text-blue-500 mr-2"></i>
+                            <span class="font-medium">下午：鱼类生长检查</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">数据采集</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">抽样检查鱼类生长情况，记录体长和体重数据</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：14:00-16:00</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：陈数据</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                          <div class="flex items-center">
+                            <i class="fas fa-chart-line text-purple-500 mr-2"></i>
+                            <span class="font-medium">晚上：数据分析</span>
+                          </div>
+                          <div class="flex items-center space-x-1">
+                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">决策支持</span>
+                          </div>
+                        </div>
+                        <p class="text-sm ml-6">分析生长数据，调整次日饲料投喂量</p>
+                        <div class="flex justify-between mt-2 ml-6 text-xs text-gray-500">
+                          <div class="flex items-center">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>预计时间：18:00-19:00</span>
+                          </div>
+                          <div class="flex items-center">
+                            <i class="far fa-user mr-1"></i>
+                            <span>执行人：陈数据</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-3 ml-11 flex space-x-2">
+                      <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i>调整计划
+                      </button>
+                      <button class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors duration-200">
+                        <i class="fas fa-bell mr-1"></i>设置提醒
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div class="text-center mt-4">
+                    <button class="text-teal-600 hover:text-teal-800 transition-colors duration-200 px-4 py-2 border border-teal-200 rounded-lg shadow-sm hover:shadow-md">
+                      <i class="fas fa-chevron-down mr-1"></i> 展开剩余计划
+                    </button>
+                  </div>
+                </div>
+                
+
+                
+                <p class="text-gray-800 mt-3">
+                  以上是根据您养殖场情况制定的详细计划，您是否确认执行这个计划？如需调整，请告知我具体修改意见。
+                </p>
+              </div>
+            </div>
+
+            <!-- 用户消息 -->
+            <div class="flex items-start mb-4 justify-end">
+              <div class="bg-teal-100 rounded-lg p-3 max-w-3xl">
+                <p class="text-gray-800">确定，我们按照这个计划执行</p>
+              </div>
+              <div
+                class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center ml-3 flex-shrink-0"
+              >
+                <i class="fas fa-user text-gray-600 text-sm"></i>
+              </div>
+            </div>
+
+            <!-- AI回复 -->
+            <div class="flex items-start mb-4">
+              <div
+                class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center mr-3 flex-shrink-0"
+              >
+                <i class="fas fa-robot text-teal-600 text-sm"></i>
+              </div>
+              <div class="bg-gray-100 rounded-lg p-3 max-w-3xl">
+                <p class="text-gray-800">
+                  很好！计划已确认。我已将任务安排发送给各执行人员，他们将按照指定时间开展工作。系统会自动跟踪任务进度，您可以随时在平台查看实时执行情况。如遇特殊情况需要调整，请及时告知，我将协助您重新安排。祝您养殖顺利！
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 输入区域 -->
+          <div class="border-t pt-4 bg-white p-4">
+            <div class="flex items-center">
+              <button
+                class="text-gray-500 hover:text-gray-700 mr-2 focus:outline-none"
+              >
+                <i class="fas fa-paperclip"></i>
+              </button>
+              <div class="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="输入您的问题..."
+                  class="w-full border border-gray-300 rounded-full py-2 px-4 focus:outline-none focus:border-teal-500"
+                />
+                <button
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-teal-500 rounded-full w-8 h-8 flex items-center justify-center hover:bg-teal-600 focus:outline-none"
+                >
+                  <i class="fas fa-paper-plane text-sm"></i>
+                </button>
+              </div>
+              <button
+                class="text-gray-500 hover:text-gray-700 ml-2 focus:outline-none"
+              >
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+            <div class="flex justify-between mt-2 text-xs text-gray-500 px-4">
+              <div>支持自然语言提问</div>
+              <div>可上传图片进行分析</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 页面交互效果
+      document.addEventListener('DOMContentLoaded', function() {
+        // 自动滚动到底部
+        const chatContainer = document.querySelector('.chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // 输入框交互
+        const inputField = document.querySelector('input');
+        const sendButton = document.querySelector('.fa-paper-plane').parentNode;
+        
+        function handleSend() {
+          const message = inputField.value.trim();
+          if (message) {
+            // 这里只是UI演示，实际应用需要与后端交互
+            const userMessageHTML = `
+              <div class="flex items-start mb-4 justify-end">
+                <div class="bg-teal-100 rounded-lg p-4 max-w-3xl shadow-sm">
+                  <p class="text-gray-800">${message}</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center ml-3 flex-shrink-0 text-white">
+                  <i class="fas fa-user"></i>
+                </div>
+              </div>
+            `;
+            
+            // 添加用户消息
+            chatContainer.insertAdjacentHTML('beforeend', userMessageHTML);
+            
+            // 添加AI正在输入的提示
+            const typingHTML = `
+              <div class="flex items-start mb-4 ai-typing">
+                <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="fas fa-robot text-teal-600"></i>
+                </div>
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                  <div class="typing-indicator">
+                    <span>●</span> <span>●</span> <span>●</span>
+                  </div>
+                </div>
+              </div>
+            `;
+            chatContainer.insertAdjacentHTML('beforeend', typingHTML);
+            
+            // 清空输入框
+            inputField.value = '';
+            
+            // 滚动到底部
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // 模拟AI回复
+            setTimeout(() => {
+              // 移除输入中提示
+              document.querySelector('.ai-typing').remove();
+              
+              // 添加AI回复
+              const aiReplyHTML = `
+                <div class="flex items-start mb-4">
+                  <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mr-3 flex-shrink-0">
+                    <i class="fas fa-robot text-teal-600"></i>
+                  </div>
+                  <div class="bg-white rounded-lg p-4 max-w-3xl shadow-sm">
+                    <p class="text-gray-800">我已收到您的消息：${message}，请问还有其他问题需要帮助吗？</p>
+                    
+                    <div class="flex flex-wrap gap-2 mt-3">
+                      <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-1 rounded-full transition-all">
+                        查看相关建议
+                      </button>
+                      <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-1 rounded-full transition-all">
+                        了解更多详情
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+              chatContainer.insertAdjacentHTML('beforeend', aiReplyHTML);
+              
+              // 滚动到底部
+              chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 1500);
+          }
+        }
+        
+        // 发送按钮点击事件
+        sendButton.addEventListener('click', handleSend);
+        
+        // 输入框回车事件
+        inputField.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            handleSend();
+          }
+        });
+        
+        // 聊天历史项点击事件
+        const chatHistoryItems = document.querySelectorAll('.chat-history-item');
+        chatHistoryItems.forEach(item => {
+          item.addEventListener('click', function() {
+            // 移除所有项的active类
+            chatHistoryItems.forEach(i => i.classList.remove('active'));
+            // 为当前点击项添加active类
+            this.classList.add('active');
+          });
+        });
+        
+        // 新建聊天按钮点击事件
+        const newChatButton = document.querySelector('.new-chat-btn');
+        newChatButton.addEventListener('click', function() {
+          // 这里只是UI演示，实际应用需要创建新的聊天会话
+          alert('创建新的聊天会话');
+        });
+        
+        // 展开剩余计划按钮点击事件
+        document.addEventListener('click', function(e) {
+          // 检查点击的元素是否是展开按钮或其子元素
+          const expandButton = e.target.closest('.text-teal-600, .text-teal-800');
+          if (expandButton && (expandButton.querySelector('.fa-chevron-down') || expandButton.querySelector('.fa-chevron-up'))) {
+            // 切换展开/收起状态
+            const isExpanded = expandButton.querySelector('.fa-chevron-up');
+            const hiddenTasks = document.getElementById('hidden-tasks');
+            
+            if (isExpanded) {
+              // 收起任务
+              expandButton.innerHTML = '<i class="fas fa-chevron-down mr-1"></i> 展开剩余计划';
+              if (hiddenTasks) hiddenTasks.style.display = 'none';
+            } else {
+              // 展开任务
+              expandButton.innerHTML = '<i class="fas fa-chevron-up mr-1"></i> 收起剩余计划';
+              
+              // 如果隐藏任务区域不存在，则创建
+              if (!hiddenTasks) {
+                // 创建隐藏任务区域
+                const tasksContainer = document.createElement('div');
+                tasksContainer.id = 'hidden-tasks';
+                tasksContainer.className = 'mt-4 space-y-4';
+                
+                // 添加第3-5天的任务卡片
+                tasksContainer.innerHTML = `
+                  <!-- 第3天任务卡片 -->
+                  <div class="task-card p-4 border-l-4 border-blue-500 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center mb-2">
+                      <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-vial text-white"></i>
+                      </div>
+                      <h3 class="text-lg font-semibold">第3天：水质检测与调整</h3>
+                    </div>
+                    <ul class="ml-11 list-disc space-y-1 text-gray-700">
+                      <li>进行全面水质检测，记录pH值、氨氮、溶解氧等指标</li>
+                      <li>根据检测结果调整水质参数</li>
+                      <li>检查过滤系统运行状态</li>
+                      <li>添加必要的水质调节剂</li>
+                    </ul>
+                    <div class="mt-3 ml-11 flex space-x-2">
+                      <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i>调整计划
+                      </button>
+                      <button class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors duration-200">
+                        <i class="fas fa-bell mr-1"></i>设置提醒
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- 第4天任务卡片 -->
+                  <div class="task-card p-4 border-l-4 border-green-500 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center mb-2">
+                      <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-fish text-white"></i>
+                      </div>
+                      <h3 class="text-lg font-semibold">第4天：鱼类健康检查</h3>
+                    </div>
+                    <ul class="ml-11 list-disc space-y-1 text-gray-700">
+                      <li>观察鱼类行为，记录异常情况</li>
+                      <li>抽样检查鱼类体表是否有寄生虫或疾病迹象</li>
+                      <li>测量样本鱼的体长和体重，评估生长情况</li>
+                      <li>必要时进行预防性药浴处理</li>
+                    </ul>
+                    <div class="mt-3 ml-11 flex space-x-2">
+                      <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i>调整计划
+                      </button>
+                      <button class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors duration-200">
+                        <i class="fas fa-bell mr-1"></i>设置提醒
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- 第5天任务卡片 -->
+                  <div class="task-card p-4 border-l-4 border-purple-500 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center mb-2">
+                      <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center mr-3">
+                        <i class="fas fa-chart-line text-white"></i>
+                      </div>
+                      <h3 class="text-lg font-semibold">第5天：数据分析与总结</h3>
+                    </div>
+                    <ul class="ml-11 list-disc space-y-1 text-gray-700">
+                      <li>汇总一周内的所有养殖数据</li>
+                      <li>分析鱼类生长趋势和健康状况</li>
+                      <li>评估饲料转化率和水质变化</li>
+                      <li>制定下周养殖计划调整方案</li>
+                    </ul>
+                    <div class="mt-3 ml-11 flex space-x-2">
+                      <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i>调整计划
+                      </button>
+                      <button class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors duration-200">
+                        <i class="fas fa-bell mr-1"></i>设置提醒
+                      </button>
+                    </div>
+                  </div>
+                `;
+                
+                // 将任务区域添加到展开按钮后面
+                expandButton.parentNode.insertBefore(tasksContainer, expandButton.nextSibling);
+              } else {
+                hiddenTasks.style.display = 'block';
+              }
+            }
+           }
+           
+           // 添加任务卡片按钮的点击事件
+           document.addEventListener('click', function(e) {
+             // 检查是否点击了任务卡片中的按钮
+             const actionButton = e.target.closest('.text-xs');
+             if (actionButton) {
+               // 简单的演示效果
+               if (actionButton.innerHTML.includes('调整计划')) {
+                 alert('打开任务调整面板');
+               } else if (actionButton.innerHTML.includes('设置提醒')) {
+                 alert('设置任务提醒');
+               }
+             }
+           });
+          // 任务卡片已通过动态方式添加
+          // 任务卡片的悬停效果已通过CSS类实现
+        });
+      });
+    </script>
+  </body>
+</html>

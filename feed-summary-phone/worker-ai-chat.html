@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>小鲤AI助手 - 对话</title>
+    <link
+      href="./tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="./all.min.css"
+    />
+    <style>
+      :root {
+        --color-primary: #007AFF; /* iOS 蓝色 */
+        --color-secondary: #34C759; /* iOS 绿色 */
+        --color-warning: #FF9500; /* iOS 橙色 */
+        --color-danger: #FF3B30; /* iOS 红色 */
+        --color-info: #5856D6; /* iOS 紫色 */
+        --color-gray: #8E8E93; /* iOS 灰色 */
+        --color-light-gray: #F2F2F7; /* iOS 浅灰色背景 */
+        --color-dark-blue: #0A84FF; /* iOS 深蓝色 */
+        --color-teal: #64D2FF; /* iOS 青色 */
+        --color-pink: #FF2D55; /* iOS 粉色 */
+        --color-yellow: #FFCC00; /* iOS 黄色 */
+      }
+      
+      /* 渐变背景色 */
+      .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-teal));
+      }
+      
+      .bg-gradient-secondary {
+        background: linear-gradient(135deg, var(--color-secondary), #5BDA8A);
+      }
+      
+      .bg-gradient-warning {
+        background: linear-gradient(135deg, var(--color-warning), #FFBD33);
+      }
+      
+      .bg-gradient-danger {
+        background: linear-gradient(135deg, var(--color-danger), var(--color-pink));
+      }
+      
+      /* 老年模式样式 */
+      body {
+        font-size: 18px;
+        line-height: 1.5;
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        background-color: var(--color-light-gray);
+        font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif;
+        color: #1C1C1E;
+      }
+      
+      /* 磨砂玻璃效果 */
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      
+      /* 增加对比度 */
+      .bg-primary {
+        background-color: #1e60d6; /* 更深的蓝色 */
+      }
+      .text-primary {
+        color: #1e60d6; /* 更深的蓝色 */
+      }
+      .bg-secondary {
+        background-color: #0a8f63; /* 更深的绿色 */
+      }
+      .text-secondary {
+        color: #0a8f63; /* 更深的绿色 */
+      }
+      .bg-warning {
+        background-color: #e29400; /* 更深的黄色 */
+      }
+      .text-warning {
+        color: #e29400; /* 更深的黄色 */
+      }
+      .bg-danger {
+        background-color: #d01f1f; /* 更深的红色 */
+      }
+      .text-danger {
+        color: #d01f1f; /* 更深的红色 */
+      }
+      .bg-info {
+        background-color: #4a4dd1; /* 更深的紫色 */
+      }
+      .text-info {
+        color: #4a4dd1; /* 更深的紫色 */
+      }
+      
+      /* 增大字体和按钮尺寸 */
+      .text-xs {
+        font-size: 16px;
+      }
+      .text-sm {
+        font-size: 18px;
+      }
+      .text-base {
+        font-size: 20px;
+      }
+      .text-lg {
+        font-size: 24px;
+      }
+      .text-xl {
+        font-size: 28px;
+      }
+      .text-2xl {
+        font-size: 32px;
+      }
+      
+      /* 增大图标尺寸 */
+      .card-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+      }
+      
+      /* 增大功能按钮尺寸 */
+      .function-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+      }
+      
+      /* 增大底部导航图标 */
+      .bottom-nav i {
+        font-size: 28px;
+      }
+      
+      .bottom-nav span {
+        font-size: 16px;
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 8px 0;
+      }
+      
+      /* 卡片悬停效果 */
+      .card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+      
+      /* 下拉刷新动画 */
+      .pull-to-refresh {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -60px;
+        transition: margin-top 0.3s ease;
+      }
+      
+      .pull-to-refresh.active {
+        margin-top: 0;
+      }
+      
+      /* 增强按钮可点击性 */
+      .clickable {
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .clickable:active {
+        transform: scale(0.95);
+      }
+      
+      /* 聊天气泡样式 - 老年友好版 */
+      .chat-bubble {
+        max-width: 85%;
+        border-radius: 18px;
+        padding: 14px 18px;
+        margin-bottom: 14px;
+        position: relative;
+        word-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        line-height: 1.5;
+        font-size: 20px;
+      }
+      
+      .chat-bubble.user {
+        background-color: #1e60d6;
+        color: white;
+        border-bottom-right-radius: 4px;
+        margin-left: auto;
+      }
+      
+      .chat-bubble.ai {
+        background-color: #f2f2f7;
+        color: #1C1C1E;
+        border-bottom-left-radius: 4px;
+        margin-right: auto;
+      }
+      
+      .chat-bubble.system {
+        background-color: rgba(142, 142, 147, 0.1);
+        color: #666;
+        border: none;
+        margin: 16px auto;
+        text-align: center;
+        max-width: 90%;
+        font-size: 18px;
+        padding: 10px 18px;
+        border-radius: 12px;
+      }
+      
+      /* 任务卡片样式 */
+      .task-card {
+        border: none;
+        border-radius: 16px;
+        padding: 16px;
+        margin: 14px 0;
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      
+      /* 头像样式 */
+      .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 2px solid white;
+        font-size: 24px;
+      }
+      
+      .avatar.user {
+        background-color: #1e60d6;
+      }
+      
+      .avatar.ai {
+        background-color: #0a8f63;
+      }
+      
+      /* 输入框样式 */
+      .chat-input {
+        background-color: #f2f2f7;
+        border: none;
+        border-radius: 24px;
+        padding: 14px 20px;
+        font-size: 20px;
+        transition: all 0.3s;
+        height: 60px;
+      }
+      
+      .chat-input:focus {
+        background-color: #fff;
+        box-shadow: 0 0 0 2px #1e60d6;
+        outline: none;
+      }
+      
+      /* 快捷回复按钮 */
+      .quick-reply {
+        background-color: #f2f2f7;
+        border: 1px solid #ddd;
+        border-radius: 16px;
+        padding: 12px 18px;
+        font-size: 18px;
+        margin: 0 8px 8px 0;
+        display: inline-block;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .quick-reply:active {
+        background-color: #e5e5ea;
+        transform: scale(0.98);
+      }
+      
+      /* 动画效果 */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+      
+      /* 隐藏滚动条 */
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 下拉刷新指示器 -->
+    <div class="refresh-indicator flex items-center justify-center overflow-hidden transition-all duration-300 h-0">
+      <div class="refresh-spinner animate-spin text-primary">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+    </div>
+    
+    <!-- 顶部导航栏 -->
+    <div class="bg-white shadow-md sticky top-0 z-10">
+      <div class="flex items-center justify-between p-4">
+        <div class="flex items-center">
+          <a href="worker.html" class="mr-3 w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-all text-primary">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <div>
+            <div class="flex items-center">
+              <h1 class="text-lg font-bold text-gray-800">小鲤AI助手</h1>
+              <span class="ml-2 px-2 py-0.5 bg-blue-50 text-primary text-xs rounded-full font-medium">Beta</span>
+            </div>
+            <p class="text-xs text-gray-500">智能对话，高效协作</p>
+          </div>
+        </div>
+        <div class="flex items-center">
+          <div class="flex items-center mr-3 bg-blue-50 px-2 py-1 rounded-full">
+            <div class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></div>
+            <span class="text-xs text-primary font-medium">在线</span>
+          </div>
+          <button class="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-all mr-2 text-primary">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+          <button class="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-all text-primary relative group">
+            <i class="fas fa-ellipsis-v"></i>
+            <div class="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg p-2 hidden group-hover:block w-48">
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center">
+                <i class="fas fa-history mr-2 text-gray-500"></i> 历史记录
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center">
+                <i class="fas fa-cog mr-2 text-gray-500"></i> 设置
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center">
+                <i class="fas fa-question-circle mr-2 text-gray-500"></i> 帮助
+              </a>
+            </div>
+          </button>
+        </div>
+      </div>
+  
+      
+      <!-- 工人信息 -->
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center mr-3">
+            <i class="fas fa-user text-primary text-2xl"></i>
+          </div>
+          <div>
+            <div class="text-xl font-medium">张师傅</div>
+            <div class="text-lg">养殖工人</div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-lg">小鲤助手</div>
+          <div class="flex items-center justify-end">
+            <div class="w-3 h-3 rounded-full bg-green-400 mr-1"></div>
+            <div class="text-lg">在线</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 波浪背景效果 -->
+      <div class="absolute bottom-0 left-0 right-0 h-16 opacity-20 overflow-hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="absolute bottom-0 left-0 w-full" style="min-width: 100%; width: 100vw; transform: translateX(0);">
+          <path fill="#ffffff" fill-opacity="1" d="M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,138.7C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 聊天内容区域 -->
+    <div class="p-4 pb-32" id="chatContainer">
+      <!-- 日期分隔线 -->
+      <div class="flex items-center justify-center my-4">
+        <div class="bg-gray-200 h-px flex-grow"></div>
+        <div class="mx-4 text-lg text-gray-500 font-medium">今天</div>
+        <div class="bg-gray-200 h-px flex-grow"></div>
+      </div>
+      
+      <!-- 系统消息 -->
+      <div class="chat-bubble system animate-fade-in">
+        <p>欢迎使用小鲤AI助手，我可以帮您记录养殖数据、提交任务报告和解答问题</p>
+      </div>
+      
+      <!-- AI消息 -->
+      <!-- <div class="flex items-start mb-5 animate-fade-in">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>张师傅，您好！今天有什么需要我帮忙的吗？</p>
+            <p class="mt-2">您可以告诉我养殖棚的打样数据，我会自动匹配相关任务并提交报告。</p>
+          </div>
+          <p class="text-lg text-gray-500 mt-1 ml-1">09:15</p>
+        </div>
+      </div> -->
+      
+      <!-- 用户消息 - 1号养殖棚打样数据 -->
+      <div class="flex items-start mb-5 animate-fade-in">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble user">
+            <p>那个...小鲤啊，我...我刚才去1号棚子那边打样了...嗯...鱼儿长得挺好的。我给你说说啊，那个...长度嘛，大概有这么长，差不多...二十三厘米吧。重量嘛，我称了，四百五十克左右。看着挺精神的，游得也欢实，活蹦乱跳的。外观啊，挺好，鳞片亮堂，没啥问题。你记一下哈，我这老记性，怕一会儿忘了。</p>
+          </div>
+          <p class="text-lg text-gray-500 mt-1 ml-1">09:16</p>
+        </div>
+      </div>
+      
+      <!-- AI消息 - 处理中 -->
+      <div class="flex items-start mb-5 animate-fade-in">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>好的，张师傅，我都记下来了。您稍等一下，我马上帮您处理这些信息...</p>
+          </div>
+          <p class="text-lg text-gray-500 mt-1 ml-1">09:17</p>
+        </div>
+      </div>
+      
+      <!-- AI消息 - 任务报告 -->
+      <div class="flex items-start mb-5 animate-fade-in">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>张师傅，您的数据我都记好了！这就是您今天要做的"1号养殖棚鱼类打样"任务。</p>
+            
+            <div class="task-card">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <i class="fas fa-clipboard-check text-primary mr-2 text-xl"></i>
+                  <h3 class="font-bold text-primary text-xl">任务完成啦</h3>
+                </div>
+                <span class="bg-green-100 text-secondary px-3 py-1 rounded-lg text-lg">已完成</span>
+              </div>
+              
+              <div class="text-lg">
+                <p class="mb-2"><strong>任务：</strong> 1号养殖棚鱼类打样</p>
+                <p class="mb-2"><strong>完成时间：</strong> 09:18</p>
+                <p class="mb-2"><strong>完成人：</strong> 张师傅</p>
+                
+                <p class="mt-3 mb-2"><strong>您记录的数据：</strong></p>
+                <ul class="list-none pl-2 mb-3">
+                  <li class="flex items-start mb-2">
+                    <i class="fas fa-ruler text-primary mr-2 mt-1"></i>
+                    <span>鱼儿长度：23厘米</span>
+                  </li>
+                  <li class="flex items-start mb-2">
+                    <i class="fas fa-weight text-primary mr-2 mt-1"></i>
+                    <span>鱼儿重量：450克</span>
+                  </li>
+                  <li class="flex items-start mb-2">
+                    <i class="fas fa-eye text-primary mr-2 mt-1"></i>
+                    <span>外观情况：良好</span>
+                  </li>
+                  <li class="flex items-start mb-2">
+                    <i class="fas fa-running text-primary mr-2 mt-1"></i>
+                    <span>活动情况：活跃</span>
+                  </li>
+                </ul>
+                
+                <p class="mb-2"><strong>分析结果：</strong></p>
+                <p>张师傅，您养的鱼长得很好啊！按照这个速度，应该能按时达到出塘标准。您现在的饲养方法很合适，就这样继续喂下去就行。</p>
+              </div>
+            </div>
+            
+            <p class="mt-3">我已经把您的报告发给王经理了。张师傅，您还有什么需要我帮忙的吗？</p>
+          </div>
+          <p class="text-lg text-gray-500 mt-1 ml-1">09:18</p>
+        </div>
+      </div>
+      
+      <!-- 用户消息 - 查询任务 -->
+      <div class="flex items-start mb-5 animate-fade-in">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble user">
+            <p>小鲤啊，我今天还有啥活要干啊？我这记性不好，你帮我看看还有啥任务没完成。</p>
+          </div>
+          <p class="text-lg text-gray-500 mt-1 ml-1">09:20</p>
+        </div>
+      </div>
+      
+      <!-- AI消息 - 任务列表 -->
+      <div class="flex items-start mb-5 animate-fade-in">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>张师傅，您今天一共有3件事要做：</p>
+            <p class="mt-2">1. 1号养殖棚鱼类打样 <span class="text-secondary">✓ 已经完成啦，做得很好！</span></p>
+            <p>2. 5号池投喂饲料 <span class="text-warning">⚠ 这个比较急，要尽快去做</span></p>
+            <p>3. 2号池水质检测 <span class="text-warning">⚠ 这个不着急，等您有空再做</span></p>
+            <p class="mt-2">张师傅，您先去5号池喂鱼吧，那边的鱼该吃饭了。</p>
+          </div>
+          <p class="text-lg text-gray-500 mt-1 ml-1">09:20</p>
+        </div>
+      </div>
+      
+      <!-- 快捷回复选项 -->
+      <div class="flex flex-wrap mb-4">
+        <div class="quick-reply" onclick="sendQuickReply('我要汇报打样数据')">
+          <i class="fas fa-fish mr-1"></i> 我要汇报打样数据
+        </div>
+        <div class="quick-reply" onclick="sendQuickReply('我今天还有啥活要干')">
+          <i class="fas fa-tasks mr-1"></i> 我今天还有啥活要干
+        </div>
+        <div class="quick-reply" onclick="sendQuickReply('水质有问题')">
+          <i class="fas fa-exclamation-triangle mr-1"></i> 水质有问题
+        </div>
+        <div class="quick-reply" onclick="sendQuickReply('设备坏了')">
+          <i class="fas fa-tools mr-1"></i> 设备坏了
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部输入区域 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+      <!-- 数据输入表单 (默认隐藏) -->
+      <div id="dataForm" class="mb-4 bg-gray-50 p-4 rounded-xl hidden">
+        <h3 class="text-xl font-bold mb-3 text-primary">1号养殖棚鱼儿情况</h3>
+        
+        <div class="mb-3">
+          <label class="block text-lg font-medium mb-2">鱼儿有多长 (厘米)</label>
+          <input type="number" id="bodyLength" class="w-full chat-input" placeholder="请输入数字">
+        </div>
+        
+        <div class="mb-3">
+          <label class="block text-lg font-medium mb-2">鱼儿有多重 (克)</label>
+          <input type="number" id="bodyWeight" class="w-full chat-input" placeholder="请输入数字">
+        </div>
+        
+        <div class="mb-3">
+          <label class="block text-lg font-medium mb-2">鱼儿外观怎么样</label>
+          <select id="appearance" class="w-full chat-input">
+            <option value="">请选择</option>
+            <option value="良好">很好看</option>
+            <option value="一般">一般般</option>
+            <option value="较差">不太好</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label class="block text-lg font-medium mb-2">鱼儿活动情况</label>
+          <select id="activity" class="w-full chat-input">
+            <option value="">请选择</option>
+            <option value="活跃">游得很欢</option>
+            <option value="正常">正常游动</option>
+            <option value="迟缓">游得慢</option>
+          </select>
+        </div>
+        
+        <div class="flex justify-between">
+          <button class="bg-gray-300 text-gray-700 px-6 py-3 rounded-xl text-lg font-medium" onclick="hideDataForm()">不填了</button>
+          <button class="bg-primary text-white px-6 py-3 rounded-xl text-lg font-medium" onclick="submitData()">发送给小鲤</button>
+        </div>
+      </div>
+      
+      <!-- 常规输入框 -->
+      <div id="normalInput" class="flex items-center">
+        <button class="w-14 h-14 rounded-full flex items-center justify-center text-gray-500 bg-gray-100 mr-3" onclick="showDataForm()">
+          <i class="fas fa-clipboard-list text-2xl"></i>
+        </button>
+        <div class="flex-grow relative">
+          <input type="text" id="messageInput" placeholder="点这里输入或按麦克风说话..." class="w-full chat-input pr-14">
+          <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary w-10 h-10 flex items-center justify-center">
+            <i class="fas fa-microphone text-2xl"></i>
+          </button>
+        </div>
+        <button id="sendButton" class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white ml-3">
+          <i class="fas fa-paper-plane text-2xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white bottom-nav z-10 border-t border-gray-200" style="display: none;">
+      <div class="flex justify-around py-2">
+        <a href="worker.html" class="flex flex-col items-center px-3 py-1 text-gray-500">
+          <i class="fas fa-home"></i>
+          <span class="mt-1">首页</span>
+        </a>
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-gray-500">
+          <i class="fas fa-tasks"></i>
+          <span class="mt-1">任务</span>
+        </a>
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-gray-500">
+          <i class="fas fa-fish"></i>
+          <span class="mt-1">养殖池</span>
+        </a>
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-primary">
+          <i class="fas fa-robot"></i>
+          <span class="mt-1">小鲤助手</span>
+        </a>
+      </div>
+    </nav>
+
+    <script>
+      // 页面加载完成后滚动到底部
+      window.onload = function() {
+        scrollToBottom();
+      };
+      
+      // 滚动到底部函数
+      function scrollToBottom() {
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+      
+      // 显示数据表单
+      function showDataForm() {
+        document.getElementById('dataForm').classList.remove('hidden');
+        document.getElementById('normalInput').classList.add('hidden');
+      }
+      
+      // 隐藏数据表单
+      function hideDataForm() {
+        document.getElementById('dataForm').classList.add('hidden');
+        document.getElementById('normalInput').classList.remove('hidden');
+      }
+      
+      // 发送快捷回复
+      function sendQuickReply(message) {
+        alert('您选择了：' + message + '\n\n这是演示版本，聊天内容已经预先设置好了。');
+      }
+      
+      // 提交数据
+      function submitData() {
+        alert('谢谢您填写鱼儿数据！\n\n这是演示版本，聊天内容已经预先设置好了。');
+        hideDataForm();
+      }
+      
+      // 发送消息事件监听
+      document.getElementById('sendButton').addEventListener('click', function() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+          alert('您说：' + message + '\n\n这是演示版本，聊天内容已经预先设置好了。');
+          messageInput.value = '';
+        }
+      });
+      
+      // 下拉刷新功能
+      let touchStartY = 0;
+      let touchEndY = 0;
+      const pullToRefresh = document.getElementById('pullToRefresh');
+      
+      document.addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+      }, false);
+      
+      document.addEventListener('touchmove', function(e) {
+        touchEndY = e.touches[0].clientY;
+        
+        // 只有当页面滚动到顶部时才触发下拉刷新
+        if (window.scrollY === 0 && touchEndY > touchStartY) {
+          const distance = touchEndY - touchStartY;
+          
+          if (distance > 30 && distance < 90) {
+            pullToRefresh.classList.add('active');
+            e.preventDefault(); // 阻止默认滚动
+          }
+        }
+      }, { passive: false });
+      
+      document.addEventListener('touchend', function() {
+        if (pullToRefresh.classList.contains('active')) {
+          // 模拟刷新操作
+          setTimeout(() => {
+            pullToRefresh.classList.remove('active');
+            // 这里可以添加实际的刷新逻辑
+            // location.reload();
+          }, 1500);
+        }
+      }, false);
+    </script>
+  </body>
+</html>

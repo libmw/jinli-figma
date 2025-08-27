@@ -1,0 +1,2545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>渔业养殖鱼苗采购系统</title>
+    <!-- Tailwind CSS -->
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="../static/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Chart.js -->
+    <script src="../static/chart.js"></script>
+
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+      
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .bottom-nav {
+        display: none; /* 隐藏底部导航栏 */
+      }
+      
+      /* 步骤指示器样式 */
+      .step-active {
+        background-color: var(--color-primary);
+        color: white;
+        border-color: var(--color-primary);
+      }
+      .step-inactive {
+        background-color: #f3f4f6;
+        color: #6b7280;
+        border-color: #d1d5db;
+      }
+      .step-completed {
+        background-color: var(--color-secondary);
+        color: white;
+        border-color: var(--color-secondary);
+      }
+      
+      /* 步骤指示器 */
+      .step-indicator {
+        position: relative;
+        height: 4px;
+        background-color: #e5e7eb;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .step-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: var(--color-primary);
+        transition: width 0.5s ease;
+      }
+
+      /* 下拉刷新动画 */
+      #pullToRefresh {
+        height: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: height 0.3s;
+        overflow: hidden;
+      }
+
+      #pullToRefresh.active {
+        height: 60px;
+      }
+
+      .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--color-primary);
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 下拉刷新指示器 -->
+    <div id="pullToRefresh">
+      <div class="spinner"></div>
+      <span class="ml-2 text-sm text-gray-500">正在刷新...</span>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <span class="text-2xl font-bold text-primary">渔业养殖鱼苗采购系统</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-bell text-gray-600"></i>
+          </button>
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-cog text-gray-600"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+              <i class="fas fa-user"></i>
+            </div>
+            <span class="text-sm font-medium">管理员</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-4 py-4">
+      <!-- 鱼苗库存状态卡片 -->
+      <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center">
+            <div class="card-icon bg-blue-100 text-primary mr-4">
+              <i class="fas fa-fish text-xl"></i>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">库存状态</p>
+              <h3 class="text-xl font-bold">3种鱼苗需补充</h3>
+            </div>
+          </div>
+          <a href="#" class="bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 text-sm flex items-center">
+            <span>查看库存详情</span>
+            <i class="fas fa-chevron-right ml-1 text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 鱼苗详细库存 -->
+      <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <h2 class="text-lg font-bold mb-4">鱼苗库存详情</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- 草鱼苗 -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+              <span class="text-base font-medium">草鱼苗</span>
+              <span class="text-sm text-danger font-medium">5,000尾</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+              <div class="bg-danger rounded-full h-2" style="width: 25%"></div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-500 mt-2">
+              <span>阈值: 20,000尾</span>
+              <span>25%</span>
+            </div>
+          </div>
+          
+          <!-- 鲤鱼苗 -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+              <span class="text-base font-medium">鲤鱼苗</span>
+              <span class="text-sm text-secondary font-medium">25,000尾</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+              <div class="bg-secondary rounded-full h-2" style="width: 166%"></div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-500 mt-2">
+              <span>阈值: 15,000尾</span>
+              <span>166%</span>
+            </div>
+          </div>
+          
+          <!-- 罗非鱼苗 -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex justify-between items-center">
+              <span class="text-base font-medium">罗非鱼苗</span>
+              <span class="text-sm text-warning font-medium">12,000尾</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+              <div class="bg-warning rounded-full h-2" style="width: 120%"></div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-500 mt-2">
+              <span>阈值: 10,000尾</span>
+              <span>120%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 车辆对比模态框 -->
+      <div
+        id="vehicleCompareModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+      >
+        <div class="bg-white rounded-xl w-11/12 max-w-5xl max-h-[90vh] overflow-y-auto">
+          <div class="p-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-medium">车辆对比</h3>
+              <button id="closeCompareModalBtn" class="text-gray-500">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4">
+            <!-- 图表对比 -->
+            <div class="mb-4">
+              <h4 class="text-sm font-medium mb-2">运输能力对比</h4>
+              <canvas id="vehicleBar" height="100"></canvas>
+            </div>
+
+
+            <!-- 详细信息 -->
+            <div class="grid grid-cols-1 gap-3">
+              <!-- 车辆1 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <h4 class="text-sm font-medium mb-1">鄂A·12345</h4>
+                <p class="text-xs text-gray-500 mb-2">
+                  张师傅 - 专业鱼苗运输10年经验
+                </p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span class="text-gray-500">联系电话：</span>
+                    <span>138-8888-1111</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">运输时间：</span>
+                    <span>最长24小时</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">历史死亡率：</span>
+                    <span class="text-green-500">＜3%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 车辆2 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <h4 class="text-sm font-medium mb-1">鄂B·67890</h4>
+                <p class="text-xs text-gray-500 mb-2">
+                  李师傅 - 鱼苗运输8年经验
+                </p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span class="text-gray-500">联系电话：</span>
+                    <span>139-9999-2222</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">运输时间：</span>
+                    <span>最长12小时</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">历史死亡率：</span>
+                    <span class="text-yellow-500">3%-5%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 车辆3 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <h4 class="text-sm font-medium mb-1">鄂C·54321</h4>
+                <p class="text-xs text-gray-500 mb-2">
+                  王师傅 - 鱼苗运输5年经验
+                </p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span class="text-gray-500">联系电话：</span>
+                    <span>137-7777-3333</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">运输时间：</span>
+                    <span>最长6小时</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">历史死亡率：</span>
+                    <span class="text-red-500">5%-8%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        // JavaScript代码
+        let currentStep = 0;
+        const totalSteps = 7;
+
+        // 更新进度条和步骤指示器函数
+        function updateProgressBars() {
+          // 更新进度条
+          for (let i = 1; i <= 6; i++) {
+            const progressBar = document.getElementById(`progress${i}`);
+            if (progressBar) {
+              if (i < currentStep) {
+                progressBar.style.width = "100%";
+              } else {
+                progressBar.style.width = "0%";
+              }
+            }
+          }
+          
+          // 更新步骤指示器
+          for (let i = 1; i <= 7; i++) {
+            const stepIndicator = document.getElementById(`step${i}Indicator`);
+            if (stepIndicator) {
+              // 移除所有状态类
+              stepIndicator.classList.remove('step-active', 'step-completed', 'step-inactive');
+              
+              // 根据当前步骤设置状态
+              if (i < currentStep) {
+                // 已完成的步骤
+                stepIndicator.classList.add('step-completed');
+              } else if (i === currentStep) {
+                // 当前步骤
+                stepIndicator.classList.add('step-active');
+              } else {
+                // 未完成的步骤
+                stepIndicator.classList.add('step-inactive');
+              }
+            }
+          }
+        }
+
+        // 切换步骤函数
+        function goToStep(step) {
+          // 隐藏所有步骤
+          for (let i = 0; i <= totalSteps; i++) {
+            const stepElement = document.getElementById(`step${i}`);
+            if (stepElement) {
+              stepElement.classList.add("hidden");
+            }
+          }
+
+          // 显示当前步骤
+          const currentStepElement = document.getElementById(`step${step}`);
+          if (currentStepElement) {
+            currentStepElement.classList.remove("hidden");
+          }
+
+          // 更新当前步骤
+          currentStep = step;
+
+          // 更新进度条和步骤指示器
+          updateProgressBars();
+        }
+
+        // 初始化页面
+        document.addEventListener("DOMContentLoaded", function () {
+          // 显示初始步骤
+          goToStep(0);
+
+          // 开始流程按钮
+          document.getElementById("startProcessBtn").addEventListener("click", function () {
+            goToStep(1);
+          });
+
+          // 步骤1导航按钮
+          document.getElementById("backToStep1Btn").addEventListener("click", function () {
+            goToStep(0);
+          });
+
+          document.getElementById("gotoStep2Btn").addEventListener("click", function () {
+            goToStep(2);
+          });
+
+          // 步骤2导航按钮
+          document.getElementById("backToStep2Btn").addEventListener("click", function () {
+            goToStep(1);
+          });
+
+          document.getElementById("gotoStep3Btn").addEventListener("click", function () {
+            goToStep(3);
+          });
+
+          // 步骤3导航按钮
+          document.getElementById("backToStep3Btn").addEventListener("click", function () {
+            goToStep(2);
+          });
+
+          document.getElementById("gotoStep4Btn").addEventListener("click", function () {
+            goToStep(4);
+          });
+
+          // 步骤4导航按钮
+          document.getElementById("backToStep4Btn").addEventListener("click", function () {
+            goToStep(3);
+          });
+
+          document.getElementById("gotoStep5Btn").addEventListener("click", function () {
+            goToStep(5);
+          });
+
+          // 步骤5导航按钮
+          document.getElementById("backToStep5Btn").addEventListener("click", function () {
+            goToStep(4);
+          });
+
+          document.getElementById("gotoStep6Btn").addEventListener("click", function () {
+            goToStep(6);
+          });
+
+          // 步骤6导航按钮
+          document.getElementById("backToStep6Btn").addEventListener("click", function () {
+            goToStep(5);
+          });
+
+          document.getElementById("gotoStep7Btn").addEventListener("click", function () {
+            goToStep(7);
+          });
+
+          // 步骤7导航按钮
+          document.getElementById("backToStep7Btn").addEventListener("click", function () {
+            goToStep(6);
+          });
+
+          document.getElementById("completeProcessBtn").addEventListener("click", function () {
+            // 验证是否已评分
+            if (currentFishRating === 0) {
+              alert('请对鱼苗质量进行评分');
+              return;
+            }
+            
+            // 获取评分和评价数据
+            const fishRating = currentFishRating;
+            const ratingTexts = ['', '很差', '较差', '一般', '良好', '优秀'];
+            
+            // 显示评分成功提示
+            alert(`评分成功！您对鱼苗质量的评分为: ${ratingTexts[fishRating]}\n鱼苗采购流程已完成！`);
+            goToStep(0);
+          });
+
+          // 车辆对比模态框
+          document.getElementById("compareVehiclesBtn").addEventListener("click", function () {
+            document.getElementById("vehicleCompareModal").classList.remove("hidden");
+            
+            // 初始化图表
+            const ctx = document.getElementById('vehicleBar').getContext('2d');
+            new Chart(ctx, {
+              type: 'bar',
+              data: {
+                labels: ['专业型', '标准型', '经济型'],
+                datasets: [{
+                  label: '运输能力（尾）',
+                  data: [50000, 30000, 20000],
+                  backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                  ],
+                  borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 159, 64, 1)'
+                  ],
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          });
+
+          document.getElementById("closeCompareModalBtn").addEventListener("click", function () {
+            document.getElementById("vehicleCompareModal").classList.add("hidden");
+          });
+        });
+      </script>
+
+
+    <!-- 步骤指示器卡片 -->
+    <div class="container mx-auto px-4 py-4">
+      <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+        <h2 class="text-lg font-bold mb-4">采购流程</h2>
+        <div class="flex justify-between items-center overflow-x-auto py-2">
+          <div class="flex flex-col items-center mx-1">
+            <div id="step1Indicator" class="w-8 h-8 rounded-full border-2 step-active flex items-center justify-center mb-1">
+              <i class="fas fa-fish text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">发起</span>
+          </div>
+          <div class="flex-1 h-2 bg-gray-200 mx-1" style="min-width: 20px; max-width: 40px">
+            <div id="progress1" class="h-full bg-primary" style="width: 0%"></div>
+          </div>
+          <div class="flex flex-col items-center mx-1">
+            <div id="step2Indicator" class="w-8 h-8 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+              <i class="fas fa-truck text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">车辆</span>
+          </div>
+          <div class="flex-1 h-2 bg-gray-200 mx-1" style="min-width: 20px; max-width: 40px">
+            <div id="progress2" class="h-full bg-primary" style="width: 0%"></div>
+          </div>
+          <div class="flex flex-col items-center mx-1">
+            <div id="step3Indicator" class="w-8 h-8 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+              <i class="fas fa-spray-can text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">消毒</span>
+          </div>
+          <div class="flex-1 h-2 bg-gray-200 mx-1" style="min-width: 20px; max-width: 40px">
+            <div id="progress3" class="h-full bg-primary" style="width: 0%"></div>
+          </div>
+          <div class="flex flex-col items-center mx-1">
+            <div id="step4Indicator" class="w-8 h-8 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+              <i class="fas fa-search text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">抽查</span>
+          </div>
+          <div class="flex-1 h-2 bg-gray-200 mx-1" style="min-width: 20px; max-width: 40px">
+            <div id="progress4" class="h-full bg-primary" style="width: 0%"></div>
+          </div>
+          <div class="flex flex-col items-center mx-1">
+            <div id="step5Indicator" class="w-8 h-8 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+              <i class="fas fa-shield-alt text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">预防</span>
+          </div>
+          <div class="flex-1 h-2 bg-gray-200 mx-1" style="min-width: 20px; max-width: 40px">
+            <div id="progress5" class="h-full bg-primary" style="width: 0%"></div>
+          </div>
+          <div class="flex flex-col items-center mx-1">
+            <div id="step6Indicator" class="w-8 h-8 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+              <i class="fas fa-dolly text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">下车</span>
+          </div>
+          <div class="flex-1 h-2 bg-gray-200 mx-1" style="min-width: 20px; max-width: 40px">
+            <div id="progress6" class="h-full bg-primary" style="width: 0%"></div>
+          </div>
+          <div class="flex flex-col items-center mx-1">
+            <div id="step7Indicator" class="w-8 h-8 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+              <i class="fas fa-star text-xs"></i>
+            </div>
+            <span class="text-xs font-medium">评价</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主要内容区域 -->
+      <div class="card">
+        <!-- 步骤0: 开始页面 -->
+        <div id="step0" class="p-4">
+          <div class="text-center py-6">
+            <div
+              class="w-20 h-20 rounded-full bg-blue-100 text-primary flex items-center justify-center mx-auto mb-4"
+            >
+              <i class="fas fa-fish text-3xl"></i>
+            </div>
+            <h2 class="text-xl font-medium mb-2">鱼苗采购流程</h2>
+            <p class="text-sm text-gray-500 mb-6">
+              通过本系统可以完成鱼苗采购的全流程管理
+            </p>
+
+            <button
+              id="startProcessBtn"
+              class="w-full py-3 bg-primary text-white rounded-lg font-medium transition-all hover:bg-primary-dark"
+            >
+              开始采购流程
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤1: 发起采购任务 -->
+        <div id="step1" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤1: 发起采购任务</h2>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >鱼苗品种</label
+            >
+            <select
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">请选择鱼苗品种</option>
+              <option value="草鱼">草鱼</option>
+              <option value="鲤鱼">鲤鱼</option>
+              <option value="鲫鱼">鲫鱼</option>
+              <option value="鲢鱼">鲢鱼</option>
+              <option value="罗非鱼">罗非鱼</option>
+              <option value="黄颡鱼">黄颡鱼</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >采购数量 (尾)</label
+            >
+            <input
+              type="number"
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="请输入采购数量"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >规格要求</label
+            >
+            <select
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">请选择规格要求</option>
+              <option value="鱼苗(1-3cm)">鱼苗(1-3cm)</option>
+              <option value="鱼种(3-5cm)">鱼种(3-5cm)</option>
+              <option value="鱼种(5-8cm)">鱼种(5-8cm)</option>
+              <option value="鱼种(8-12cm)">鱼种(8-12cm)</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >鱼苗公司</label
+            >
+            <div class="grid grid-cols-1 gap-3">
+              <!-- 鱼苗公司1 -->
+              <div
+                class="border border-gray-200 rounded-lg p-3 hover:border-primary transition-all"
+              >
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="text-sm font-medium">水产良种场</h3>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star-half-alt"></i>
+                      <span class="text-gray-500 ml-1">(4.5)</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-medium text-primary"
+                      >¥0.15/尾</span
+                    >
+                    <span class="text-xs text-gray-500">预付款: 30%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 鱼苗公司2 -->
+              <div
+                class="border border-gray-200 rounded-lg p-3 hover:border-primary transition-all"
+              >
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="text-sm font-medium">海洋育苗中心</h3>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="far fa-star"></i>
+                      <span class="text-gray-500 ml-1">(4.0)</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-medium text-primary"
+                      >¥0.12/尾</span
+                    >
+                    <span class="text-xs text-gray-500">预付款: 50%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 鱼苗公司3 -->
+              <div
+                class="border border-gray-200 rounded-lg p-3 hover:border-primary transition-all"
+              >
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="text-sm font-medium">淡水鱼繁育基地</h3>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <span class="text-gray-500 ml-1">(4.8)</span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-medium text-primary"
+                      >¥0.18/尾</span
+                    >
+                    <span class="text-xs text-gray-500">预付款: 20%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-2">
+            <button
+              id="compareSuppliersBtn"
+              class="w-full py-2 bg-blue-50 text-primary rounded-lg text-sm font-medium transition-all hover:bg-blue-100"
+            >
+              <i class="fas fa-exchange-alt mr-1"></i>对比鱼苗公司
+            </button>
+          </div>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep1Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              返回
+            </button>
+            <button
+              id="gotoStep2Btn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              下一步
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤2: 车辆联系 -->
+        <div id="step2" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤2: 车辆联系</h2>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >选择运输车辆</label
+            >
+            <div class="grid grid-cols-1 gap-3">
+              <!-- 车辆1 -->
+              <div
+                class="border border-gray-200 rounded-lg p-3 hover:border-primary transition-all"
+              >
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="text-sm font-medium">专业鱼苗运输车</h3>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star-half-alt"></i>
+                      <span class="text-gray-500 ml-1">(4.7)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                      <span
+                        class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full"
+                        >恒温</span
+                      >
+                      <span
+                        class="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full"
+                        >氧气系统</span
+                      >
+                      <span
+                        class="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-full"
+                        >GPS</span
+                      >
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-medium text-primary">¥1,200</span>
+                    <span class="text-xs text-gray-500">容量: 50,000尾</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 车辆2 -->
+              <div
+                class="border border-gray-200 rounded-lg p-3 hover:border-primary transition-all"
+              >
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="text-sm font-medium">标准鱼苗运输车</h3>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="far fa-star"></i>
+                      <span class="text-gray-500 ml-1">(4.0)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                      <span
+                        class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full"
+                        >恒温</span
+                      >
+                      <span
+                        class="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full"
+                        >氧气系统</span
+                      >
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-medium text-primary">¥900</span>
+                    <span class="text-xs text-gray-500">容量: 30,000尾</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 车辆3 -->
+              <div
+                class="border border-gray-200 rounded-lg p-3 hover:border-primary transition-all"
+              >
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h3 class="text-sm font-medium">经济型运输车</h3>
+                    <div class="flex items-center text-yellow-500 text-xs mt-1">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="far fa-star"></i>
+                      <i class="far fa-star"></i>
+                      <span class="text-gray-500 ml-1">(3.2)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                      <span
+                        class="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full"
+                        >氧气系统</span
+                      >
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm font-medium text-primary">¥600</span>
+                    <span class="text-xs text-gray-500">容量: 20,000尾</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <button
+                id="compareVehiclesBtn"
+                class="w-full py-2 bg-blue-50 text-primary rounded-lg text-sm font-medium transition-all hover:bg-blue-100"
+              >
+                <i class="fas fa-exchange-alt mr-1"></i>对比运输车辆
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep2Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              上一步
+            </button>
+            <button
+              id="gotoStep3Btn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              下一步
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤3: 车辆消毒 -->
+        <div id="step3" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤3: 车辆消毒</h2>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >消毒时间</label
+            >
+            <input
+              type="datetime-local"
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >消毒方式</label
+            >
+            <select
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">请选择消毒方式</option>
+              <option value="漂白粉">漂白粉</option>
+              <option value="高锰酸钾">高锰酸钾</option>
+              <option value="碘制剂">碘制剂</option>
+              <option value="紫外线">紫外线</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >消毒剂用量</label
+            >
+            <input
+              type="text"
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="请输入用量和单位"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >消毒照片</label
+            >
+            <div
+              id="disinfectionPhotoContainer"
+              class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-all"
+            >
+              <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+              <p class="text-sm text-gray-500">点击上传消毒照片</p>
+              <input
+                type="file"
+                id="disinfectionPhotoInput"
+                accept="image/*"
+                capture="camera"
+                class="hidden"
+              />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >消毒负责人</label
+            >
+            <input
+              type="text"
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="请输入负责人姓名"
+            />
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep3Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              上一步
+            </button>
+            <button
+              id="gotoStep4Btn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              下一步
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤4: 现场抽查 -->
+        <div id="step4" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤4: 现场抽查</h2>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >鱼苗断食评估</label
+            >
+            <select
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">请选择断食状态</option>
+              <option value="完全断食">完全断食 (24小时以上)</option>
+              <option value="基本断食">基本断食 (12-24小时)</option>
+              <option value="部分断食">部分断食 (6-12小时)</option>
+              <option value="未断食">未断食 (6小时以内)</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >鱼苗健康度评估</label
+            >
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">活力</label>
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="优">优</option>
+                  <option value="良">良</option>
+                  <option value="中">中</option>
+                  <option value="差">差</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">体色</label>
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="正常">正常</option>
+                  <option value="偏淡">偏淡</option>
+                  <option value="偏深">偏深</option>
+                  <option value="异常">异常</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">体形</label>
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="正常">正常</option>
+                  <option value="瘦弱">瘦弱</option>
+                  <option value="畸形">畸形</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"
+                  >规格一致性</label
+                >
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="高">高</option>
+                  <option value="中">中</option>
+                  <option value="低">低</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >抽样死亡率 (%)</label
+            >
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="请输入抽样死亡率"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >抽查照片</label
+            >
+            <div
+              id="inspectionPhotoContainer"
+              class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-all"
+            >
+              <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+              <p class="text-sm text-gray-500">点击上传抽查照片</p>
+              <input
+                type="file"
+                id="inspectionPhotoInput"
+                accept="image/*"
+                capture="camera"
+                class="hidden"
+              />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >抽查备注</label
+            >
+            <textarea
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              rows="2"
+              placeholder="请输入抽查备注信息"
+            ></textarea>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep4Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              上一步
+            </button>
+            <button
+              id="gotoStep5Btn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              下一步
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤5: 应激预防 -->
+        <div id="step5" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤5: 应激预防</h2>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >预防用药</label
+            >
+            <div class="grid grid-cols-1 gap-3">
+              <!-- 药品1 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium">维生素C</h3>
+                    <p class="text-xs text-gray-500">
+                      增强免疫力，减轻应激反应
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2 pl-7">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >用量 (mg/L)</label
+                  >
+                  <input
+                    type="number"
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                    placeholder="请输入用量"
+                  />
+                </div>
+              </div>
+
+              <!-- 药品2 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium">硫酸铜</h3>
+                    <p class="text-xs text-gray-500">杀菌消毒，预防细菌感染</p>
+                  </div>
+                </div>
+                <div class="mt-2 pl-7">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >用量 (mg/L)</label
+                  >
+                  <input
+                    type="number"
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                    placeholder="请输入用量"
+                  />
+                </div>
+              </div>
+
+              <!-- 药品3 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium">盐水</h3>
+                    <p class="text-xs text-gray-500">
+                      调节渗透压，减轻应激反应
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2 pl-7">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >浓度 (%)</label
+                  >
+                  <input
+                    type="number"
+                    step="0.1"
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                    placeholder="请输入浓度"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >用药照片</label
+            >
+            <div
+              id="medicationPhotoContainer"
+              class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-all"
+            >
+              <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+              <p class="text-sm text-gray-500">点击上传用药照片</p>
+              <input
+                type="file"
+                id="medicationPhotoInput"
+                accept="image/*"
+                capture="camera"
+                class="hidden"
+              />
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >用药时间</label
+            >
+            <input
+              type="datetime-local"
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >用药备注</label
+            >
+            <textarea
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              rows="2"
+              placeholder="请输入用药备注信息"
+            ></textarea>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep5Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              上一步
+            </button>
+            <button
+              id="gotoStep6Btn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              下一步
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤6: 鱼苗下车 -->
+        <div id="step6" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤6: 鱼苗下车</h2>
+
+          <div class="mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-2">物流信息</h3>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">物流公司</label>
+                <input
+                  type="text"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="请输入物流公司"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">车牌号</label>
+                <input
+                  type="text"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="请输入车牌号"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">司机姓名</label>
+                <input
+                  type="text"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="请输入司机姓名"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">联系电话</label>
+                <input
+                  type="tel"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="请输入联系电话"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">运输费用</label>
+                <input
+                  type="number"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder="请输入费用"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">到达时间</label>
+                <input
+                  type="datetime-local"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-2">下车处理流程</h3>
+            <div class="space-y-3">
+              <!-- 盐水消毒 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 rounded-full bg-blue-100 text-primary text-xs flex items-center justify-center"
+                    >
+                      1
+                    </div>
+                    <h3 class="text-sm font-medium ml-2">盐水消毒</h3>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                </div>
+                <div class="mt-2 pl-8">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >盐水浓度 (%)</label
+                  >
+                  <input
+                    type="number"
+                    step="0.1"
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                    placeholder="请输入盐水浓度"
+                  />
+                </div>
+              </div>
+
+              <!-- 养殖池消毒 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 rounded-full bg-blue-100 text-primary text-xs flex items-center justify-center"
+                    >
+                      2
+                    </div>
+                    <h3 class="text-sm font-medium ml-2">养殖池消毒</h3>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                </div>
+                <div class="mt-2 pl-8">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >消毒方式</label
+                  >
+                  <select
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                  >
+                    <option value="">请选择消毒方式</option>
+                    <option value="漂白粉">漂白粉</option>
+                    <option value="高锰酸钾">高锰酸钾</option>
+                    <option value="生石灰">生石灰</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 水花入桶 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 rounded-full bg-blue-100 text-primary text-xs flex items-center justify-center"
+                    >
+                      3
+                    </div>
+                    <h3 class="text-sm font-medium ml-2">水花入桶</h3>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                </div>
+                <div class="mt-2 pl-8">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >水温差 (°C)</label
+                  >
+                  <input
+                    type="number"
+                    step="0.1"
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                    placeholder="请输入水温差"
+                  />
+                </div>
+              </div>
+
+              <!-- 细网捞取 -->
+              <div class="border border-gray-200 rounded-lg p-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 rounded-full bg-blue-100 text-primary text-xs flex items-center justify-center"
+                    >
+                      4
+                    </div>
+                    <h3 class="text-sm font-medium ml-2">寸片细网捞取</h3>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                </div>
+                <div class="mt-2 pl-8">
+                  <label class="block text-xs text-gray-500 mb-1"
+                    >网目规格 (mm)</label
+                  >
+                  <input
+                    type="number"
+                    step="0.1"
+                    class="w-full p-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent text-sm"
+                    placeholder="请输入网目规格"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >下车照片</label
+            >
+            <div
+              id="unloadingPhotoContainer"
+              class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-all"
+            >
+              <i class="fas fa-camera text-3xl text-gray-400 mb-2"></i>
+              <p class="text-sm text-gray-500">点击上传下车照片</p>
+              <input
+                type="file"
+                id="unloadingPhotoInput"
+                accept="image/*"
+                capture="camera"
+                class="hidden"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep6Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              上一步
+            </button>
+            <button
+              id="gotoStep7Btn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              下一步
+            </button>
+          </div>
+        </div>
+
+        <!-- 步骤7: 鱼苗评价 -->
+        <div id="step7" class="p-4 hidden">
+          <h2 class="text-lg font-medium mb-4">步骤7: 鱼苗评价</h2>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >鱼苗质量评分</label
+            >
+            <div class="flex items-center">
+              <div id="fishRating" class="flex text-2xl text-gray-300 cursor-pointer">
+                <i class="fas fa-star mr-1" data-rating="1"></i>
+                <i class="fas fa-star mr-1" data-rating="2"></i>
+                <i class="fas fa-star mr-1" data-rating="3"></i>
+                <i class="fas fa-star mr-1" data-rating="4"></i>
+                <i class="fas fa-star" data-rating="5"></i>
+              </div>
+              <span id="fishRatingText" class="ml-2 text-sm text-gray-500"
+                >请评分</span
+              >
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >鱼苗质量评估</label
+            >
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"
+                  >规格一致性</label
+                >
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="优">优</option>
+                  <option value="良">良</option>
+                  <option value="中">中</option>
+                  <option value="差">差</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">活力状态</label>
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="优">优</option>
+                  <option value="良">良</option>
+                  <option value="中">中</option>
+                  <option value="差">差</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"
+                  >死亡率 (%)</label
+                >
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="请输入死亡率"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"
+                  >畸形率 (%)</label
+                >
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                  placeholder="请输入畸形率"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >鱼苗公司服务评价</label
+            >
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"
+                  >交付及时性</label
+                >
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="优">优</option>
+                  <option value="良">良</option>
+                  <option value="中">中</option>
+                  <option value="差">差</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">售后服务</label>
+                <select
+                  class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                >
+                  <option value="">请选择</option>
+                  <option value="优">优</option>
+                  <option value="良">良</option>
+                  <option value="中">中</option>
+                  <option value="差">差</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >评价备注</label
+            >
+            <textarea
+              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              rows="3"
+              placeholder="请输入评价备注信息"
+            ></textarea>
+          </div>
+
+          <div class="flex justify-between mt-6">
+            <button
+              id="backToStep7Btn"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-all hover:bg-gray-50"
+            >
+              上一步
+            </button>
+            <button
+              id="completeProcessBtn"
+              class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:bg-primary-dark"
+            >
+              完成流程
+            </button>
+          </div>
+        </div>
+
+        <!-- 流程完成 -->
+        <div id="processComplete" class="p-4 hidden">
+          <div class="text-center py-6">
+            <div
+              class="w-20 h-20 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto mb-4"
+            >
+              <i class="fas fa-check text-3xl"></i>
+            </div>
+            <h2 class="text-xl font-medium mb-2">鱼苗采购流程已完成</h2>
+            <p class="text-sm text-gray-500 mb-6">
+              您已成功完成鱼苗采购的全部流程
+            </p>
+
+            <button
+              id="startNewProcessBtn"
+              class="w-full py-3 bg-primary text-white rounded-lg font-medium transition-all hover:bg-primary-dark"
+            >
+              开始新的采购流程
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 鱼苗公司对比模态框 -->
+    <div
+      id="supplierCompareModal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden"
+    >
+      <div
+        class="bg-white rounded-lg w-full max-w-5xl  mx-4 max-h-[90vh] overflow-y-auto"
+      >
+        <div
+          class="p-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white"
+        >
+          <h3 class="text-lg font-medium">鱼苗公司对比</h3>
+          <button
+            id="closeSupplierModalBtn"
+            class="text-gray-500 hover:text-gray-700"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="p-4">
+          <!-- 切换视图按钮 -->
+          <div class="flex justify-center mb-4">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+              <button
+                id="supplierRadarBtn"
+                class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-l-lg"
+              >
+                雷达图
+              </button>
+              <button
+                id="supplierBarBtn"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300"
+              >
+                柱状图
+              </button>
+              <button
+                id="supplierTableBtn"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 rounded-r-lg"
+              >
+                表格
+              </button>
+            </div>
+          </div>
+
+          <!-- 图表容器 -->
+          <div id="supplierRadarChart" class="mb-4">
+            <canvas id="radarChart" height="250"></canvas>
+          </div>
+
+          <div id="supplierBarChart" class="mb-4 hidden">
+            <canvas id="barChart" height="250"></canvas>
+          </div>
+
+          <div id="supplierTableView" class="mb-4 hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      评估项目
+                    </th>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      水产良种场
+                    </th>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      海洋育苗中心
+                    </th>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      淡水鱼繁育基地
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      鱼苗质量
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      4.5
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      4.0
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      4.8
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      价格
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      ¥0.15/尾
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      ¥0.12/尾
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      ¥0.18/尾
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      预付款比例
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      30%
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      50%
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      20%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      交付周期
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      3天
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      2天
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      4天
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      售后服务
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      4.2
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      3.8
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      4.5
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 详细信息 -->
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="text-sm font-medium mb-2">详细信息</h4>
+
+            <!-- 水产良种场 -->
+            <div class="mb-3">
+              <h5 class="text-sm font-medium text-primary">水产良种场</h5>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p class="text-xs text-gray-500">成立时间</p>
+                  <p class="text-sm">2005年</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">年产量</p>
+                  <p class="text-sm">500万尾</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">质量认证</p>
+                  <p class="text-sm">ISO9001, 水产健康认证</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">售后服务</p>
+                  <p class="text-sm">7天内死亡率超5%赔付</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 海洋育苗中心 -->
+            <div class="mb-3">
+              <h5 class="text-sm font-medium text-primary">海洋育苗中心</h5>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p class="text-xs text-gray-500">成立时间</p>
+                  <p class="text-sm">2010年</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">年产量</p>
+                  <p class="text-sm">300万尾</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">质量认证</p>
+                  <p class="text-sm">水产健康认证</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">售后服务</p>
+                  <p class="text-sm">5天内死亡率超10%赔付</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 淡水鱼繁育基地 -->
+            <div>
+              <h5 class="text-sm font-medium text-primary">淡水鱼繁育基地</h5>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p class="text-xs text-gray-500">成立时间</p>
+                  <p class="text-sm">2000年</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">年产量</p>
+                  <p class="text-sm">800万尾</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">质量认证</p>
+                  <p class="text-sm">ISO9001, 有机水产认证</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">售后服务</p>
+                  <p class="text-sm">10天内死亡率超3%赔付</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 车辆对比模态框 -->
+    <div
+      id="vehicleCompareModal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden"
+    >
+      <div
+        class="bg-white rounded-lg w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto"
+      >
+        <div
+          class="p-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white"
+        >
+          <h3 class="text-lg font-medium">运输车辆对比</h3>
+          <button
+            id="closeVehicleModalBtn"
+            class="text-gray-500 hover:text-gray-700"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="p-4">
+          <!-- 切换视图按钮 -->
+          <div class="flex justify-center mb-4">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+              <button
+                id="vehicleRadarBtn"
+                class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-l-lg"
+              >
+                雷达图
+              </button>
+              <button
+                id="vehicleBarBtn"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300"
+              >
+                柱状图
+              </button>
+              <button
+                id="vehicleTableBtn"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 rounded-r-lg"
+              >
+                表格
+              </button>
+            </div>
+          </div>
+
+          <!-- 图表容器 -->
+          <div id="vehicleRadarChart" class="mb-4">
+            <canvas id="vehicleRadar" height="250"></canvas>
+          </div>
+
+          <div id="vehicleBarChart" class="mb-4 hidden">
+            <canvas id="vehicleBar" height="250"></canvas>
+          </div>
+
+          <div id="vehicleTableView" class="mb-4 hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      评估项目
+                    </th>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      专业鱼苗运输车
+                    </th>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      标准鱼苗运输车
+                    </th>
+                    <th
+                      class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      经济型运输车
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      运输能力
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      50,000尾
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      30,000尾
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      20,000尾
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      价格
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      ¥1,200
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      ¥900
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      ¥600
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      恒温系统
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      有
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      有
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      无
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      氧气系统
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      有
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      有
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      有
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      GPS追踪
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      有
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      无
+                    </td>
+                    <td
+                      class="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      无
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 详细信息 -->
+          <div class="border-t border-gray-200 pt-4">
+            <h4 class="text-sm font-medium mb-2">详细信息</h4>
+
+            <!-- 专业鱼苗运输车 -->
+            <div class="mb-3">
+              <h5 class="text-sm font-medium text-primary">专业鱼苗运输车</h5>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p class="text-xs text-gray-500">车辆类型</p>
+                  <p class="text-sm">专业水产运输车</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">设备配置</p>
+                  <p class="text-sm">恒温系统、氧气系统、GPS追踪</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">运输时间</p>
+                  <p class="text-sm">24小时内</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">历史死亡率</p>
+                  <p class="text-sm"><2%</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 标准鱼苗运输车 -->
+            <div class="mb-3">
+              <h5 class="text-sm font-medium text-primary">标准鱼苗运输车</h5>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p class="text-xs text-gray-500">车辆类型</p>
+                  <p class="text-sm">改装水产运输车</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">设备配置</p>
+                  <p class="text-sm">恒温系统、氧气系统</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">运输时间</p>
+                  <p class="text-sm">36小时内</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">历史死亡率</p>
+                  <p class="text-sm">3-5%</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 经济型运输车 -->
+            <div>
+              <h5 class="text-sm font-medium text-primary">经济型运输车</h5>
+              <div class="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <p class="text-xs text-gray-500">车辆类型</p>
+                  <p class="text-sm">普通货车改装</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">设备配置</p>
+                  <p class="text-sm">氧气系统</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">运输时间</p>
+                  <p class="text-sm">48小时内</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500">历史死亡率</p>
+                  <p class="text-sm">5-10%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // 用药照片上传逻辑
+        const medicationPhotoContainer = document.getElementById('medicationPhotoContainer');
+        medicationPhotoContainer.addEventListener('click', () => {
+            document.getElementById('medicationPhotoInput').click();
+        });
+        
+        document.getElementById('medicationPhotoInput').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    medicationPhotoContainer.innerHTML = `
+                        <img src="${e.target.result}" class="max-h-40 mx-auto mb-2" />
+                        <button id="changeMedicationPhotoBtn" class="text-primary text-sm font-medium">
+                            <i class="fas fa-camera mr-1"></i>更换照片
+                        </button>
+                    `;
+                    
+                    document.getElementById('changeMedicationPhotoBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('medicationPhotoInput').click();
+                    });
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // 消毒照片上传逻辑
+        const disinfectionPhotoContainer = document.getElementById('disinfectionPhotoContainer');
+        disinfectionPhotoContainer.addEventListener('click', () => {
+            document.getElementById('disinfectionPhotoInput').click();
+        });
+        
+        document.getElementById('disinfectionPhotoInput').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    disinfectionPhotoContainer.innerHTML = `
+                        <img src="${e.target.result}" class="max-h-40 mx-auto mb-2" />
+                        <button id="changeDisinfectionPhotoBtn" class="text-primary text-sm font-medium">
+                            <i class="fas fa-camera mr-1"></i>更换照片
+                        </button>
+                    `;
+                    
+                    document.getElementById('changeDisinfectionPhotoBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('disinfectionPhotoInput').click();
+                    });
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // 抽查照片上传逻辑
+        const inspectionPhotoContainer = document.getElementById('inspectionPhotoContainer');
+        inspectionPhotoContainer.addEventListener('click', () => {
+            document.getElementById('inspectionPhotoInput').click();
+        });
+        
+        document.getElementById('inspectionPhotoInput').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    inspectionPhotoContainer.innerHTML = `
+                        <img src="${e.target.result}" class="max-h-40 mx-auto mb-2" />
+                        <button id="changeInspectionPhotoBtn" class="text-primary text-sm font-medium">
+                            <i class="fas fa-camera mr-1"></i>更换照片
+                        </button>
+                    `;
+                    
+                    document.getElementById('changeInspectionPhotoBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('inspectionPhotoInput').click();
+                    });
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // 下车照片上传逻辑
+        const unloadingPhotoContainer = document.getElementById('unloadingPhotoContainer');
+        unloadingPhotoContainer.addEventListener('click', () => {
+            document.getElementById('unloadingPhotoInput').click();
+        });
+        
+        document.getElementById('unloadingPhotoInput').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    unloadingPhotoContainer.innerHTML = `
+                        <img src="${e.target.result}" class="max-h-40 mx-auto mb-2" />
+                        <button id="changeUnloadingPhotoBtn" class="text-primary text-sm font-medium">
+                            <i class="fas fa-camera mr-1"></i>更换照片
+                        </button>
+                    `;
+                    
+                    document.getElementById('changeUnloadingPhotoBtn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.getElementById('unloadingPhotoInput').click();
+                    });
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+        
+        // 鱼苗公司对比按钮点击事件
+        document.getElementById('compareSuppliersBtn').addEventListener('click', function() {
+          // 显示鱼苗公司对比模态框
+          document.getElementById('supplierCompareModal').classList.remove('hidden');
+          
+          // 初始化图表
+          setTimeout(() => {
+            // 雷达图
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            const radarChart = new Chart(radarCtx, {
+              type: 'radar',
+              data: {
+                labels: ['鱼苗质量', '价格', '交付周期', '售后服务', '预付款比例'],
+                datasets: [
+                  {
+                    label: '水产良种场',
+                    data: [90, 75, 85, 84, 70],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                  },
+                  {
+                    label: '海洋育苗中心',
+                    data: [80, 90, 95, 76, 50],
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                  },
+                  {
+                    label: '淡水鱼繁育基地',
+                    data: [96, 70, 75, 90, 80],
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  r: {
+                    angleLines: {
+                      display: true
+                    },
+                    suggestedMin: 50,
+                    suggestedMax: 100
+                  }
+                }
+              }
+            });
+            
+            // 柱状图
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            const barChart = new Chart(barCtx, {
+              type: 'bar',
+              data: {
+                labels: ['价格(元/尾)', '预付款(%)', '交付周期(天)', '质量评分', '售后评分'],
+                datasets: [
+                  {
+                    label: '水产良种场',
+                    data: [0.15, 30, 3, 4.5, 4.2],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                  },
+                  {
+                    label: '海洋育苗中心',
+                    data: [0.12, 50, 2, 4.0, 3.8],
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                  },
+                  {
+                    label: '淡水鱼繁育基地',
+                    data: [0.18, 20, 4, 4.8, 4.5],
+                    backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          }, 100);
+        });
+        
+        // 关闭鱼苗公司对比模态框
+        document.getElementById('closeSupplierModalBtn').addEventListener('click', function() {
+          document.getElementById('supplierCompareModal').classList.add('hidden');
+        });
+        
+        // 切换视图按钮事件
+        document.getElementById('supplierRadarBtn').addEventListener('click', function() {
+          document.getElementById('supplierRadarChart').classList.remove('hidden');
+          document.getElementById('supplierBarChart').classList.add('hidden');
+          document.getElementById('supplierTableView').classList.add('hidden');
+          
+          document.getElementById('supplierRadarBtn').classList.remove('bg-white', 'text-gray-700');
+          document.getElementById('supplierRadarBtn').classList.add('bg-primary', 'text-white');
+          document.getElementById('supplierBarBtn').classList.remove('bg-primary', 'text-white');
+          document.getElementById('supplierBarBtn').classList.add('bg-white', 'text-gray-700');
+          document.getElementById('supplierTableBtn').classList.remove('bg-primary', 'text-white');
+          document.getElementById('supplierTableBtn').classList.add('bg-white', 'text-gray-700');
+        });
+        
+        document.getElementById('supplierBarBtn').addEventListener('click', function() {
+          document.getElementById('supplierRadarChart').classList.add('hidden');
+          document.getElementById('supplierBarChart').classList.remove('hidden');
+          document.getElementById('supplierTableView').classList.add('hidden');
+          
+          document.getElementById('supplierRadarBtn').classList.remove('bg-primary', 'text-white');
+          document.getElementById('supplierRadarBtn').classList.add('bg-white', 'text-gray-700');
+          document.getElementById('supplierBarBtn').classList.remove('bg-white', 'text-gray-700');
+          document.getElementById('supplierBarBtn').classList.add('bg-primary', 'text-white');
+          document.getElementById('supplierTableBtn').classList.remove('bg-primary', 'text-white');
+          document.getElementById('supplierTableBtn').classList.add('bg-white', 'text-gray-700');
+        });
+        
+        document.getElementById('supplierTableBtn').addEventListener('click', function() {
+          document.getElementById('supplierRadarChart').classList.add('hidden');
+          document.getElementById('supplierBarChart').classList.add('hidden');
+          document.getElementById('supplierTableView').classList.remove('hidden');
+          
+          document.getElementById('supplierRadarBtn').classList.remove('bg-primary', 'text-white');
+          document.getElementById('supplierRadarBtn').classList.add('bg-white', 'text-gray-700');
+          document.getElementById('supplierBarBtn').classList.remove('bg-primary', 'text-white');
+          document.getElementById('supplierBarBtn').classList.add('bg-white', 'text-gray-700');
+          document.getElementById('supplierTableBtn').classList.remove('bg-white', 'text-gray-700');
+          document.getElementById('supplierTableBtn').classList.add('bg-primary', 'text-white');
+        });
+        
+        // 鱼苗质量评分逻辑
+        const fishRatingStars = document.querySelectorAll('#fishRating i');
+        let currentFishRating = 0;
+        
+        fishRatingStars.forEach(star => {
+            // 鼠标悬停效果
+            star.addEventListener('mouseover', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                updateFishStarsDisplay(rating, true);
+            });
+            
+            // 鼠标离开效果
+            star.addEventListener('mouseout', function() {
+                updateFishStarsDisplay(currentFishRating, false);
+            });
+            
+            // 点击选择评分
+            star.addEventListener('click', function() {
+                currentFishRating = parseInt(this.getAttribute('data-rating'));
+                updateFishStarsDisplay(currentFishRating, false);
+                updateFishRatingText(currentFishRating);
+            });
+        });
+        
+        // 更新星星显示
+        function updateFishStarsDisplay(rating, isHover) {
+            fishRatingStars.forEach(star => {
+                const starRating = parseInt(star.getAttribute('data-rating'));
+                if (starRating <= rating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+        
+        // 更新评分文字
+        function updateFishRatingText(rating) {
+            const ratingText = document.getElementById('fishRatingText');
+            if (rating === 0) {
+                ratingText.textContent = '请评分';
+                ratingText.className = 'ml-2 text-sm text-gray-500';
+            } else {
+                const ratingTexts = ['', '很差', '较差', '一般', '良好', '优秀'];
+                ratingText.textContent = ratingTexts[rating];
+                
+                // 根据评分设置不同颜色
+                ratingText.className = 'ml-2 text-sm ';
+                if (rating <= 2) {
+                    ratingText.className += 'text-red-500';
+                } else if (rating === 3) {
+                    ratingText.className += 'text-orange-500';
+                } else {
+                    ratingText.className += 'text-green-500';
+                }
+            }
+        }
+      });
+    </script>
+  </body>
+</html>

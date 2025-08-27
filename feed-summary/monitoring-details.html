@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渔场管理系统 - 智能监测详情</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <script src="../static/chart.js"></script>
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+      <div
+        class="container mx-auto px-4 py-3 flex justify-between items-center"
+      >
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-gray-500 hover:text-primary">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <span class="text-2xl font-bold text-primary">渔场管理系统</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-bell text-gray-600"></i>
+          </button>
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-cog text-gray-600"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white"
+            >
+              <i class="fas fa-user"></i>
+            </div>
+            <span class="text-sm font-medium">管理员</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">智能监测详情</h1>
+        <div class="flex space-x-2">
+          <button
+            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center"
+          >
+            <i class="fas fa-filter mr-2"></i> 筛选
+          </button>
+          <button
+            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center"
+          >
+            <i class="fas fa-download mr-2"></i> 导出
+          </button>
+          <button
+            class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center"
+          >
+            <i class="fas fa-plus mr-2"></i> 添加监测点
+          </button>
+        </div>
+      </div>
+
+      <!-- 监测概览 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">养殖区域总数</p>
+              <h3 class="text-2xl font-bold mt-1">15</h3>
+              <p class="text-xs text-green-500 mt-2">
+                <i class="fas fa-arrow-up mr-1"></i>较上月增加 1
+              </p>
+            </div>
+            <div class="card-icon bg-blue-100 text-primary">
+              <i class="fas fa-map-marked-alt text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">监测点数量</p>
+              <h3 class="text-2xl font-bold mt-1">38</h3>
+              <p class="text-xs text-green-500 mt-2">
+                <i class="fas fa-arrow-up mr-1"></i>较上月增加 5
+              </p>
+            </div>
+            <div class="card-icon bg-green-100 text-secondary">
+              <i class="fas fa-chart-line text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">智能设备数量</p>
+              <h3 class="text-2xl font-bold mt-1">45</h3>
+              <p class="text-xs text-green-500 mt-2">
+                <i class="fas fa-arrow-up mr-1"></i>较上月增加 3
+              </p>
+            </div>
+            <div class="card-icon bg-yellow-100 text-warning">
+              <i class="fas fa-microchip text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">正常区域</p>
+              <h3 class="text-2xl font-bold mt-1 text-green-500">12</h3>
+              <p class="text-xs text-gray-500 mt-2">占比 80%</p>
+            </div>
+            <div class="card-icon bg-green-100 text-secondary">
+              <i class="fas fa-check-circle text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">异常区域</p>
+              <h3 class="text-2xl font-bold mt-1 text-red-500">3</h3>
+              <p class="text-xs text-red-500 mt-2">
+                <i class="fas fa-arrow-up mr-1"></i>较上周增加 1
+              </p>
+            </div>
+            <div class="card-icon bg-red-100 text-danger">
+              <i class="fas fa-exclamation-triangle text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 监测数据历史趋势 -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-bold">监测数据历史趋势</h3>
+            <div class="flex space-x-2">
+              <button
+                class="bg-primary text-white px-3 py-1 rounded-full text-xs font-medium"
+              >
+                1周
+              </button>
+              <button
+                class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium"
+              >
+                1个月
+              </button>
+              <button
+                class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium"
+              >
+                3个月
+              </button>
+            </div>
+          </div>
+          <div class="h-80">
+            <canvas id="monitoringHistoryChart"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-bold">区域状态统计</h3>
+            <div class="flex space-x-2">
+              <button
+                class="bg-primary text-white px-3 py-1 rounded-full text-xs font-medium"
+              >
+                全部
+              </button>
+              <button
+                class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium"
+              >
+                正常
+              </button>
+              <button
+                class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium"
+              >
+                异常
+              </button>
+            </div>
+          </div>
+          <div class="h-80">
+            <canvas id="areaStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 区域卡片列表 -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-bold">区域列表</h3>
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="搜索区域..."
+              class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            <i
+              class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            ></i>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- 区域卡片 1 - 正常 -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover flex flex-col h-full">
+            <div class="p-6 flex-grow">
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-water"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold">A区养殖场</h4>
+                    <p class="text-xs text-gray-500">东部沿海区域</p>
+                  </div>
+                </div>
+                <span class="bg-green-100 text-secondary text-xs px-2 py-1 rounded-full">正常</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">监测点</p>
+                  <p class="text-lg font-bold">8</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">智能设备</p>
+                  <p class="text-lg font-bold">12</p>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">PH值</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">7.2</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">溶氧量</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">6.5mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">水温</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">24.5°C</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">氨氮</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">0.2mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">浊度</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">15NTU</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 mt-auto">
+              <a href="area-details.html?id=1" class="text-primary text-sm font-medium flex items-center justify-center">
+                查看详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 区域卡片 2 - 异常 -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover flex flex-col h-full">
+            <div class="p-6 flex-grow">
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-water"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold">B区养殖场</h4>
+                    <p class="text-xs text-gray-500">中部内陆区域</p>
+                  </div>
+                </div>
+                <span class="bg-red-100 text-danger text-xs px-2 py-1 rounded-full">异常</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">监测点</p>
+                  <p class="text-lg font-bold">6</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">智能设备</p>
+                  <p class="text-lg font-bold">8</p>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">PH值</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">7.0</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">溶氧量</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">4.2mg/L</span>
+                    <span class="text-xs bg-red-100 text-danger px-1.5 py-0.5 rounded">偏低</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">水温</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">26.8°C</span>
+                    <span class="text-xs bg-yellow-100 text-warning px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">氨氮</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">0.5mg/L</span>
+                    <span class="text-xs bg-yellow-100 text-warning px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">浊度</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">25NTU</span>
+                    <span class="text-xs bg-yellow-100 text-warning px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 mt-auto">
+              <a href="area-details.html?id=2" class="text-primary text-sm font-medium flex items-center justify-center">
+                查看详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 区域卡片 3 - 正常 -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover flex flex-col h-full">
+            <div class="p-6 flex-grow">
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-water"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold">C区养殖场</h4>
+                    <p class="text-xs text-gray-500">南部沿海区域</p>
+                  </div>
+                </div>
+                <span class="bg-green-100 text-secondary text-xs px-2 py-1 rounded-full">正常</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">监测点</p>
+                  <p class="text-lg font-bold">7</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">智能设备</p>
+                  <p class="text-lg font-bold">10</p>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">PH值</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">7.3</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">溶氧量</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">6.2mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">水温</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">23.8°C</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">氨氮</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">0.18mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">浊度</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">12NTU</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 mt-auto">
+              <a href="area-details.html?id=3" class="text-primary text-sm font-medium flex items-center justify-center">
+                查看详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 区域卡片 4 - 异常 -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover flex flex-col h-full">
+            <div class="p-6 flex-grow">
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-water"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold">D区养殖场</h4>
+                    <p class="text-xs text-gray-500">西部山区</p>
+                  </div>
+                </div>
+                <span class="bg-red-100 text-danger text-xs px-2 py-1 rounded-full">异常</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">监测点</p>
+                  <p class="text-lg font-bold">5</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">智能设备</p>
+                  <p class="text-lg font-bold">7</p>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">PH值</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">6.5</span>
+                    <span class="text-xs bg-yellow-100 text-warning px-1.5 py-0.5 rounded">偏低</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">溶氧量</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">3.8mg/L</span>
+                    <span class="text-xs bg-red-100 text-danger px-1.5 py-0.5 rounded">偏低</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">水温</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">22.5°C</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">氨氮</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">0.6mg/L</span>
+                    <span class="text-xs bg-red-100 text-danger px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">浊度</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">30NTU</span>
+                    <span class="text-xs bg-red-100 text-danger px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 mt-auto">
+              <a href="area-details.html?id=4" class="text-primary text-sm font-medium flex items-center justify-center">
+                查看详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 区域卡片 5 - 正常 -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover flex flex-col h-full">
+            <div class="p-6 flex-grow">
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-water"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold">E区养殖场</h4>
+                    <p class="text-xs text-gray-500">北部湖区</p>
+                  </div>
+                </div>
+                <span class="bg-green-100 text-secondary text-xs px-2 py-1 rounded-full">正常</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">监测点</p>
+                  <p class="text-lg font-bold">6</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">智能设备</p>
+                  <p class="text-lg font-bold">8</p>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">PH值</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">7.1</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">溶氧量</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">6.0mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">水温</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">24.2°C</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">氨氮</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">0.22mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">浊度</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">14NTU</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 mt-auto">
+              <a href="area-details.html?id=5" class="text-primary text-sm font-medium flex items-center justify-center">
+                查看详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- 区域卡片 6 - 异常 -->
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover flex flex-col h-full">
+            <div class="p-6 flex-grow">
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-water"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold">F区养殖场</h4>
+                    <p class="text-xs text-gray-500">东北部区域</p>
+                  </div>
+                </div>
+                <span class="bg-red-100 text-danger text-xs px-2 py-1 rounded-full">异常</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">监测点</p>
+                  <p class="text-lg font-bold">6</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-3 text-center">
+                  <p class="text-xs text-gray-500">智能设备</p>
+                  <p class="text-lg font-bold">8</p>
+                </div>
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">PH值</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">7.8</span>
+                    <span class="text-xs bg-yellow-100 text-warning px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">溶氧量</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">5.5mg/L</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">水温</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">27.5°C</span>
+                    <span class="text-xs bg-red-100 text-danger px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">氨氮</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">0.45mg/L</span>
+                    <span class="text-xs bg-yellow-100 text-warning px-1.5 py-0.5 rounded">偏高</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm">浊度</span>
+                  <div class="flex items-center">
+                    <span class="text-sm font-medium mr-2">18NTU</span>
+                    <span class="text-xs bg-green-100 text-secondary px-1.5 py-0.5 rounded">正常</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 mt-auto">
+              <a href="area-details.html?id=6" class="text-primary text-sm font-medium flex items-center justify-center">
+                查看详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分页 -->
+        <div class="flex justify-between items-center mt-6">
+          <p class="text-sm text-gray-500">显示 1-6 条，共 15 条</p>
+          <div class="flex space-x-1">
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50"
+            >
+              <i class="fas fa-chevron-left text-xs"></i>
+            </button>
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-md border border-primary bg-primary text-white"
+            >
+              1
+            </button>
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            >
+              2
+            </button>
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            >
+              3
+            </button>
+            <button
+              class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50"
+            >
+              <i class="fas fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-8 py-6">
+      <div class="container mx-auto px-4">
+        <div class="text-center text-gray-500 text-sm">
+          &copy; 2023 渔场管理系统. 保留所有权利.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // 监测数据历史趋势图表
+      const monitoringHistoryCtx = document
+        .getElementById("monitoringHistoryChart")
+        .getContext("2d");
+      const monitoringHistoryChart = new Chart(monitoringHistoryCtx, {
+        type: "line",
+        data: {
+          labels: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+          datasets: [
+            {
+              label: "水温(°C)",
+              data: [23.5, 23.8, 24.2, 24.5, 24.8, 24.6, 24.5],
+              borderColor: "#3B82F6",
+              backgroundColor: "rgba(59, 130, 246, 0.1)",
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: "pH值",
+              data: [7.1, 7.2, 7.2, 7.3, 7.2, 7.1, 7.2],
+              borderColor: "#10B981",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: "溶氧(mg/L)",
+              data: [6.2, 6.0, 5.8, 5.7, 5.6, 5.7, 5.8],
+              borderColor: "#FBBF24",
+              backgroundColor: "rgba(251, 191, 36, 0.1)",
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: "氨氮(mg/L)",
+              data: [0.18, 0.20, 0.22, 0.25, 0.23, 0.21, 0.20],
+              borderColor: "#8B5CF6",
+              backgroundColor: "rgba(139, 92, 246, 0.1)",
+              tension: 0.3,
+              fill: false
+            },
+            {
+              label: "浊度(NTU)",
+              data: [12, 13, 15, 16, 15, 14, 15],
+              borderColor: "#EC4899",
+              backgroundColor: "rgba(236, 72, 153, 0.1)",
+              tension: 0.3,
+              fill: false
+            }
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+            },
+            tooltip: {
+              mode: "index",
+              intersect: false,
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: "rgba(0, 0, 0, 0.05)",
+              },
+            },
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+          },
+        },
+      });
+
+      // 区域状态统计图表
+      const areaStatusCtx = document
+        .getElementById("areaStatusChart")
+        .getContext("2d");
+      const areaStatusChart = new Chart(areaStatusCtx, {
+        type: "bar",
+        data: {
+          labels: ["A区", "B区", "C区", "D区", "E区", "F区", "G区", "H区"],
+          datasets: [
+            {
+              label: "正常监测点",
+              data: [8, 4, 7, 3, 6, 3, 5, 4],
+              backgroundColor: "#10B981",
+              barPercentage: 0.6,
+              categoryPercentage: 0.5,
+            },
+            {
+              label: "异常监测点",
+              data: [0, 2, 0, 2, 0, 3, 0, 1],
+              backgroundColor: "#EF4444",
+              barPercentage: 0.6,
+              categoryPercentage: 0.5,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                drawBorder: false,
+                color: "rgba(0, 0, 0, 0.05)",
+              },
+              ticks: {
+                precision: 0,
+              },
+            },
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

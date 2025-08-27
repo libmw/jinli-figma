@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>供应商详情 - 鱼种采购系统</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+      
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px; /* 移除底部导航栏后减少底部间距 */
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* 评分星星样式 */
+      .rating-star {
+        color: #d1d5db;
+      }
+      
+      .rating-star.active {
+        color: #fbbf24;
+      }
+      
+      /* 标签页样式 */
+      .tab-active {
+        color: var(--color-primary);
+        border-bottom: 2px solid var(--color-primary);
+      }
+      
+      /* 图表样式 */
+      .chart-container {
+        height: 200px;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="bg-blue-500 text-white p-4 sticky top-0 z-10">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="supplier.html" class="mr-2">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-lg font-bold">供应商详情</h1>
+        </div>
+        <div class="flex items-center">
+          <button class="bg-white bg-opacity-20 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="bg-white bg-opacity-20 rounded-full w-8 h-8 flex items-center justify-center">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 供应商基本信息 -->
+    <div class="bg-white p-4 mb-3">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <h2 class="text-xl font-bold">广东海洋鱼种场</h2>
+          <div class="flex items-center mt-1">
+            <div class="flex">
+              <i class="fas fa-star rating-star active"></i>
+              <i class="fas fa-star rating-star active"></i>
+              <i class="fas fa-star rating-star active"></i>
+              <i class="fas fa-star rating-star active"></i>
+              <i class="fas fa-star rating-star"></i>
+            </div>
+            <span class="text-sm text-gray-500 ml-1">4.0</span>
+          </div>
+        </div>
+        <span class="bg-blue-100 text-primary text-xs px-2 py-0.5 rounded-full">合作中</span>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <p class="text-xs text-gray-500">联系人</p>
+          <p class="text-sm font-medium">张经理</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">联系电话</p>
+          <p class="text-sm font-medium">138****1234</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">电子邮箱</p>
+          <p class="text-sm font-medium">gd_fish@example.com</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">合作开始时间</p>
+          <p class="text-sm font-medium">2022-03-15</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">主营品种</p>
+          <p class="text-sm font-medium">草鱼、鲤鱼</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">合作次数</p>
+          <p class="text-sm font-medium">12次</p>
+        </div>
+      </div>
+      
+      <div>
+        <p class="text-xs text-gray-500 mb-1">地址</p>
+        <p class="text-sm">广东省广州市番禺区沙湾镇渔业基地A区12号</p>
+      </div>
+    </div>
+
+    <!-- 标签页 -->
+    <div class="flex bg-white border-b border-gray-200 mb-3">
+      <button class="flex-1 py-3 text-sm font-medium tab-active" data-tab="history">
+        合作历史
+      </button>
+      <button class="flex-1 py-3 text-sm font-medium text-gray-500" data-tab="analysis">
+        数据分析
+      </button>
+      <button class="flex-1 py-3 text-sm font-medium text-gray-500" data-tab="notes">
+        备注信息
+      </button>
+    </div>
+
+    <!-- 合作历史标签内容 -->
+    <div class="tab-content" id="history-tab">
+      <div class="bg-white p-4 mb-3">
+        <h3 class="text-base font-bold mb-3">最近合作记录</h3>
+        
+        <!-- 合作记录列表 -->
+        <div class="space-y-4">
+          <!-- 合作记录1 -->
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h4 class="text-sm font-bold">草鱼种采购</h4>
+                <p class="text-xs text-gray-500 mt-0.5">2023-06-10</p>
+              </div>
+              <span class="bg-blue-100 text-primary text-xs px-2 py-0.5 rounded-full">进行中</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+              <div>
+                <p class="text-xs text-gray-500">数量</p>
+                <p class="text-xs font-medium">10万尾</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">单价</p>
+                <p class="text-xs font-medium">¥0.15/尾</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">总金额</p>
+                <p class="text-xs font-medium">¥15,000</p>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <a href="purchase-detail.html?id=1" class="text-primary text-xs">
+                查看详情
+              </a>
+            </div>
+          </div>
+          
+          <!-- 合作记录2 -->
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h4 class="text-sm font-bold">鲤鱼种采购</h4>
+                <p class="text-xs text-gray-500 mt-0.5">2023-05-15</p>
+              </div>
+              <span class="bg-green-100 text-secondary text-xs px-2 py-0.5 rounded-full">已完成</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+              <div>
+                <p class="text-xs text-gray-500">数量</p>
+                <p class="text-xs font-medium">15万尾</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">单价</p>
+                <p class="text-xs font-medium">¥0.12/尾</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">总金额</p>
+                <p class="text-xs font-medium">¥18,000</p>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <a href="purchase-detail.html?id=4" class="text-primary text-xs">
+                查看详情
+              </a>
+            </div>
+          </div>
+          
+          <!-- 合作记录3 -->
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h4 class="text-sm font-bold">草鱼种采购</h4>
+                <p class="text-xs text-gray-500 mt-0.5">2023-04-20</p>
+              </div>
+              <span class="bg-green-100 text-secondary text-xs px-2 py-0.5 rounded-full">已完成</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+              <div>
+                <p class="text-xs text-gray-500">数量</p>
+                <p class="text-xs font-medium">8万尾</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">单价</p>
+                <p class="text-xs font-medium">¥0.14/尾</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500">总金额</p>
+                <p class="text-xs font-medium">¥11,200</p>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <a href="purchase-detail.html?id=6" class="text-primary text-xs">
+                查看详情
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+          <button class="text-primary text-sm">
+            查看更多记录
+            <i class="fas fa-chevron-down ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据分析标签内容 -->
+    <div class="tab-content hidden" id="analysis-tab">
+      <div class="bg-white p-4 mb-3">
+        <h3 class="text-base font-bold mb-3">采购数据分析</h3>
+        
+        <!-- 采购金额趋势图 -->
+        <div class="mb-4">
+          <h4 class="text-sm font-medium mb-2">采购金额趋势</h4>
+          <div class="chart-container" id="purchaseAmountChart">
+            <canvas id="amountChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- 采购品种分布 -->
+        <div class="mb-4">
+          <h4 class="text-sm font-medium mb-2">采购品种分布</h4>
+          <div class="chart-container" id="speciesDistributionChart">
+            <canvas id="speciesChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- 质量评分趋势 -->
+        <div>
+          <h4 class="text-sm font-medium mb-2">质量评分趋势</h4>
+          <div class="chart-container" id="qualityRatingChart">
+            <canvas id="ratingChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 备注信息标签内容 -->
+    <div class="tab-content hidden" id="notes-tab">
+      <div class="bg-white p-4 mb-3">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-base font-bold">备注信息</h3>
+          <button class="text-primary text-sm">
+            <i class="fas fa-plus mr-1"></i> 添加备注
+          </button>
+        </div>
+        
+        <!-- 备注列表 -->
+        <div class="space-y-3">
+          <!-- 备注1 -->
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="flex justify-between items-start mb-2">
+              <p class="text-xs text-gray-500">2023-06-08</p>
+              <span class="text-xs text-gray-500">张三</span>
+            </div>
+            <p class="text-sm">该供应商的草鱼种质量稳定，成活率高，值得长期合作。</p>
+          </div>
+          
+          <!-- 备注2 -->
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="flex justify-between items-start mb-2">
+              <p class="text-xs text-gray-500">2023-05-12</p>
+              <span class="text-xs text-gray-500">李四</span>
+            </div>
+            <p class="text-sm">最近一批鲤鱼种有轻微水霉病，但经过处理后恢复良好。建议下次采购前提前沟通消毒事宜。</p>
+          </div>
+          
+          <!-- 备注3 -->
+          <div class="border border-gray-200 rounded-lg p-3">
+            <div class="flex justify-between items-start mb-2">
+              <p class="text-xs text-gray-500">2023-04-15</p>
+              <span class="text-xs text-gray-500">王五</span>
+            </div>
+            <p class="text-sm">供应商可以提供运输服务，但需提前3天预约。运输车辆设备齐全，氧气充足。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 快捷操作按钮 -->
+    <div class="fixed bottom-16 right-4 z-20">
+      <div class="flex flex-col space-y-2">
+        <a href="negotiate-create.html?supplier=1" class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+          <i class="fas fa-comments"></i>
+        </a>
+        <a href="purchase-create.html?supplier=1" class="bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+          <i class="fas fa-shopping-cart"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- 底部导航栏已移除 -->
+
+    <!-- 引入Chart.js库 -->
+    <script src="../static/chart.js"></script>
+    
+    <script>
+      // 标签页切换
+      const tabButtons = document.querySelectorAll('[data-tab]');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // 移除所有标签的激活状态
+          tabButtons.forEach(btn => {
+            btn.classList.remove('tab-active');
+            btn.classList.add('text-gray-500');
+          });
+          
+          // 添加当前标签的激活状态
+          button.classList.add('tab-active');
+          button.classList.remove('text-gray-500');
+          
+          // 隐藏所有内容
+          tabContents.forEach(content => {
+            content.classList.add('hidden');
+          });
+          
+          // 显示当前标签对应的内容
+          const tabId = button.getAttribute('data-tab');
+          document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+        });
+      });
+      
+      // 初始化图表
+      window.onload = function() {
+        // 采购金额趋势图
+        const amountCtx = document.getElementById('amountChart').getContext('2d');
+        const amountChart = new Chart(amountCtx, {
+          type: 'line',
+          data: {
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+            datasets: [{
+              label: '采购金额(元)',
+              data: [8000, 12000, 9500, 11200, 18000, 15000],
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
+              },
+              x: {
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
+              }
+            }
+          }
+        });
+        
+        // 采购品种分布图
+        const speciesCtx = document.getElementById('speciesChart').getContext('2d');
+        const speciesChart = new Chart(speciesCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['草鱼', '鲤鱼', '其他'],
+            datasets: [{
+              data: [65, 30, 5],
+              backgroundColor: [
+                '#3b82f6',
+                '#10b981',
+                '#6366f1'
+              ],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  font: {
+                    size: 10
+                  }
+                }
+              }
+            }
+          }
+        });
+        
+        // 质量评分趋势图
+        const ratingCtx = document.getElementById('ratingChart').getContext('2d');
+        const ratingChart = new Chart(ratingCtx, {
+          type: 'bar',
+          data: {
+            labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+            datasets: [{
+              label: '质量评分',
+              data: [3.5, 4.0, 3.8, 4.2, 4.0, 4.5],
+              backgroundColor: '#fbbf24'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 5,
+                ticks: {
+                  stepSize: 1,
+                  font: {
+                    size: 10
+                  }
+                }
+              },
+              x: {
+                ticks: {
+                  font: {
+                    size: 10
+                  }
+                }
+              }
+            }
+          }
+        });
+      };
+    </script>
+  </body>
+</html>

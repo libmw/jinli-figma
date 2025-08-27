@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔业养殖饲料进货系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../static/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // Tailwind配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E40AF', // 深蓝色作为主色调
+                        secondary: '#3B82F6', // 浅蓝色作为辅助色
+                        accent: '#F59E0B', // 橙色作为强调色
+                        success: '#10B981', // 绿色表示成功
+                        warning: '#FBBF24', // 黄色表示警告
+                        danger: '#EF4444', // 红色表示危险
+                        light: '#F3F4F6', // 浅色背景
+                        dark: '#1F2937', // 深色文本
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .step-active {
+                @apply bg-primary text-white border-primary;
+            }
+            .step-inactive {
+                @apply bg-light text-gray-500 border-gray-300;
+            }
+            .step-completed {
+                @apply bg-success text-white border-success;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-dark min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold">饲料进货系统</h1>
+            <button id="helpBtn" class="p-2 rounded-full hover:bg-primary/80 transition">
+                <i class="fa fa-question-circle"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 pt-24 pb-20">
+        <!-- 步骤指示器 -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div class="flex flex-col items-center w-1/5">
+                    <div id="step1Indicator" class="w-10 h-10 rounded-full border-2 step-active flex items-center justify-center mb-2">
+                        <i class="fa fa-bell"></i>
+                    </div>
+                    <span class="text-xs text-center">触发</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-2">
+                    <div id="progress1" class="h-full bg-primary" style="width: 0%"></div>
+                </div>
+                <div class="flex flex-col items-center w-1/5">
+                    <div id="step2Indicator" class="w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-2">
+                        <i class="fa fa-archive"></i>
+                    </div>
+                    <span class="text-xs text-center">腾库</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-2">
+                    <div id="progress2" class="h-full bg-primary" style="width: 0%"></div>
+                </div>
+                <div class="flex flex-col items-center w-1/5">
+                    <div id="step3Indicator" class="w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-2">
+                        <i class="fa fa-shopping-cart"></i>
+                    </div>
+                    <span class="text-xs text-center">进货</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-2">
+                    <div id="progress3" class="h-full bg-primary" style="width: 0%"></div>
+                </div>
+                <div class="flex flex-col items-center w-1/5">
+                    <div id="step4Indicator" class="w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-2">
+                        <i class="fa fa-truck"></i>
+                    </div>
+                    <span class="text-xs text-center">运输</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-2">
+                    <div id="progress4" class="h-full bg-primary" style="width: 0%"></div>
+                </div>
+                <div class="flex flex-col items-center w-1/5">
+                    <div id="step5Indicator" class="w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-2">
+                        <i class="fa fa-inbox"></i>
+                    </div>
+                    <span class="text-xs text-center">清点</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤内容区域 -->
+        <div class="bg-white rounded-xl p-6 card-shadow">
+            <!-- 步骤1: 触发进货流程 -->
+            <div id="step1" class="step-content">
+                <h2 class="text-2xl font-bold mb-6 text-primary">饲料存量报警</h2>
+                <div class="bg-warning/10 border-l-4 border-warning p-4 rounded mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fa fa-exclamation-triangle text-warning text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-gray-700">
+                                <strong>警告:</strong> 鱼用颗粒饲料存量低于阈值(500kg)，当前存量: 320kg
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">库存详情</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">饲料类型</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前存量</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">阈值</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">鱼用颗粒饲料</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-danger">320kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">500kg</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">虾用混合饲料</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-success">850kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">500kg</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">特种鱼饲料</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-success">620kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">400kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="startProcessBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow transition transform hover:scale-105">
+                        发起进货流程
+                    </button>
+                </div>
+            </div>
+
+            <!-- 步骤2: 腾库任务 -->
+            <div id="step2" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary">腾库任务</h2>
+                <p class="text-gray-600 mb-6">系统已自动生成腾库任务，可与进货流程并行处理。</p>
+                
+                <div class="bg-light rounded-lg p-5 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg">腾库任务详情</h3>
+                        <span class="bg-warning/20 text-warning text-xs px-2 py-1 rounded-full">进行中</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">任务ID:</span>
+                            <span class="font-medium">ST-20231120-001</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">目标库房:</span>
+                            <span class="font-medium">A区-03号库房</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">预计完成时间:</span>
+                            <span class="font-medium">2023-11-21 14:00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">负责人:</span>
+                            <span class="font-medium">张三</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5">
+                        <h4 class="font-medium mb-2">任务进度</h4>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-success h-2.5 rounded-full" style="width: 45%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>45%</span>
+                            <span>5/11项完成</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <button id="backToStep1Btn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-lg shadow transition">
+                        <i class="fa fa-arrow-left mr-2"></i>返回
+                    </button>
+                    <button id="gotoStep3Btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow transition transform hover:scale-105">
+                        进入进货流程<i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 步骤3: 选择饲料类型和厂家 -->
+            <div id="step3" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary">选择饲料类型和厂家</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">饲料类型</label>
+                    <select id="feedTypeSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
+                        <option value="">请选择饲料类型</option>
+                        <option value="fish-pellet" selected>鱼用颗粒饲料</option>
+                        <option value="shrimp-mix">虾用混合饲料</option>
+                        <option value="special-fish">特种鱼饲料</option>
+                        <option value="other">其他类型</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700">进货数量 (kg)</label>
+                        <span class="text-xs text-gray-500">建议: 1000kg</span>
+                    </div>
+                    <input type="number" id="quantityInput" value="1000" min="100" step="100" 
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700">选择厂家</label>
+                        <button id="compareSuppliersBtn" class="text-primary text-sm font-medium flex items-center">
+                            <i class="fa fa-balance-scale mr-1"></i> 厂家对比
+                        </button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="supplier" value="supplier1" class="mt-1 mr-3" checked>
+                                <div>
+                                    <h4 class="font-medium">海洋饲料有限公司</h4>
+                                    <p class="text-sm text-gray-500 mt-1">价格: ¥3.2/kg | 支付方式: 月结 | 运输成本: ¥0.5/kg</p>
+                                    <div class="flex items-center mt-2 text-xs text-yellow-500">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-half-o"></i>
+                                        <span class="text-gray-500 ml-1">(4.5/5)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="supplier" value="supplier2" class="mt-1 mr-3">
+                                <div>
+                                    <h4 class="font-medium">水产养殖饲料厂</h4>
+                                    <p class="text-sm text-gray-500 mt-1">价格: ¥3.0/kg | 支付方式: 预付30% | 运输成本: ¥0.6/kg</p>
+                                    <div class="flex items-center mt-2 text-xs text-yellow-500">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-o"></i>
+                                        <span class="text-gray-500 ml-1">(4.0/5)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="supplier" value="supplier3" class="mt-1 mr-3">
+                                <div>
+                                    <h4 class="font-medium">远洋生物科技</h4>
+                                    <p class="text-sm text-gray-500 mt-1">价格: ¥3.5/kg | 支付方式: 货到付款 | 运输成本: ¥0.4/kg</p>
+                                    <div class="flex items-center mt-2 text-xs text-yellow-500">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <span class="text-gray-500 ml-1">(5.0/5)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <button id="backToStep2Btn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-lg shadow transition">
+                        <i class="fa fa-arrow-left mr-2"></i>返回
+                    </button>
+                    <button id="gotoStep4Btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow transition transform hover:scale-105">
+                        下一步: 选择运输车辆<i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 步骤4: 选择运输车辆和卸货者 -->
+            <div id="step4" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary">选择运输车辆和卸货者</h2>
+                
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-truck text-primary mr-2"></i>运输车辆选择
+                    </h3>
+                    
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700">可用车辆</label>
+                        <button id="compareVehiclesBtn" class="text-primary text-sm font-medium flex items-center">
+                            <i class="fa fa-balance-scale mr-1"></i> 车辆对比
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="vehicle" value="vehicle1" class="mt-1 mr-3" checked>
+                                <div>
+                                    <h4 class="font-medium">粤A·12345 (厢式货车)</h4>
+                                    <p class="text-sm text-gray-500 mt-1">运费: ¥800 | 预计时间: 8小时 | 司机: 李四</p>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span class="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">恒温</span>
+                                        <span class="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">防雨</span>
+                                        <span class="bg-purple-50 text-purple-700 text-xs px-2 py-1 rounded-full">GPS跟踪</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="vehicle" value="vehicle2" class="mt-1 mr-3">
+                                <div>
+                                    <h4 class="font-medium">粤B·67890 (冷藏车)</h4>
+                                    <p class="text-sm text-gray-500 mt-1">运费: ¥1200 | 预计时间: 6小时 | 司机: 王五</p>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span class="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">恒温</span>
+                                        <span class="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">防雨</span>
+                                        <span class="bg-red-50 text-red-700 text-xs px-2 py-1 rounded-full">冷链</span>
+                                        <span class="bg-purple-50 text-purple-700 text-xs px-2 py-1 rounded-full">GPS跟踪</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="vehicle" value="vehicle3" class="mt-1 mr-3">
+                                <div>
+                                    <h4 class="font-medium">粤C·54321 (普通货车)</h4>
+                                    <p class="text-sm text-gray-500 mt-1">运费: ¥600 | 预计时间: 10小时 | 司机: 赵六</p>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span class="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">防雨</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-users text-primary mr-2"></i>卸货者选择
+                    </h3>
+                    
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700">可用卸货团队</label>
+                        <button id="compareUnloadersBtn" class="text-primary text-sm font-medium flex items-center">
+                            <i class="fa fa-balance-scale mr-1"></i> 卸货者对比
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="unloader" value="unloader1" class="mt-1 mr-3" checked>
+                                <div>
+                                    <h4 class="font-medium">快速卸货队</h4>
+                                    <p class="text-sm text-gray-500 mt-1">价格: ¥500 | 效率: 2吨/小时 | 负责人: 钱七</p>
+                                    <div class="flex items-center mt-2 text-xs text-yellow-500">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-o"></i>
+                                        <span class="text-gray-500 ml-1">破损率: 0.5%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary cursor-pointer transition">
+                            <div class="flex items-start">
+                                <input type="radio" name="unloader" value="unloader2" class="mt-1 mr-3">
+                                <div>
+                                    <h4 class="font-medium">专业搬运团队</h4>
+                                    <p class="text-sm text-gray-500 mt-1">价格: ¥650 | 效率: 3吨/小时 | 负责人: 孙八</p>
+                                    <div class="flex items-center mt-2 text-xs text-yellow-500">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-half-o"></i>
+                                        <span class="text-gray-500 ml-1">破损率: 0.2%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-8">
+                    <button id="backToStep3Btn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-lg shadow transition">
+                        <i class="fa fa-arrow-left mr-2"></i>返回
+                    </button>
+                    <button id="gotoStep5Btn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow transition transform hover:scale-105">
+                        下一步: 车辆到达<i class="fa fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 步骤5: 车辆到达和卸货清点 -->
+            <div id="step5" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6 text-primary">车辆到达与卸货清点</h2>
+                
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-camera text-primary mr-2"></i>车辆到达拍照
+                    </h3>
+                    
+                    <div class="bg-light rounded-lg p-5 mb-6">
+                        <p class="text-sm text-gray-600 mb-4">请拍摄包含司机、车牌号和送货单的照片</p>
+                        
+                        <div id="arrivalPhotoContainer" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
+                            <i class="fa fa-camera text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">点击上传照片</p>
+                            <input type="file" id="arrivalPhotoInput" accept="image/*" capture="camera" class="hidden">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">运输时间</label>
+                                <input type="datetime-local" id="transportTimeInput" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">运输成本</label>
+                                <input type="number" id="transportCostInput" placeholder="¥" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        
+                        <button id="confirmArrivalBtn" class="w-full bg-secondary hover:bg-secondary/90 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+                            确认车辆到达
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="unloadingSection" class="mb-8 hidden">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-boxes text-primary mr-2"></i>卸货清点
+                    </h3>
+                    
+                    <div class="bg-light rounded-lg p-5">
+                        <p class="text-sm text-gray-600 mb-4">卸货完成后，请拍照并记录破损和打湿情况</p>
+                        
+                        <div id="unloadingPhotoContainer" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
+                            <i class="fa fa-camera text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-500">点击上传清点照片</p>
+                            <input type="file" id="unloadingPhotoInput" accept="image/*" capture="camera" class="hidden">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">破损量 (kg)</label>
+                                <input type="number" id="damageInput" min="0" step="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">打湿量 (kg)</label>
+                                <input type="number" id="wetInput" min="0" step="1" class="w-full p-2 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+                        
+                        <button id="completeProcessBtn" class="w-full bg-success hover:bg-success/90 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+                            完成进货流程
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="processCompleteSection" class="hidden text-center py-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/20 text-success mb-4">
+                        <i class="fa fa-check text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">进货流程已完成</h3>
+                    <p class="text-gray-600 mb-6">所有步骤已顺利完成，库存已更新</p>
+                    <button id="newProcessBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow transition transform hover:scale-105">
+                        发起新的进货流程
+                    </button>
+                </div>
+                
+                <div class="flex justify-start mt-8">
+                    <button id="backToStep4Btn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-lg shadow transition">
+                        <i class="fa fa-arrow-left mr-2"></i>返回
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部导航 -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t">
+        <div class="container mx-auto">
+            <div class="flex justify-around py-3">
+                <button class="flex flex-col items-center text-primary">
+                    <i class="fa fa-home text-lg"></i>
+                    <span class="text-xs mt-1">首页</span>
+                </button>
+                <button class="flex flex-col items-center text-gray-500">
+                    <i class="fa fa-history text-lg"></i>
+                    <span class="text-xs mt-1">历史</span>
+                </button>
+                <button class="flex flex-col items-center text-gray-500">
+                    <i class="fa fa-bar-chart text-lg"></i>
+                    <span class="text-xs mt-1">统计</span>
+                </button>
+                <button class="flex flex-col items-center text-gray-500">
+                    <i class="fa fa-user text-lg"></i>
+                    <span class="text-xs mt-1">我的</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 对比模态框 -->
+    <div id="compareModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div class="p-5 border-b">
+                <div class="flex justify-between items-center">
+                    <h3 id="modalTitle" class="text-lg font-bold">厂家对比</h3>
+                    <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="modalContent" class="p-5">
+                <!-- 对比内容将通过JavaScript动态填充 -->
+            </div>
+            <div class="p-4 border-t flex justify-end">
+                <button id="confirmCompareBtn" class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-lg shadow transition">
+                    确认选择
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 步骤导航逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            // 步骤元素
+            const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+            const stepIndicators = ['step1Indicator', 'step2Indicator', 'step3Indicator', 'step4Indicator', 'step5Indicator'];
+            const progressBars = ['progress1', 'progress2', 'progress3', 'progress4'];
+            
+            // 步骤切换函数
+            function goToStep(stepIndex) {
+                // 隐藏所有步骤内容
+                steps.forEach(step => {
+                    document.getElementById(step).classList.add('hidden');
+                });
+                
+                // 显示目标步骤内容
+                document.getElementById(steps[stepIndex]).classList.remove('hidden');
+                
+                // 更新步骤指示器状态
+                stepIndicators.forEach((indicator, index) => {
+                    const element = document.getElementById(indicator);
+                    if (index < stepIndex) {
+                        element.className = 'w-10 h-10 rounded-full border-2 step-completed flex items-center justify-center mb-2';
+                        element.innerHTML = '<i class="fa fa-check"></i>';
+                    } else if (index === stepIndex) {
+                        element.className = 'w-10 h-10 rounded-full border-2 step-active flex items-center justify-center mb-2';
+                    } else {
+                        element.className = 'w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-2';
+                    }
+                });
+                
+                // 更新进度条
+                progressBars.forEach((progress, index) => {
+                    const element = document.getElementById(progress);
+                    if (index < stepIndex) {
+                        element.style.width = '100%';
+                    } else if (index === stepIndex) {
+                        element.style.width = '50%';
+                    } else {
+                        element.style.width = '0%';
+                    }
+                });
+            }
+            
+            // 步骤按钮事件监听
+            document.getElementById('startProcessBtn').addEventListener('click', () => goToStep(1));
+            document.getElementById('backToStep1Btn').addEventListener('click', () => goToStep(0));
+            document.getElementById('gotoStep3Btn').addEventListener('click', () => goToStep(2));
+            document.getElementById('backToStep2Btn').addEventListener('click', () => goToStep(1));
+            document.getElementById('gotoStep4Btn').addEventListener('click', () => goToStep(3));
+            document.getElementById('backToStep3Btn').addEventListener('click', () => goToStep(2));
+            document.getElementById('gotoStep5Btn').addEventListener('click', () => goToStep(4));
+            document.getElementById('backToStep4Btn').addEventListener('click', () => goToStep(3));
+            
+            // 照片上传逻辑
+            const arrivalPhotoContainer = document.getElementById('arrivalPhotoContainer');
+            
+            // 模态框逻辑
+            const compareModal = document.getElementById('compareModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const confirmCompareBtn = document.getElementById('confirmCompareBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            // 打开模态框函数
+            function openModal(title, content) {
+                modalTitle.textContent = title;
+                modalContent.innerHTML = content;
+                compareModal.classList.remove('hidden');
+            }
+            
+            // 关闭模态框
+            closeModalBtn.addEventListener('click', () => {
+                compareModal.classList.add('hidden');
+            });
+            
+            confirmCompareBtn.addEventListener('click', () => {
+                compareModal.classList.add('hidden');
+            });
+            
+            // 厂家对比
+            document.getElementById('compareSuppliersBtn').addEventListener('click', () => {
+                const content = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">厂家</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">价格</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">支付方式</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">运输成本</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">评分</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">海洋饲料有限公司</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥3.2/kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">月结</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥0.5/kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div class="flex items-center text-yellow-500">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-half-o"></i>
+                                            <span class="text-gray-500 ml-1">(4.5)</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">水产养殖饲料厂</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥3.0/kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">预付30%</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥0.6/kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div class="flex items-center text-yellow-500">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star-o"></i>
+                                            <span class="text-gray-500 ml-1">(4.0)</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">远洋生物科技</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥3.5/kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">货到付款</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥0.4/kg</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div class="flex items-center text-yellow-500">
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <span class="text-gray-500 ml-1">(5.0)</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                openModal('厂家对比', content);
+            });
+            
+            // 车辆对比
+            document.getElementById('compareVehiclesBtn').addEventListener('click', () => {
+                const content = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">车辆信息</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">运费</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">预计时间</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">司机</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">功能</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">粤A·12345 (厢式货车)</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥800</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">8小时</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">李四</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">恒温</span>
+                                            <span class="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full">防雨</span>
+                                            <span class="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-full">GPS</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">粤B·67890 (冷藏车)</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥1200</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">6小时</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">王五</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">恒温</span>
+                                            <span class="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full">防雨</span>
+                                            <span class="bg-red-50 text-red-700 text-xs px-2 py-0.5 rounded-full">冷链</span>
+                                            <span class="bg-purple-50 text-purple-700 text-xs px-2 py-0.5 rounded-full">GPS</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">粤C·54321 (普通货车)</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥600</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">10小时</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">赵六</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full">防雨</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                openModal('车辆对比', content);
+            });
+            
+            // 卸货者对比
+            document.getElementById('compareUnloadersBtn').addEventListener('click', () => {
+                const content = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">卸货团队</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">价格</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">效率</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">负责人</th>
+                                    <th class="px-3 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">破损率</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">快速卸货队</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥500</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">2吨/小时</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">钱七</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">0.5%</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">专业搬运团队</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">¥650</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">3吨/小时</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">孙八</td>
+                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">0.2%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                openModal('卸货者对比', content);
+            });
+            
+            // 照片上传点击事件
+            arrivalPhotoContainer.addEventListener('click', () => {
+                document.getElementById('arrivalPhotoInput').click();
+            });
+            
+            document.getElementById('arrivalPhotoInput').addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        arrivalPhotoContainer.innerHTML = `
+                            <img src="${event.target.result}" alt="车辆到达照片" class="max-w-full max-h-60 object-contain rounded">
+                            <button id="changePhotoBtn" class="mt-2 text-sm text-primary">更换照片</button>
+                        `;
+                        document.getElementById('changePhotoBtn').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            document.getElementById('arrivalPhotoInput').click();
+                        });
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 确认车辆到达
+            document.getElementById('confirmArrivalBtn').addEventListener('click', function() {
+                document.getElementById('unloadingSection').classList.remove('hidden');
+                // 滚动到卸货清点部分
+                document.getElementById('unloadingSection').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // 完成进货流程
+            document.getElementById('completeProcessBtn').addEventListener('click', function() {
+                document.getElementById('unloadingSection').classList.add('hidden');
+                document.getElementById('processCompleteSection').classList.remove('hidden');
+            });
+            
+            // 新流程按钮
+            document.getElementById('newProcessBtn').addEventListener('click', function() {
+                goToStep(0);
+                document.getElementById('processCompleteSection').classList.add('hidden');
+                // 重置照片上传区域
+                arrivalPhotoContainer.innerHTML = `
+                    <i class="fa fa-camera text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-500">点击上传照片</p>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>

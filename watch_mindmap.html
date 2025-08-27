@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出行安全指南</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .mindmap {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+        }
+        .center-node {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .branches {
+            display: flex;
+            margin-top: 40px;
+            gap: 40px;
+        }
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .branch-title {
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .do-item {
+            background-color: #8BC34A;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .dont-item {
+            background-color: #F44336;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .connector {
+            height: 20px;
+            width: 2px;
+            background-color: #9E9E9E;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="mindmap">
+        <div>
+            <div class="center-node">儿童出行安全指南</div>
+            <div class="branches">
+                <div class="branch">
+                    <div class="branch-title">应该做的事项</div>
+                    <div class="items">
+                        <div class="do-item">1. 出门前告诉家长去向</div>
+                        <div class="connector"></div>
+                        <div class="do-item">2. 记住家长的联系方式</div>
+                        <div class="connector"></div>
+                        <div class="do-item">3. 走人行道和斑马线</div>
+                        <div class="connector"></div>
+                        <div class="do-item">4. 遵守交通信号灯</div>
+                        <div class="connector"></div>
+                        <div class="do-item">5. 和信任的伙伴一起出行</div>
+                    </div>
+                </div>
+                <div class="branch">
+                    <div class="branch-title">不应该做的事项</div>
+                    <div class="items">
+                        <div class="dont-item">1. 不要接受陌生人的礼物</div>
+                        <div class="connector"></div>
+                        <div class="dont-item">2. 不要在黑暗处独自行走</div>
+                        <div class="connector"></div>
+                        <div class="dont-item">3. 不要在马路上玩耍</div>
+                        <div class="connector"></div>
+                        <div class="dont-item">4. 不要搭乘陌生人的车</div>
+                        <div class="connector"></div>
+                        <div class="dont-item">5. 不要泄露家庭信息</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

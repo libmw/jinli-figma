@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渔场管理系统 - 智能投喂Agent详情</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <script src="../static/chart.js"></script>
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+        --color-success: #22c55e;
+        --color-purple: #8b5cf6;
+        --color-pink: #ec4899;
+        --color-orange: #f97316;
+        --color-teal: #14b8a6;
+        --color-cyan: #06b6d4;
+        --color-lime: #84cc16;
+        --color-indigo: #4f46e5;
+        --color-amber: #f59e0b;
+        --color-emerald: #10b981;
+        --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        --gradient-green: linear-gradient(135deg, #10b981 0%, #84cc16 100%);
+        --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        --gradient-orange: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
+        --gradient-cyan: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+      }
+      /* 背景颜色 */
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .bg-success {
+        background-color: var(--color-success);
+      }
+      .bg-purple {
+        background-color: var(--color-purple);
+      }
+      .bg-pink {
+        background-color: var(--color-pink);
+      }
+      .bg-orange {
+        background-color: var(--color-orange);
+      }
+      .bg-teal {
+        background-color: var(--color-teal);
+      }
+      .bg-cyan {
+        background-color: var(--color-cyan);
+      }
+      .bg-lime {
+        background-color: var(--color-lime);
+      }
+      .bg-indigo {
+        background-color: var(--color-indigo);
+      }
+      .bg-amber {
+        background-color: var(--color-amber);
+      }
+      .bg-emerald {
+        background-color: var(--color-emerald);
+      }
+      
+      /* 渐变背景 */
+      .bg-gradient-blue {
+        background-image: var(--gradient-blue);
+      }
+      .bg-gradient-green {
+        background-image: var(--gradient-green);
+      }
+      .bg-gradient-purple {
+        background-image: var(--gradient-purple);
+      }
+      .bg-gradient-orange {
+        background-image: var(--gradient-orange);
+      }
+      .bg-gradient-cyan {
+        background-image: var(--gradient-cyan);
+      }
+      
+      /* 文本颜色 */
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .text-success {
+        color: var(--color-success);
+      }
+      .text-purple {
+        color: var(--color-purple);
+      }
+      .text-pink {
+        color: var(--color-pink);
+      }
+      .text-orange {
+        color: var(--color-orange);
+      }
+      .text-teal {
+        color: var(--color-teal);
+      }
+      .text-cyan {
+        color: var(--color-cyan);
+      }
+      .text-lime {
+        color: var(--color-lime);
+      }
+      .text-indigo {
+        color: var(--color-indigo);
+      }
+      .text-amber {
+        color: var(--color-amber);
+      }
+      .text-emerald {
+        color: var(--color-emerald);
+      }
+      
+      /* 边框颜色 */
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+      .border-success {
+        border-color: var(--color-success);
+      }
+      .border-purple {
+        border-color: var(--color-purple);
+      }
+      .border-pink {
+        border-color: var(--color-pink);
+      }
+      .border-orange {
+        border-color: var(--color-orange);
+      }
+      .border-teal {
+        border-color: var(--color-teal);
+      }
+      .border-cyan {
+        border-color: var(--color-cyan);
+      }
+      .border-lime {
+        border-color: var(--color-lime);
+      }
+      .border-indigo {
+        border-color: var(--color-indigo);
+      }
+      .border-amber {
+        border-color: var(--color-amber);
+      }
+      .border-emerald {
+        border-color: var(--color-emerald);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-gradient-blue shadow-sm sticky top-0 z-10">
+      <div
+        class="container mx-auto px-4 py-3 flex justify-between items-center"
+      >
+        <div class="flex items-center space-x-4">
+          <a href="area-details.html" class="text-white hover:text-amber">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <span class="text-2xl font-bold text-white">智能投喂Agent详情</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-indigo/20 text-white">
+            <i class="fas fa-bell"></i>
+          </button>
+          <button class="p-2 rounded-full hover:bg-indigo/20 text-white">
+            <i class="fas fa-cog"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-amber flex items-center justify-center text-white"
+            >
+              <i class="fas fa-user"></i>
+            </div>
+            <span class="text-sm font-medium text-white">管理员</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+      <!-- Agent基本信息卡片 -->
+      <div class="bg-white rounded-xl shadow-md p-6 mb-6 border-l-4 border-cyan">
+        <div class="flex justify-between items-start">
+          <div class="flex items-center">
+            <div
+              class="w-16 h-16 bg-gradient-cyan rounded-lg flex items-center justify-center mr-4"
+            >
+              <i class="fas fa-utensils text-white text-3xl"></i>
+            </div>
+            <div class="bg-gradient-blue/5 p-4 rounded-lg border border-blue-100">
+              <h1 class="text-2xl font-bold">智能投喂Agent</h1>
+              <div class="flex items-center mt-1">
+                <p class="text-gray-500">ID: AGENT-001</p>
+                <span
+                  class="ml-3 px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full"
+                  >高级版</span
+                >
+                <span
+                  class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                >
+                  <span
+                    class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"
+                  ></span
+                  >运行中
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="flex space-x-2">
+            <button
+              class="bg-gradient-purple text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center hover:opacity-90 transition-colors duration-200"
+            >
+              <i class="fas fa-sync-alt mr-2"></i> 更新模型
+            </button>
+            <button
+              class="bg-gradient-orange text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center hover:opacity-90 transition-colors duration-200"
+            >
+              <i class="fas fa-sliders-h mr-2"></i> 调整参数
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-6 mt-6">
+          <div class="border-r border-gray-200 pr-4">
+            <p class="text-sm text-gray-500">AI模型版本</p>
+            <p class="text-lg font-medium mt-1">FeedingV2.0</p>
+            <p class="text-xs text-gray-400 mt-1">上线时间: 2023-06-15</p>
+          </div>
+          <div class="border-r border-gray-200 pr-4">
+            <p class="text-sm text-gray-500">AI置信度</p>
+            <p class="text-lg font-medium mt-1">92%</p>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+              <div
+                class="bg-info h-1.5 rounded-full"
+                style="width: 92%"
+              ></div>
+            </div>
+          </div>
+          <div class="border-r border-gray-200 pr-4">
+            <p class="text-sm text-gray-500">上次投喂</p>
+            <p class="text-lg font-medium mt-1">2小时前</p>
+            <p class="text-xs text-success mt-1">
+              <i class="fas fa-check-circle"></i> 正常
+            </p>
+          </div>
+          <div class="bg-gradient-green/5 p-4 rounded-lg border border-green-100">
+            <p class="text-sm text-gray-500">下次预计投喂</p>
+            <p class="text-lg font-medium mt-1">1小时后</p>
+            <p class="text-xs text-gray-400 mt-1">预计投喂量: 6.5kg</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 投喂数据统计 -->
+      <div class="grid grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover border-t-4 border-purple">
+          <div class="flex justify-between items-start">
+            <div class="bg-gradient-purple/5 p-4 rounded-lg border border-purple-100">
+              <p class="text-gray-500 text-sm">今日投喂次数</p>
+              <h3 class="text-2xl font-bold mt-1">4 次</h3>
+              <p class="text-xs text-green-500 mt-2">
+                <i class="fas fa-arrow-up mr-1"></i>较昨日 +1
+              </p>
+            </div>
+            <div class="card-icon bg-gradient-purple text-white">
+              <i class="fas fa-calendar-day text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4">
+            <p class="text-xs text-gray-500 mb-1">投喂时间分布</p>
+            <div class="grid grid-cols-4 gap-4 mt-2">
+              <div class="flex flex-col items-center">
+                <div class="relative w-full h-[60px] flex items-end">
+                  <div class="absolute inset-0 bg-info/10 rounded-lg"></div>
+                  <div class="relative w-full bg-gradient-to-t from-info to-info/60 rounded-lg shadow-sm transition-all hover:translate-y-[-2px]" style="height: 30px"></div>
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 bg-white text-info text-xs font-medium px-1.5 py-0.5 rounded-full shadow-sm border border-info/20">6kg</div>
+                </div>
+                <p class="text-xs font-medium text-gray-600 mt-2 text-center">6:00</p>
+              </div>
+              <div class="flex flex-col items-center">
+                <div class="relative w-full h-[60px] flex items-end">
+                  <div class="absolute inset-0 bg-info/10 rounded-lg"></div>
+                  <div class="relative w-full bg-gradient-to-t from-info to-info/60 rounded-lg shadow-sm transition-all hover:translate-y-[-2px]" style="height: 30px"></div>
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 bg-white text-info text-xs font-medium px-1.5 py-0.5 rounded-full shadow-sm border border-info/20">8kg</div>
+                </div>
+                <p class="text-xs font-medium text-gray-600 mt-2 text-center">12:00</p>
+              </div>
+              <div class="flex flex-col items-center">
+                <div class="relative w-full h-[60px] flex items-end">
+                  <div class="absolute inset-0 bg-info/10 rounded-lg"></div>
+                  <div class="relative w-full bg-gradient-to-t from-info to-info/60 rounded-lg shadow-sm transition-all hover:translate-y-[-2px]" style="height: 30px"></div>
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 bg-white text-info text-xs font-medium px-1.5 py-0.5 rounded-full shadow-sm border border-info/20">7kg</div>
+                </div>
+                <p class="text-xs font-medium text-gray-600 mt-2 text-center">18:00</p>
+              </div>
+              <div class="flex flex-col items-center">
+                <div class="relative w-full h-[60px] flex items-end">
+                  <div class="absolute inset-0 bg-info/10 rounded-lg"></div>
+                  <div class="relative w-full bg-gradient-to-t from-info/40 to-info/20 rounded-lg shadow-sm transition-all hover:translate-y-[-2px] border border-dashed border-info/30" style="height: 30px"></div>
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 bg-white text-gray-500 text-xs font-medium px-1.5 py-0.5 rounded-full shadow-sm border border-gray-200">4kg</div>
+                </div>
+                <p class="text-xs font-medium text-gray-600 mt-2 text-center">待定</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover border-t-4 border-orange">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">今日投喂总量</p>
+              <h3 class="text-2xl font-bold mt-1">25 kg</h3>
+              <p class="text-xs text-gray-500 mt-2">饵料系数: 1.2</p>
+            </div>
+            <div class="card-icon bg-gradient-orange text-white">
+              <i class="fas fa-weight text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4">
+            <canvas id="feedingChart" height="80"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover border-t-4 border-emerald">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">鱼群状态</p>
+              <h3 class="text-2xl font-bold mt-1 text-success">活跃</h3>
+              <p class="text-xs text-gray-500 mt-2">摄食率: 95%</p>
+            </div>
+            <div class="card-icon bg-gradient-green text-white">
+              <i class="fas fa-fish text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4">
+            <p class="text-xs text-gray-500 mb-1">鱼群活动指数</p>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div
+                class="bg-success h-2 rounded-full"
+                style="width: 95%"
+              ></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+              <span>低</span>
+              <span>中</span>
+              <span>高</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 投喂策略与设备 -->
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo">
+          <h2 class="text-lg font-bold mb-4 flex items-center">
+            <i class="fas fa-brain text-indigo mr-2"></i> 投喂策略
+          </h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+              <p class="text-sm font-medium">当前策略</p>
+              <p class="text-lg font-bold text-info mt-1">分散式多点投喂</p>
+              <p class="text-xs text-gray-500 mt-2">
+                支持鱼种: 鲈鱼、鳜鱼
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                适用水温: 22°C - 28°C
+              </p>
+            </div>
+            <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+              <p class="text-sm font-medium">投喂时间段</p>
+              <p class="text-lg font-bold text-info mt-1">6:00, 12:00, 18:00</p>
+              <p class="text-xs text-gray-500 mt-2">
+                <i class="fas fa-robot mr-1"></i> AI自动调整
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                根据预测结果动态调整
+              </p>
+            </div>
+            <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+              <p class="text-sm font-medium">投喂量计算</p>
+              <p class="text-md font-bold text-info mt-1">基于多因素模型</p>
+              <p class="text-xs text-gray-500 mt-2">
+                考虑因素: 烧碱用量、浊度、排污次数、鱼群活跃度
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                精确度: <span class="text-success">±3%</span>
+              </p>
+            </div>
+            <div class="border border-gray-100 rounded-lg p-4 bg-gray-50">
+              <p class="text-sm font-medium">投喂调整规则</p>
+              <p class="text-md font-bold text-info mt-1">用户确认后部署</p>
+              <p class="text-xs text-gray-500 mt-2">
+                已应用规则: 8条
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                上次应用: <span class="text-warning">昨日 22:00</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-pink">
+          <h2 class="text-lg font-bold mb-4 flex items-center">
+            <i class="fas fa-cogs text-pink mr-2"></i> 投喂设备
+          </h2>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-purple rounded-lg flex items-center justify-center mr-3">
+                  <i class="fas fa-robot text-white"></i>
+                </div>
+                <div>
+                  <p class="font-medium">自动投喂机 #1</p>
+                  <p class="text-xs text-gray-500">型号: AF-2000Pro</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>
+                  正常运行
+                </span>
+                <p class="text-xs text-gray-500 mt-1">负责区域: 养殖池：A0-A1</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-orange rounded-lg flex items-center justify-center mr-3">
+                  <i class="fas fa-robot text-white"></i>
+                </div>
+                <div>
+                  <p class="font-medium">自动投喂机 #2</p>
+                  <p class="text-xs text-gray-500">型号: AF-2000Pro</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>
+                  正常运行
+                </span>
+                <p class="text-xs text-gray-500 mt-1">负责区域: 养殖池：A2-A3</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-10 h-10 bg-gradient-green rounded-lg flex items-center justify-center mr-3">
+                  <i class="fas fa-robot text-white"></i>
+                </div>
+                <div>
+                  <p class="font-medium">自动投喂机 #3</p>
+                  <p class="text-xs text-gray-500">型号: AF-2000Pro</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>
+                  正常运行
+                </span>
+                <p class="text-xs text-gray-500 mt-1">负责区域: 养殖池：A4-A5</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 投喂历史记录与调整 -->
+      <div class="grid grid-cols-1 gap-6 mb-6">
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-teal">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold flex items-center">
+              <i class="fas fa-history text-teal mr-2"></i> 投喂历史记录
+            </h2>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition-colors duration-200">
+                今日
+              </button>
+              <button class="px-3 py-1 bg-gradient-cyan text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200">
+                本周
+              </button>
+              <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition-colors duration-200">
+                本月
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr>
+                  <th class="px-4 py-3 bg-gradient-cyan/10 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    时间
+                  </th>
+                  <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    投喂量
+                  </th>
+                  <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    投喂设备
+                  </th>
+                  <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    摄食率
+                  </th>
+                  <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    AI置信度
+                  </th>
+                  <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    状态
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm font-medium">今日 12:00</div>
+                    <div class="text-xs text-gray-500">2023-09-15</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">6.8 kg</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">全部设备</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm text-success">95%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">92%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                      正常
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm font-medium">今日 06:00</div>
+                    <div class="text-xs text-gray-500">2023-09-15</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">6.5 kg</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">全部设备</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm text-success">93%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">90%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      正常
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm font-medium">昨日 18:00</div>
+                    <div class="text-xs text-gray-500">2023-09-14</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">5.7 kg</div>
+                    <div class="text-xs text-warning">调整 -5%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">全部设备</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm text-success">90%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">88%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                      已调整
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm font-medium">昨日 12:00</div>
+                    <div class="text-xs text-gray-500">2023-09-14</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">6.2 kg</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">全部设备</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm text-success">92%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="text-sm">91%</div>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      正常
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex justify-center mt-4">
+            <button class="px-4 py-2 bg-gradient-cyan text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 shadow-sm">
+              查看更多记录
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 最近调整记录 -->
+      <div class="bg-white rounded-xl shadow-md p-6 mb-6 border-l-4 border-lime">
+        <h2 class="text-lg font-bold mb-4 flex items-center">
+          <i class="fas fa-sliders-h text-lime mr-2"></i> 最近调整记录
+        </h2>
+        <div class="space-y-4">
+          <div class="border-l-4 border-warning pl-4 py-2 bg-warning/5 rounded-r-lg">
+            <div class="flex justify-between">
+              <div>
+                <p class="font-medium">碱度控制箱桶烧碱用量明显增大-降低投喂量5%</p>
+                <p class="text-sm text-gray-500 mt-1">
+                  检测到水体碱度异常升高，系统自动降低投喂量以减少鱼类代谢产物，防止水质进一步恶化。
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-500">昨日 22:00</p>
+                <p class="text-xs text-warning mt-1">系统自动调整</p>
+              </div>
+            </div>
+          </div>
+          <div class="border-l-4 border-info pl-4 py-2 bg-info/5 rounded-r-lg">
+            <div class="flex justify-between">
+              <div>
+                <p class="font-medium">根据鱼群生长情况-调整饵料配方比例</p>
+                <p class="text-sm text-gray-500 mt-1">
+                  基于最近两周的生长数据，系统优化了饵料配方中蛋白质和脂肪的比例，提高生长效率。
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-500">3天前</p>
+                <p class="text-xs text-info mt-1">管理员确认</p>
+              </div>
+            </div>
+          </div>
+          <div class="border-l-4 border-success pl-4 py-2 bg-success/5 rounded-r-lg">
+            <div class="flex justify-between">
+              <div>
+                <p class="font-medium">优化投喂时间-调整为三餐制</p>
+                <p class="text-sm text-gray-500 mt-1">
+                  根据水温上升趋势和鱼类活动规律，系统将投喂频次从两餐调整为三餐，优化了投喂时间点。
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-500">1周前</p>
+                <p class="text-xs text-success mt-1">效果良好</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI预测建议 -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-t-4 border-amber">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold flex items-center">
+            <div class="w-8 h-8 bg-gradient-orange rounded-full flex items-center justify-center mr-2 shadow-md">
+              <i class="fas fa-lightbulb text-white"></i>
+            </div>
+            <span>AI预测建议</span>
+            <span class="ml-2 px-2 py-0.5 bg-amber/20 text-amber text-xs rounded-md">3条新建议</span>
+          </h2>
+          <div class="flex space-x-2">
+            <button class="px-3 py-1.5 bg-gradient-orange text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+              <i class="fas fa-filter mr-1"></i> 筛选
+            </button>
+            <button class="px-3 py-1.5 bg-gradient-orange text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+              <i class="fas fa-sort mr-1"></i> 排序
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-5">
+          <!-- 投喂优化建议 -->
+          <div class="border-2 border-amber-500 rounded-lg p-5 bg-amber-50 relative overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
+            <div class="flex justify-between">
+              <div class="w-4/5 pl-2">
+                <div class="flex items-center">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-500 text-gray-900 mr-2 shadow-sm font-bold">
+                    <i class="fas fa-chart-line mr-1"></i>投喂优化
+                  </span>
+                  <div class="flex items-center bg-white px-2 py-0.5 rounded-full shadow-sm">
+                    <i class="fas fa-chart-pie text-amber-500 mr-1"></i>
+                    <p class="text-sm font-medium">预测置信度: <span class="text-amber-600 font-bold">89%</span></p>
+                  </div>
+                  <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <i class="fas fa-exclamation-circle mr-1"></i>优先级高
+                  </span>
+                </div>
+                <p class="font-bold text-xl mt-3 text-gray-800">明日中午建议增加投喂量8%</p>
+                <div class="flex items-center mt-1 text-amber-700 flex-wrap">
+                  <i class="fas fa-sun mr-1"></i>
+                  <span class="text-sm font-medium">预计气温上升</span>
+                  <i class="fas fa-arrow-up ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">2°C</span>
+                  <i class="fas fa-tint ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">溶氧量增加</span>
+                  <i class="fas fa-eye ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">水浊度降低</span>
+                  <i class="fas fa-fish ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">吃食活跃度高</span>
+                </div>
+                <p class="text-sm text-gray-700 mt-2 bg-white p-2 rounded-md border border-amber-200">
+                  <i class="fas fa-robot text-amber-500 mr-1"></i>
+                  综合分析：水浊度降低(12NTU→8NTU)，鱼群吃食活跃度上升(+15%)，溶氧量增加(5.8mg/L→6.2mg/L)，且近期排污频次正常(3次/周)。系统预测增加投喂量8%可提高生长速率，不会对水质产生负面影响。
+                </p>
+                <div class="flex mt-2 space-x-2 flex-wrap">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>生长优化
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>水温相关
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>水质监测
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>活跃度分析
+                  </span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="bg-white p-2 rounded-lg shadow-sm border border-amber-200">
+                  <p class="text-sm font-medium text-gray-700">10分钟前</p>
+                  <p class="text-xs font-bold text-amber-500 mt-1 flex items-center justify-end">
+                    <i class="fas fa-clock mr-1"></i> 等待确认
+                  </p>
+                </div>
+                <div class="mt-2 bg-white p-2 rounded-lg shadow-sm border border-amber-200">
+                  <p class="text-xs text-gray-600">预期效果</p>
+                  <p class="text-sm font-bold text-amber-600">+3.5% 生长率</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-4">
+              <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors duration-200 flex items-center shadow-sm">
+                <i class="fas fa-clock mr-1"></i> 稍后处理
+              </button>
+              <button class="px-4 py-2 bg-gradient-purple text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+                <i class="fas fa-times mr-1"></i> 拒绝
+              </button>
+              <button class="px-4 py-2 bg-gradient-green text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+                <i class="fas fa-check mr-1"></i> 采纳
+              </button>
+            </div>
+          </div>
+          
+          <!-- 饵料配方建议 -->
+          <div class="border-2 border-blue-500 rounded-lg p-5 bg-blue-50 relative overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+            <div class="flex justify-between">
+              <div class="w-4/5 pl-2">
+                <div class="flex items-center">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500 text-gray-900 mr-2 shadow-sm font-bold">
+                    <i class="fas fa-flask mr-1"></i>饵料配方
+                  </span>
+                  <div class="flex items-center bg-white px-2 py-0.5 rounded-full shadow-sm">
+                    <i class="fas fa-chart-pie text-blue-500 mr-1"></i>
+                    <p class="text-sm font-medium">预测置信度: <span class="text-blue-600 font-bold">92%</span></p>
+                  </div>
+                  <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <i class="fas fa-exclamation-circle mr-1"></i>优先级中
+                  </span>
+                </div>
+                <p class="font-bold text-xl mt-3 text-gray-800">调整饵料蛋白质含量至32%</p>
+                <div class="flex items-center mt-1 text-blue-700 flex-wrap">
+                  <i class="fas fa-chart-bar mr-1"></i>
+                  <span class="text-sm font-medium">当前含量: 28%</span>
+                  <i class="fas fa-arrow-up ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">建议增加: 4%</span>
+                  <i class="fas fa-flask ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">烧碱用量: 低</span>
+                  <i class="fas fa-water ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">水质状况: 良好</span>
+                </div>
+                <p class="text-sm text-gray-700 mt-2 bg-white p-2 rounded-md border border-blue-200">
+                  <i class="fas fa-robot text-blue-500 mr-1"></i>
+                  综合分析：近期烧碱用量较低(0.8kg/亩)，水浊度稳定(10NTU)，排污频次减少(2次/周→1次/周)，鱼群吃食活跃度中等(65%)。系统预测当前饵料蛋白质含量(28%)偏低，建议调整至32%可提高饲料转化率约5%，预计可加快生长速度。
+                </p>
+                <div class="flex mt-2 space-x-2 flex-wrap">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>饵料优化
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>蛋白质调整
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>水质管理
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>排污优化
+                  </span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="bg-white p-2 rounded-lg shadow-sm border border-blue-200">
+                  <p class="text-sm font-medium text-gray-700">2小时前</p>
+                  <p class="text-xs font-bold text-blue-500 mt-1 flex items-center justify-end">
+                    <i class="fas fa-clock mr-1"></i> 等待确认
+                  </p>
+                </div>
+                <div class="mt-2 bg-white p-2 rounded-lg shadow-sm border border-blue-200">
+                  <p class="text-xs text-gray-600">预期效果</p>
+                  <p class="text-sm font-bold text-blue-600">+5% 饲料转化率</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-4">
+              <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors duration-200 flex items-center shadow-sm">
+                <i class="fas fa-clock mr-1"></i> 稍后处理
+              </button>
+              <button class="px-4 py-2 bg-gradient-purple text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+                <i class="fas fa-times mr-1"></i> 拒绝
+              </button>
+              <button class="px-4 py-2 bg-gradient-green text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+                <i class="fas fa-check mr-1"></i> 采纳
+              </button>
+            </div>
+          </div>
+          
+          <!-- 投喂时间建议 -->
+          <div class="border-2 border-green-500 rounded-lg p-5 bg-green-50 relative overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+            <div class="flex justify-between">
+              <div class="w-4/5 pl-2">
+                <div class="flex items-center">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500 text-gray-900 mr-2 shadow-sm font-bold">
+                    <i class="fas fa-clock mr-1"></i>投喂时间
+                  </span>
+                  <div class="flex items-center bg-white px-2 py-0.5 rounded-full shadow-sm">
+                    <i class="fas fa-chart-pie text-green-500 mr-1"></i>
+                    <p class="text-sm font-medium">预测置信度: <span class="text-green-600 font-bold">95%</span></p>
+                  </div>
+                </div>
+                <p class="font-bold text-xl mt-3 text-gray-800">调整早间投喂时间至5:30</p>
+                <div class="flex items-center mt-1 text-green-700 flex-wrap">
+                  <i class="fas fa-clock mr-1"></i>
+                  <span class="text-sm font-medium">当前时间: 6:00</span>
+                  <i class="fas fa-arrow-down ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">提前: 30分钟</span>
+                  <i class="fas fa-tint ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">溶氧峰值期</span>
+                  <i class="fas fa-fish ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">活跃度: 高</span>
+                  <i class="fas fa-trash ml-2 mr-1"></i>
+                  <span class="text-sm font-medium">排污: 充分</span>
+                </div>
+                <p class="text-sm text-gray-700 mt-2 bg-white p-2 rounded-md border border-green-200">
+                  <i class="fas fa-robot text-green-500 mr-1"></i>
+                  综合分析：凌晨5:00-6:00溶氧量达到峰值(6.5mg/L)，水浊度低(7NTU)，鱼群活跃度高(80%)，近期排污充分(4次/周)，烧碱用量适中(1.2kg/亩)。提前投喂时间可利用最佳水质环境，预计可提高摄食率2-3%。
+                </p>
+                <div class="flex mt-2 space-x-2 flex-wrap">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>时间优化
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-100 text-cyan-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>溶氧相关
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>烧碱管理
+                  </span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 mb-1">
+                    <i class="fas fa-tag mr-1"></i>排污管理
+                  </span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="bg-white p-2 rounded-lg shadow-sm border border-green-200">
+                  <p class="text-sm font-medium text-gray-700">昨日</p>
+                  <p class="text-xs font-bold text-green-500 mt-1 flex items-center justify-end">
+                    <i class="fas fa-check-circle mr-1"></i> 已采纳
+                  </p>
+                </div>
+                <div class="mt-2 bg-white p-2 rounded-lg shadow-sm border border-green-200">
+                  <p class="text-xs text-gray-600">实际效果</p>
+                  <p class="text-sm font-bold text-green-600">+2.8% 摄食率</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-4">
+              <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300 transition-colors duration-200 flex items-center shadow-sm opacity-50 cursor-not-allowed">
+                <i class="fas fa-clock mr-1"></i> 稍后处理
+              </button>
+              <button class="px-4 py-2 bg-gradient-purple text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm opacity-50 cursor-not-allowed">
+                <i class="fas fa-times mr-1"></i> 拒绝
+              </button>
+              <button class="px-4 py-2 bg-gradient-green text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm opacity-50 cursor-not-allowed">
+                <i class="fas fa-check-circle mr-1"></i> 已采纳
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-6 space-x-4">
+          <button class="px-4 py-2 bg-gradient-cyan text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+            <i class="fas fa-history mr-1"></i> 查看历史建议
+          </button>
+          <button class="px-4 py-2 bg-gradient-purple text-white rounded-md text-sm hover:opacity-90 transition-colors duration-200 flex items-center shadow-sm">
+            <i class="fas fa-cog mr-1"></i> 建议设置
+          </button>
+        </div>
+      </div>
+
+      <!-- 性能指标 -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-cyan">
+        <h2 class="text-lg font-bold mb-4 flex items-center">
+          <i class="fas fa-chart-line text-cyan mr-2"></i> Agent性能指标
+        </h2>
+        <div class="grid grid-cols-3 gap-6">
+          <div>
+            <p class="text-sm text-gray-500 mb-2">本周投喂总量</p>
+            <p class="text-2xl font-bold">168 kg</p>
+            <div class="flex items-center mt-1">
+              <span class="text-xs text-green-500 mr-2">
+                <i class="fas fa-arrow-up"></i> 5%
+              </span>
+              <span class="text-xs text-gray-500">较上周</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">饵料系数: 1.2</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-2">增重比</p>
+            <p class="text-2xl font-bold text-success">1.35</p>
+            <div class="flex items-center mt-1">
+              <span class="text-xs text-green-500 mr-2">
+                <i class="fas fa-arrow-up"></i> 0.05
+              </span>
+              <span class="text-xs text-gray-500">较上周</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">行业平均: 1.25</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-2">AI决策准确率</p>
+            <p class="text-2xl font-bold text-info">94%</p>
+            <div class="flex items-center mt-1">
+              <span class="text-xs text-green-500 mr-2">
+                <i class="fas fa-arrow-up"></i> 2%
+              </span>
+              <span class="text-xs text-gray-500">较上月</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">模型迭代次数: 8</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 投喂数据图表
+      const feedingCtx = document.getElementById('feedingChart').getContext('2d');
+      const feedingChart = new Chart(feedingCtx, {
+        type: 'line',
+        data: {
+          labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+          datasets: [{
+            label: '日投喂量(kg)',
+            data: [22, 24, 23, 25, 25, 24, 25],
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderColor: 'rgba(99, 102, 241, 1)',
+            borderWidth: 2,
+            tension: 0.4,
+            pointRadius: 3,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: 'rgba(99, 102, 241, 1)',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 20,
+              ticks: {
+                font: {
+                  size: 10
+                }
+              },
+              grid: {
+                display: false
+              }
+            },
+            x: {
+              ticks: {
+                font: {
+                  size: 10
+                }
+              },
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔场管理系统 - 养殖投入品详情</title>
+    <link href="../static/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/all.min.css">
+    <script src="../static/chart.js"></script>
+    <style>
+        :root {
+            --color-primary: #3B82F6;
+            --color-secondary: #10B981;
+            --color-warning: #FBBF24;
+            --color-danger: #EF4444;
+            --color-info: #6366F1;
+        }
+        .bg-primary { background-color: var(--color-primary); }
+        .bg-secondary { background-color: var(--color-secondary); }
+        .bg-warning { background-color: var(--color-warning); }
+        .bg-danger { background-color: var(--color-danger); }
+        .bg-info { background-color: var(--color-info); }
+        .text-primary { color: var(--color-primary); }
+        .text-secondary { color: var(--color-secondary); }
+        .text-warning { color: var(--color-warning); }
+        .text-danger { color: var(--color-danger); }
+        .text-info { color: var(--color-info); }
+        .border-primary { border-color: var(--color-primary); }
+        .border-secondary { border-color: var(--color-secondary); }
+        .border-warning { border-color: var(--color-warning); }
+        .border-danger { border-color: var(--color-danger); }
+        .border-info { border-color: var(--color-info); }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-gray-500 hover:text-primary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <span class="text-2xl font-bold text-primary">渔场管理系统</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-bell text-gray-600"></i>
+                </button>
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-cog text-gray-600"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="text-sm font-medium">管理员</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">养殖投入品详情</h1>
+            <div class="flex space-x-2">
+                <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-filter mr-2"></i> 筛选
+                </button>
+                <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-download mr-2"></i> 导出
+                </button>
+                <button class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center">
+                    <i class="fas fa-plus mr-2"></i> 添加投入品
+                </button>
+            </div>
+        </div>
+        
+        <!-- 投入品概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">投入品类型</p>
+                        <h3 class="text-2xl font-bold mt-1">5</h3>
+                        <p class="text-xs text-gray-500 mt-2">饲料、药剂、氧气、设备零件、鱼苗</p>
+                    </div>
+                    <div class="card-icon bg-blue-100 text-primary">
+                        <i class="fas fa-boxes text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">本月总成本</p>
+                        <h3 class="text-2xl font-bold mt-1">¥128,500</h3>
+                        <p class="text-xs text-red-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>较上月增加 ¥12,300</p>
+                    </div>
+                    <div class="card-icon bg-green-100 text-secondary">
+                        <i class="fas fa-coins text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">库存预警</p>
+                        <h3 class="text-2xl font-bold mt-1">3</h3>
+                        <p class="text-xs text-yellow-500 mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>需要补充</p>
+                    </div>
+                    <div class="card-icon bg-yellow-100 text-warning">
+                        <i class="fas fa-exclamation-circle text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">年度总成本</p>
+                        <h3 class="text-2xl font-bold mt-1">¥1,458,600</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-down mr-1"></i>较去年降低 2.5%</p>
+                    </div>
+                    <div class="card-icon bg-purple-100 text-info">
+                        <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 投入品消耗和成本统计 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold">投入品消耗情况</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white">月度</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">季度</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">年度</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="consumptionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold">投入品成本统计</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white">月度</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">季度</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">年度</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="costChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 投入品类型分布 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-1">
+                <h3 class="text-lg font-bold mb-6">投入品成本占比</h3>
+                <div class="h-64">
+                    <canvas id="costDistributionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold">投入品成本趋势</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white">近6个月</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">近12个月</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="costTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 库存预警 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">库存预警</h3>
+                <button class="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white">采购补充</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-3">
+                            <i class="fas fa-drumstick-bite"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">高蛋白饲料</h4>
+                            <p class="text-xs text-gray-500">饲料类</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">当前库存</span>
+                        <span class="text-sm font-medium">250 kg</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div class="bg-warning rounded-full h-2" style="width: 15%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-500">安全库存: 1000 kg</span>
+                        <span class="text-warning font-medium">库存不足</span>
+                    </div>
+                    <div class="mt-4">
+                        <button class="w-full py-2 bg-warning text-white rounded-lg text-sm font-medium">立即采购</button>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-3">
+                            <i class="fas fa-drumstick-bite"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">幼鱼饲料</h4>
+                            <p class="text-xs text-gray-500">饲料类</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">当前库存</span>
+                        <span class="text-sm font-medium">180 kg</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div class="bg-warning rounded-full h-2" style="width: 22%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-500">安全库存: 800 kg</span>
+                        <span class="text-warning font-medium">库存不足</span>
+                    </div>
+                    <div class="mt-4">
+                        <button class="w-full py-2 bg-warning text-white rounded-lg text-sm font-medium">立即采购</button>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-3">
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">水质改良剂</h4>
+                            <p class="text-xs text-gray-500">药剂类</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">当前库存</span>
+                        <span class="text-sm font-medium">15 L</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div class="bg-warning rounded-full h-2" style="width: 18%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-500">安全库存: 80 L</span>
+                        <span class="text-warning font-medium">库存不足</span>
+                    </div>
+                    <div class="mt-4">
+                        <button class="w-full py-2 bg-warning text-white rounded-lg text-sm font-medium">立即采购</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 投入品详情列表 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">投入品详情列表</h3>
+                <div class="relative">
+                    <input type="text" placeholder="搜索投入品..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">投入品名称</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">类型</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">本月消耗量</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">本月成本</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前存量</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-drumstick-bite"></i>
+                                    </div>
+                                    <span class="font-medium">高蛋白饲料</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">饲料类</td>
+                            <td class="px-4 py-4 text-sm">3,500 kg</td>
+                            <td class="px-4 py-4 text-sm">¥42,000</td>
+                            <td class="px-4 py-4 text-sm">250 kg</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">库存不足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-drumstick-bite"></i>
+                                    </div>
+                                    <span class="font-medium">幼鱼饲料</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">饲料类</td>
+                            <td class="px-4 py-4 text-sm">1,200 kg</td>
+                            <td class="px-4 py-4 text-sm">¥18,000</td>
+                            <td class="px-4 py-4 text-sm">180 kg</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">库存不足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-drumstick-bite"></i>
+                                    </div>
+                                    <span class="font-medium">罗非鱼专用饲料</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">饲料类</td>
+                            <td class="px-4 py-4 text-sm">2,800 kg</td>
+                            <td class="px-4 py-4 text-sm">¥33,600</td>
+                            <td class="px-4 py-4 text-sm">950 kg</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">库存充足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-info mr-3">
+                                        <i class="fas fa-prescription-bottle-alt"></i>
+                                    </div>
+                                    <span class="font-medium">水质改良剂</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">药剂类</td>
+                            <td class="px-4 py-4 text-sm">45 L</td>
+                            <td class="px-4 py-4 text-sm">¥9,000</td>
+                            <td class="px-4 py-4 text-sm">15 L</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">库存不足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-info mr-3">
+                                        <i class="fas fa-prescription-bottle-alt"></i>
+                                    </div>
+                                    <span class="font-medium">杀菌消毒剂</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">药剂类</td>
+                            <td class="px-4 py-4 text-sm">30 L</td>
+                            <td class="px-4 py-4 text-sm">¥7,500</td>
+                            <td class="px-4 py-4 text-sm">40 L</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">库存充足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-tint"></i>
+                                    </div>
+                                    <span class="font-medium">液氧</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">氧气类</td>
+                            <td class="px-4 py-4 text-sm">750 L</td>
+                            <td class="px-4 py-4 text-sm">¥8,625</td>
+                            <td class="px-4 py-4 text-sm">680 L</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">库存充足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mr-3">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <span class="font-medium">增氧机零件</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">设备零件</td>
+                            <td class="px-4 py-4 text-sm">12 套</td>
+                            <td class="px-4 py-4 text-sm">¥6,000</td>
+                            <td class="px-4 py-4 text-sm">8 套</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">库存充足</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">鲈鱼鱼苗</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">鱼苗类</td>
+                            <td class="px-4 py-4 text-sm">5,000 尾</td>
+                            <td class="px-4 py-4 text-sm">¥2,500</td>
+                            <td class="px-4 py-4 text-sm">0 尾</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">已用完</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">采购</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <p class="text-sm text-gray-500">显示 1-8 条，共 15 条</p>
+                <div class="flex space-x-1">
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-primary bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 供应商信息 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">供应商信息</h3>
+                <button class="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white">添加供应商</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">海洋饲料有限公司</h4>
+                            <p class="text-xs text-gray-500">饲料类供应商</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">联系人:</span>
+                            <span>张经理</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">联系电话:</span>
+                            <span>13812345678</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">合作时间:</span>
+                            <span>2020年至今</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">主要产品:</span>
+                            <span>高蛋白饲料、幼鱼饲料</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button class="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-medium">联系</button>
+                        <button class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">查看订单</button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-info mr-3">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">水产药剂科技有限公司</h4>
+                            <p class="text-xs text-gray-500">药剂类供应商</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">联系人:</span>
+                            <span>李经理</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">联系电话:</span>
+                            <span>13987654321</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">合作时间:</span>
+                            <span>2021年至今</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">主要产品:</span>
+                            <span>水质改良剂、杀菌消毒剂</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button class="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-medium">联系</button>
+                        <button class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">查看订单</button>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">海洋气体有限公司</h4>
+                            <p class="text-xs text-gray-500">氧气类供应商</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">联系人:</span>
+                            <span>王经理</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">联系电话:</span>
+                            <span>13765432198</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">合作时间:</span>
+                            <span>2019年至今</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-500 w-20">主要产品:</span>
+                            <span>液氧、氧气设备</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        <button class="flex-1 py-2 bg-primary text-white rounded-lg text-sm font-medium">联系</button>
+                        <button class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">查看订单</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-8 py-6">
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-500 text-sm">
+                &copy; 2023 渔场管理系统. 保留所有权利.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 投入品消耗情况图表
+        const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
+        const consumptionChart = new Chart(consumptionCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                datasets: [
+                    {
+                        label: '饲料 (kg)',
+                        data: [6500, 7200, 6800, 7500, 8200, 7500],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'transparent',
+                        tension: 0.3
+                    },
+                    {
+                        label: '药剂 (L)',
+                        data: [65, 75, 80, 85, 75, 75],
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'transparent',
+                        tension: 0.3
+                    },
+                    {
+                        label: '氧气 (L)',
+                        data: [650, 700, 720, 750, 780, 750],
+                        borderColor: '#10B981',
+                        backgroundColor: 'transparent',
+                        tension: 0.3
+                    },
+                    {
+                        label: '设备零件 (套)',
+                        data: [8, 12, 10, 15, 18, 12],
+                        borderColor: '#F59E0B',
+                        backgroundColor: 'transparent',
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 投入品成本统计图表
+        const costCtx = document.getElementById('costChart').getContext('2d');
+        const costChart = new Chart(costCtx, {
+            type: 'bar',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                datasets: [
+                    {
+                        label: '饲料',
+                        data: [78000, 86400, 81600, 90000, 98400, 90000],
+                        backgroundColor: '#3B82F6'
+                    },
+                    {
+                        label: '药剂',
+                        data: [13000, 15000, 16000, 17000, 15000, 15000],
+                        backgroundColor: '#8B5CF6'
+                    },
+                    {
+                        label: '氧气',
+                        data: [7475, 8050, 8280, 8625, 8970, 8625],
+                        backgroundColor: '#10B981'
+                    },
+                    {
+                        label: '设备零件',
+                        data: [4000, 6000, 5000, 7500, 9000, 6000],
+                        backgroundColor: '#F59E0B'
+                    },
+                    {
+                        label: '鱼苗',
+                        data: [2500, 0, 3500, 0, 2500, 0],
+                        backgroundColor: '#EC4899'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: '成本 (元)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 投入品成本占比图表
+        const costDistributionCtx = document.getElementById('costDistributionChart').getContext('2d');
+        const costDistributionChart = new Chart(costDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['饲料', '药剂', '氧气', '设备零件', '鱼苗'],
+                datasets: [{
+                    data: [70, 12, 7, 6, 5],
+                    backgroundColor: [
+                        '#3B82F6',
+                        '#8B5CF6',
+                        '#10B981',
+                        '#F59E0B',
+                        '#EC4899'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value}%`;
+                            }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+        
+        // 投入品成本趋势图表
+        const costTrendCtx = document.getElementById('costTrendChart').getContext('2d');
+        const costTrendChart = new Chart(costTrendCtx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                datasets: [{
+                    label: '总成本',
+                    data: [104975, 115450, 114380, 123125, 133870, 119625],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: '成本 (元)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

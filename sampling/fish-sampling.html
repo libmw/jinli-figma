@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鲈鱼打样流程</title>
+    <link href="../static/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="../static/chart.js"></script>
+    <style>
+        :root {
+            --color-primary: #3494E6;
+            --color-primary-dark: #2980b9;
+            --color-secondary: #4ECDC4;
+            --color-secondary-dark: #44A08D;
+            --color-danger: #FF6B6B;
+            --color-warning: #FFB900;
+            --color-success: #43E97B;
+        }
+        
+        .bg-primary {
+            background-color: var(--color-primary);
+        }
+        
+        .bg-secondary {
+            background-color: var(--color-secondary);
+        }
+        
+        .bg-danger {
+            background-color: var(--color-danger);
+        }
+        
+        .bg-warning {
+            background-color: var(--color-warning);
+        }
+        
+        .bg-success {
+            background-color: var(--color-success);
+        }
+        
+        .text-primary {
+            color: var(--color-primary);
+        }
+        
+        .text-secondary {
+            color: var(--color-secondary);
+        }
+        
+        .text-danger {
+            color: var(--color-danger);
+        }
+        
+        .text-warning {
+            color: var(--color-warning);
+        }
+        
+        .text-success {
+            color: var(--color-success);
+        }
+        
+        .border-primary {
+            border-color: var(--color-primary);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .step-active {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: white;
+        }
+        
+        .step-inactive {
+            background-color: white;
+            border-color: #e0e0e0;
+            color: #9e9e9e;
+        }
+        
+        .step-completed {
+            background-color: var(--color-success);
+            border-color: var(--color-success);
+            color: white;
+        }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .step-indicator-container {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+        }
+
+        /* 流程图样式 */
+        .flowchart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .flowchart {
+            min-width: 1000px;
+        }
+
+        .step-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .step-node:hover {
+            transform: scale(1.05);
+        }
+
+        .step-node:hover .step-circle {
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        }
+
+        .step-text {
+            font-size: 14px;
+            font-weight: 600;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .step-subtitle {
+            font-size: 11px;
+            font-weight: 400;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            opacity: 0.8;
+        }
+
+        .flow-arrow {
+            stroke: #3494E6;
+            stroke-width: 3;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .conditional-flow {
+            stroke: #4ECDC4;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            fill: none;
+            marker-end: url(#arrowhead-conditional);
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #3494E6;
+        }
+
+        .legend h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .legend-line {
+            width: 30px;
+            height: 3px;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .legend-dash {
+            width: 30px;
+            height: 2px;
+            margin-right: 10px;
+            background: repeating-linear-gradient(
+                to right,
+                #4ECDC4,
+                #4ECDC4 5px,
+                transparent 5px,
+                transparent 10px
+            );
+        }
+
+        /* 下拉刷新样式 */
+        #pullToRefresh {
+            height: 0;
+            overflow: hidden;
+            text-align: center;
+            transition: height 0.3s;
+        }
+        
+        #pullToRefresh.active {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 下拉刷新指示器 -->
+    <div id="pullToRefresh" class="bg-white w-full">
+        <div class="flex items-center justify-center py-3">
+            <i class="fas fa-sync-alt fa-spin mr-2 text-primary"></i>
+            <span class="text-gray-600">正在刷新...</span>
+        </div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <div class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <button class="mr-4 text-gray-600">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 class="text-xl font-bold">鲈鱼打样流程</h1>
+                </div>
+                <div>
+                    <button class="bg-gray-100 p-2 rounded-full text-gray-600">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 状态卡片 -->
+    <div class="container mx-auto px-4 py-4">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-6">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">打样任务状态</h3>
+                    <span class="bg-blue-100 text-primary px-3 py-1 rounded-full text-sm">进行中</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-base font-medium">今日打样任务</span>
+                            <span class="text-sm text-primary font-medium">12</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+                            <div class="bg-primary rounded-full h-2" style="width: 75%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-2">
+                            <span>已完成: 9</span>
+                            <span>75%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-base font-medium">解剖任务</span>
+                            <span class="text-sm text-warning font-medium">5</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+                            <div class="bg-warning rounded-full h-2" style="width: 40%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-2">
+                            <span>已完成: 2</span>
+                            <span>40%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-base font-medium">健康状况</span>
+                            <span class="text-sm text-success font-medium">良好</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+                            <div class="bg-success rounded-full h-2" style="width: 90%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-2">
+                            <span>健康率</span>
+                            <span>90%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 步骤指示器 -->
+    <div class="container mx-auto px-4 py-2">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-6">
+            <div class="p-6">
+                <h3 class="text-lg font-bold mb-4">打样流程步骤</h3>
+                <div class="step-indicator-container">
+                    <div class="flex items-center">
+                        <div class="flex flex-col items-center">
+                            <div id="step1Indicator" class="w-10 h-10 rounded-full border-2 step-active flex items-center justify-center mb-1">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span class="text-sm font-medium">发起任务</span>
+                        </div>
+                        <div class="flex-1 h-2 bg-gray-200 mx-2">
+                            <div id="progress1" class="h-full bg-primary" style="width: 100%"></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step2Indicator" class="w-10 h-10 rounded-full border-2 step-active flex items-center justify-center mb-1">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <span class="text-sm font-medium">接受任务</span>
+                        </div>
+                        <div class="flex-1 h-2 bg-gray-200 mx-2">
+                            <div id="progress2" class="h-full bg-primary" style="width: 100%"></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step3Indicator" class="w-10 h-10 rounded-full border-2 step-active flex items-center justify-center mb-1">
+                                <i class="fas fa-fish"></i>
+                            </div>
+                            <span class="text-sm font-medium">鱼池打样</span>
+                        </div>
+                        <div class="flex-1 h-2 bg-gray-200 mx-2">
+                            <div id="progress3" class="h-full bg-primary" style="width: 50%"></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step4Indicator" class="w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <span class="text-sm font-medium">填写结果</span>
+                        </div>
+                        <div class="flex-1 h-2 bg-gray-200 mx-2">
+                            <div id="progress4" class="h-full bg-primary" style="width: 0%"></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step5Indicator" class="w-10 h-10 rounded-full border-2 step-inactive flex items-center justify-center mb-1">
+                                <i class="fas fa-microscope"></i>
+                            </div>
+                            <span class="text-sm font-medium">解剖检查</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-4">
+        <!-- 流程图 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-6">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">鲈鱼打样流程图</h3>
+                    <span class="bg-blue-100 text-primary px-3 py-1 rounded-full text-sm">可交互</span>
+                </div>
+                
+                <div class="flowchart-container">
+                    <svg class="flowchart" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 定义箭头标记 -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#3494E6" />
+                            </marker>
+                            <marker id="arrowhead-conditional" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#4ECDC4" />
+                            </marker>
+                            
+                            <!-- 渐变定义 -->
+                            <linearGradient id="step1Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3494E6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#5643FA;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="step2Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#4ECDC4;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#44A08D;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="step3Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#45B7D1;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#96C93D;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="step4Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#F093FB;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F5576C;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="step5Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#4FACFE;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00F2FE;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="step6Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#43E97B;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#38F9D7;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="step7Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FA709A;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FEE140;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="conditionalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#FF8E8E;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+
+                        <!-- 步骤1: 发起打样任务 -->
+                        <g class="step-node" onclick="showStepDetails(1)">
+                            <circle class="step-circle" cx="100" cy="100" r="40" fill="url(#step1Gradient)" />
+                            <text class="step-text" x="100" y="95" fill="white">🤖</text>
+                            <text class="step-text" x="100" y="110" fill="white" font-size="12">发起任务</text>
+                            <text class="step-subtitle" x="100" y="160" fill="#333">管理者/AI助手</text>
+                            <text class="step-subtitle" x="100" y="175" fill="#333">创建打样任务</text>
+                        </g>
+
+                        <!-- 步骤2: 工人接受任务 -->
+                        <g class="step-node" onclick="showStepDetails(2)">
+                            <circle class="step-circle" cx="300" cy="100" r="40" fill="url(#step2Gradient)" />
+                            <text class="step-text" x="300" y="95" fill="white">👨‍🔧</text>
+                            <text class="step-text" x="300" y="110" fill="white" font-size="12">接受任务</text>
+                            <text class="step-subtitle" x="300" y="160" fill="#333">工人确认</text>
+                            <text class="step-subtitle" x="300" y="175" fill="#333">查看任务详情</text>
+                        </g>
+
+                        <!-- 步骤3: 前往鱼池 -->
+                        <g class="step-node" onclick="showStepDetails(3)">
+                            <circle class="step-circle" cx="500" cy="100" r="40" fill="url(#step3Gradient)" />
+                            <text class="step-text" x="500" y="95" fill="white">🚶</text>
+                            <text class="step-text" x="500" y="110" fill="white" font-size="12">前往鱼池</text>
+                            <text class="step-subtitle" x="500" y="160" fill="#333">定位目标鱼池</text>
+                            <text class="step-subtitle" x="500" y="175" fill="#333">准备打样工具</text>
+                        </g>
+
+                        <!-- 步骤4: 进行打样 -->
+                        <g class="step-node" onclick="showStepDetails(4)">
+                            <circle class="step-circle" cx="700" cy="100" r="40" fill="url(#step4Gradient)" />
+                            <text class="step-text" x="700" y="95" fill="white">🎣</text>
+                            <text class="step-text" x="700" y="110" fill="white" font-size="12">进行打样</text>
+                            <text class="step-subtitle" x="700" y="160" fill="#333">捕捞样本鱼</text>
+                            <text class="step-subtitle" x="700" y="175" fill="#333">记录基础数据</text>
+                        </g>
+
+                        <!-- 步骤5: 填写结果 -->
+                        <g class="step-node" onclick="showStepDetails(5)">
+                            <circle class="step-circle" cx="700" cy="300" r="40" fill="url(#step5Gradient)" />
+                            <text class="step-text" x="700" y="295" fill="white">📝</text>
+                            <text class="step-text" x="700" y="310" fill="white" font-size="12">填写结果</text>
+                            <text class="step-subtitle" x="700" y="360" fill="#333">记录长度重量</text>
+                            <text class="step-subtitle" x="700" y="375" fill="#333">上传打样图片</text>
+                        </g>
+
+                        <!-- 步骤6: 疾病检查 -->
+                        <g class="step-node" onclick="showStepDetails(6)">
+                            <circle class="step-circle" cx="500" cy="300" r="40" fill="url(#step6Gradient)" />
+                            <text class="step-text" x="500" y="295" fill="white">🔍</text>
+                            <text class="step-text" x="500" y="310" fill="white" font-size="12">疾病检查</text>
+                            <text class="step-subtitle" x="500" y="360" fill="#333">观察鱼体状况</text>
+                            <text class="step-subtitle" x="500" y="375" fill="#333">记录异常情况</text>
+                        </g>
+
+                        <!-- 条件判断: 是否有疾病 -->
+                        <g class="step-node" onclick="showStepDetails('conditional')">
+                            <rect x="460" y="400" width="80" height="50" rx="25" fill="url(#conditionalGradient)" />
+                            <text class="step-text" x="500" y="420" fill="white" font-size="12">⚠️</text>
+                            <text class="step-text" x="500" y="435" fill="white" font-size="10">发现疾病?</text>
+                        </g>
+
+                        <!-- 步骤7A: 创建解剖任务 -->
+                        <g class="step-node" onclick="showStepDetails('7A')">
+                            <circle class="step-circle" cx="300" cy="400" r="40" fill="url(#step7Gradient)" />
+                            <text class="step-text" x="300" y="395" fill="white">🔪</text>
+                            <text class="step-text" x="300" y="410" fill="white" font-size="12">创建解剖</text>
+                            <text class="step-subtitle" x="300" y="460" fill="#333">系统自动创建</text>
+                            <text class="step-subtitle" x="300" y="475" fill="#333">解剖任务</text>
+                        </g>
+
+                        <!-- 步骤7B: 完成打样 -->
+                        <g class="step-node" onclick="showStepDetails('7B')">
+                            <circle class="step-circle" cx="700" cy="500" r="40" fill="url(#step7Gradient)" />
+                            <text class="step-text" x="700" y="495" fill="white">✅</text>
+                            <text class="step-text" x="700" y="510" fill="white" font-size="12">完成打样</text>
+                            <text class="step-subtitle" x="700" y="560" fill="#333">提交所有数据</text>
+                            <text class="step-subtitle" x="700" y="575" fill="#333">生成打样报告</text>
+                        </g>
+
+                        <!-- 主流程箭头 -->
+                        <path class="flow-arrow" d="M 140 100 L 260 100" />
+                        <path class="flow-arrow" d="M 340 100 L 460 100" />
+                        <path class="flow-arrow" d="M 540 100 L 660 100" />
+                        <path class="flow-arrow" d="M 700 140 L 700 260" />
+                        <path class="flow-arrow" d="M 660 300 L 540 300" />
+                        <path class="flow-arrow" d="M 500 340 L 500 400" />
+
+                        <!-- 条件流程箭头 -->
+                        <path class="conditional-flow" d="M 460 425 L 340 425" />
+                        <text x="400" y="415" font-size="10" fill="#666" text-anchor="middle">是</text>
+                        
+                        <path class="conditional-flow" d="M 500 450 L 500 500 L 660 500" />
+                        <text x="500" y="475" font-size="10" fill="#666" text-anchor="middle">否</text>
+                        
+                        <!-- 解剖任务完成后回到主流程 -->
+                        <path class="conditional-flow" d="M 300 440 L 300 500 L 660 500" />
+
+                        <!-- 流程说明 -->
+                        <text x="500" y="650" font-size="16" font-weight="600" fill="#333" text-anchor="middle">鲈鱼打样完整流程</text>
+                        <text x="500" y="670" font-size="12" fill="#666" text-anchor="middle">从发起任务到完成打样的关键步骤</text>
+
+                        <!-- 关键节点标注 -->
+                        <g>
+                            <rect x="50" y="700" width="200" height="80" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1" />
+                            <text x="150" y="720" font-size="12" font-weight="600" fill="#333" text-anchor="middle">关键控制点</text>
+                            <text x="60" y="740" font-size="10" fill="#666">• 任务发起与分配</text>
+                            <text x="60" y="755" font-size="10" fill="#666">• 疾病检查与判断</text>
+                            <text x="60" y="770" font-size="10" fill="#666">• 数据记录与上传</text>
+                        </g>
+
+                        <g>
+                            <rect x="300" y="700" width="200" height="80" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1" />
+                            <text x="400" y="720" font-size="12" font-weight="600" fill="#333" text-anchor="middle">条件判断</text>
+                            <text x="310" y="740" font-size="10" fill="#666">• 疾病检测与判断</text>
+                            <text x="310" y="755" font-size="10" fill="#666">• 解剖任务自动创建</text>
+                            <text x="310" y="770" font-size="10" fill="#666">• 流程分支处理</text>
+                        </g>
+
+                        <g>
+                            <rect x="550" y="700" width="200" height="80" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1" />
+                            <text x="650" y="720" font-size="12" font-weight="600" fill="#333" text-anchor="middle">数据采集</text>
+                            <text x="560" y="740" font-size="10" fill="#666">• 鱼体长度与重量</text>
+                            <text x="560" y="755" font-size="10" fill="#666">• 打样图片上传</text>
+                            <text x="560" y="770" font-size="10" fill="#666">• 健康状况记录</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="legend mt-6">
+                    <h3>流程图说明</h3>
+                    <div class="legend-item">
+                        <div class="legend-line" style="background: #3494E6;"></div>
+                        <span>主要流程路径</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dash"></div>
+                        <span>条件判断流程</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #3494E6, #5643FA);"></div>
+                        <span>触发节点 - 发起任务</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #4ECDC4, #44A08D);"></div>
+                        <span>执行节点 - 工人接受</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E);"></div>
+                        <span>条件节点 - 疾病判断</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #FA709A, #FEE140);"></div>
+                        <span>完成节点 - 流程结束</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 打样任务详情 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-6">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">当前打样任务</h3>
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">进行中</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="flex flex-col">
+                        <span class="text-sm text-gray-500 mb-1">任务ID</span>
+                        <span class="text-base font-medium">FS-20231120-005</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm text-gray-500 mb-1">目标鱼池</span>
+                        <span class="text-base font-medium">B区-08号鱼池</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm text-gray-500 mb-1">预计完成时间</span>
+                        <span class="text-base font-medium">2023-11-21 16:30</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm text-gray-500 mb-1">负责人</span>
+                        <span class="text-base font-medium">李四</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h4 class="text-base font-medium mb-3">打样要求</h4>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>随机捕捞5条鲈鱼进行打样</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>测量并记录每条鱼的长度和重量</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>拍摄每条鱼的清晰照片</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>检查鱼体是否有疾病迹象</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>如发现疾病，系统将自动创建解剖任务</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="fillResultBtn" class="bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg shadow-sm transition">
+                        <i class="fas fa-clipboard-check mr-2"></i>填写打样结果
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 填写打样结果表单 (默认隐藏) -->
+    <div id="resultFormContainer" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-90vh overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">填写打样结果</h3>
+                    <button id="closeFormBtn" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="samplingResultForm">
+                    <!-- 鱼体基本信息 -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-medium mb-4">鱼体基本信息</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">鱼体长度 (cm)</label>
+                                <input type="number" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">鱼体重量 (g)</label>
+                                <input type="number" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 图片上传 -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-medium mb-4">打样图片上传</h4>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <input type="file" id="fishImageUpload" class="hidden" accept="image/*" multiple>
+                            <label for="fishImageUpload" class="cursor-pointer">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                    <p class="text-sm text-gray-500 mb-1">点击或拖拽上传图片</p>
+                                    <p class="text-xs text-gray-400">支持 JPG, PNG 格式</p>
+                                </div>
+                            </label>
+                            <div id="imagePreviewContainer" class="grid grid-cols-3 gap-3 mt-4"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 疾病情况 -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-medium mb-4">疾病情况</h4>
+                        <div class="mb-4">
+                            <div class="flex items-center mb-3">
+                                <input type="radio" id="noDiseaseRadio" name="diseaseStatus" value="no" class="mr-2" checked>
+                                <label for="noDiseaseRadio" class="text-sm font-medium text-gray-700">无疾病迹象</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="hasDiseaseRadio" name="diseaseStatus" value="yes" class="mr-2">
+                                <label for="hasDiseaseRadio" class="text-sm font-medium text-gray-700">发现疾病迹象</label>
+                            </div>
+                        </div>
+                        
+                        <div id="diseaseDetailsContainer" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">疾病症状描述</label>
+                            <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary h-24" placeholder="请详细描述观察到的疾病症状..."></textarea>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">症状位置</label>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="symptomGills" class="mr-2">
+                                        <label for="symptomGills" class="text-sm text-gray-600">鳃部</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="symptomSkin" class="mr-2">
+                                        <label for="symptomSkin" class="text-sm text-gray-600">皮肤</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="symptomFins" class="mr-2">
+                                        <label for="symptomFins" class="text-sm text-gray-600">鳍</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="symptomEyes" class="mr-2">
+                                        <label for="symptomEyes" class="text-sm text-gray-600">眼睛</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="symptomBelly" class="mr-2">
+                                        <label for="symptomBelly" class="text-sm text-gray-600">腹部</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="symptomOther" class="mr-2">
+                                        <label for="symptomOther" class="text-sm text-gray-600">其他</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 解剖选项 -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-medium mb-4">解剖选项</h4>
+                        <div class="flex items-center mb-3">
+                            <input type="checkbox" id="createAutopsyTask" class="mr-2">
+                            <label for="createAutopsyTask" class="text-sm font-medium text-gray-700">创建解剖任务</label>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">注：如发现疾病迹象，系统将自动创建解剖任务</p>
+                        
+                        <div id="autopsyDetailsContainer" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">解剖任务备注</label>
+                            <textarea class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary h-24" placeholder="请输入解剖任务的特殊要求或注意事项..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- 提交按钮 -->
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelFormBtn" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                            取消
+                        </button>
+                        <button type="submit" class="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition">
+                            <i class="fas fa-save mr-2"></i>保存结果
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 步骤详情展示
+        function showStepDetails(step) {
+            const stepDetails = {
+                1: {
+                    title: "步骤1: 发起打样任务",
+                    content: "• 管理者或AI助手创建任务\n• 指定目标鱼池\n• 设置打样要求\n• 分配给工人\n• 设置任务优先级"
+                },
+                2: {
+                    title: "步骤2: 工人接受任务",
+                    content: "• 工人接收通知\n• 确认任务详情\n• 查看鱼池位置\n• 了解打样要求\n• 准备相关工具"
+                },
+                3: {
+                    title: "步骤3: 前往鱼池",
+                    content: "• 定位目标鱼池\n• 准备打样工具\n• 检查鱼池状况\n• 记录环境参数\n• 确认打样条件"
+                },
+                4: {
+                    title: "步骤4: 进行打样",
+                    content: "• 捕捞样本鱼\n• 初步观察鱼体\n• 记录基础数据\n• 准备测量工具\n• 确保鱼体安全"
+                },
+                5: {
+                    title: "步骤5: 填写结果",
+                    content: "• 测量鱼体长度\n• 测量鱼体重量\n• 拍摄打样图片\n• 上传图片数据\n• 记录其他观察"
+                },
+                6: {
+                    title: "步骤6: 疾病检查",
+                    content: "• 观察鱼体外观\n• 检查鳃部状况\n• 观察游动行为\n• 记录异常情况\n• 判断健康状态"
+                },
+                'conditional': {
+                    title: "条件判断: 是否发现疾病",
+                    content: "• 判断是否有疾病迹象\n• 确定是否需要解剖\n• 系统自动分支处理\n• 记录判断结果\n• 确定后续流程"
+                },
+                '7A': {
+                    title: "步骤7A: 创建解剖任务",
+                    content: "• 系统自动创建解剖任务\n• 记录疾病症状\n• 分配解剖专员\n• 设置任务优先级\n• 关联打样数据"
+                },
+                '7B': {
+                    title: "步骤7B: 完成打样",
+                    content: "• 提交所有采集数据\n• 确认数据完整性\n• 生成打样报告\n• 更新鱼池状态\n• 完成任务流程"
+                }
+            };
+
+            const detail = stepDetails[step];
+            if (detail) {
+                alert(`${detail.title}\n\n${detail.content}`);
+            }
+        }
+
+        // 添加交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const stepNodes = document.querySelectorAll('.step-node');
+            
+            stepNodes.forEach(node => {
+                node.addEventListener('mouseenter', function() {
+                    this.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))';
+                });
+                
+                node.addEventListener('mouseleave', function() {
+                    this.style.filter = 'none';
+                });
+            });
+
+            // 下拉刷新逻辑
+            let touchStartY = 0;
+            let pullToRefreshElement = document.getElementById('pullToRefresh');
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', function(e) {
+                const touchY = e.touches[0].clientY;
+                const touchDiff = touchY - touchStartY;
+                
+                if (touchDiff > 60 && window.scrollY <= 0) {
+                    pullToRefreshElement.classList.add('active');
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function() {
+                if (pullToRefreshElement.classList.contains('active')) {
+                    pullToRefreshElement.classList.remove('active');
+                    // 这里可以添加实际的刷新逻辑
+                    setTimeout(() => {
+                        // 模拟刷新完成
+                        console.log('页面已刷新');
+                    }, 1000);
+                }
+            }, { passive: true });
+
+            // 填写打样结果表单相关逻辑
+            const fillResultBtn = document.getElementById('fillResultBtn');
+            const resultFormContainer = document.getElementById('resultFormContainer');
+            const closeFormBtn = document.getElementById('closeFormBtn');
+            const cancelFormBtn = document.getElementById('cancelFormBtn');
+            const samplingResultForm = document.getElementById('samplingResultForm');
+            const hasDiseaseRadio = document.getElementById('hasDiseaseRadio');
+            const noDiseaseRadio = document.getElementById('noDiseaseRadio');
+            const diseaseDetailsContainer = document.getElementById('diseaseDetailsContainer');
+            const createAutopsyTask = document.getElementById('createAutopsyTask');
+            const autopsyDetailsContainer = document.getElementById('autopsyDetailsContainer');
+            const fishImageUpload = document.getElementById('fishImageUpload');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+
+            // 显示填写结果表单
+            fillResultBtn.addEventListener('click', function() {
+                resultFormContainer.classList.remove('hidden');
+                // 更新步骤指示器状态
+                document.getElementById('step4Indicator').classList.remove('step-inactive');
+                document.getElementById('step4Indicator').classList.add('step-active');
+                document.getElementById('progress3').style.width = '100%';
+            });
+
+            // 关闭表单
+            function closeResultForm() {
+                resultFormContainer.classList.add('hidden');
+            }
+
+            closeFormBtn.addEventListener('click', closeResultForm);
+            cancelFormBtn.addEventListener('click', closeResultForm);
+
+            // 疾病状态切换
+            hasDiseaseRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    diseaseDetailsContainer.classList.remove('hidden');
+                    createAutopsyTask.checked = true; // 自动勾选创建解剖任务
+                    autopsyDetailsContainer.classList.remove('hidden');
+                }
+            });
+
+            noDiseaseRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    diseaseDetailsContainer.classList.add('hidden');
+                    // 不自动取消解剖任务选项，让用户自行决定
+                }
+            });
+
+            // 解剖任务选项
+            createAutopsyTask.addEventListener('change', function() {
+                if (this.checked) {
+                    autopsyDetailsContainer.classList.remove('hidden');
+                } else {
+                    autopsyDetailsContainer.classList.add('hidden');
+                }
+            });
+
+            // 图片上传预览
+            fishImageUpload.addEventListener('change', function() {
+                imagePreviewContainer.innerHTML = ''; // 清空预览区域
+                
+                if (this.files) {
+                    Array.from(this.files).forEach(file => {
+                        if (!file.type.match('image.*')) {
+                            return; // 跳过非图片文件
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'relative';
+                            
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'w-full h-24 object-cover rounded-lg';
+                            
+                            const removeBtn = document.createElement('button');
+                            removeBtn.type = 'button';
+                            removeBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs';
+                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.addEventListener('click', function() {
+                                imgContainer.remove();
+                            });
+                            
+                            imgContainer.appendChild(img);
+                            imgContainer.appendChild(removeBtn);
+                            imagePreviewContainer.appendChild(imgContainer);
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+
+            // 表单提交处理
+            samplingResultForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 这里可以添加表单数据的验证和处理逻辑
+                
+                // 模拟提交成功
+                alert('打样结果已成功保存！');
+                
+                // 更新步骤指示器状态
+                document.getElementById('progress4').style.width = '100%';
+                
+                // 如果有疾病或选择创建解剖任务，则激活解剖检查步骤
+                if (hasDiseaseRadio.checked || createAutopsyTask.checked) {
+                    document.getElementById('step5Indicator').classList.remove('step-inactive');
+                    document.getElementById('step5Indicator').classList.add('step-active');
+                }
+                
+                closeResultForm(); // 关闭表单
+            });
+        });
+    </script>
+</body>
+</html>

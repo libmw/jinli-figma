@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>新建洽谈记录 - 鱼种采购系统</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px; /* 移除底部导航栏后减少底部间距 */
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* 表单样式 */
+      .form-input {
+        width: 100%;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        background-color: #f9fafb;
+      }
+      
+      .form-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      .form-select {
+        width: 100%;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        background-color: #f9fafb;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+      }
+      
+      .form-select:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      .form-checkbox {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 0.25rem;
+        border: 1px solid #e5e7eb;
+        appearance: none;
+        background-color: #f9fafb;
+      }
+      
+      .form-checkbox:checked {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 0.75em 0.75em;
+      }
+      
+      .form-checkbox:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="bg-blue-500 text-white p-4 sticky top-0 z-10">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="negotiate.html" class="mr-2">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-lg font-bold">新建洽谈记录</h1>
+        </div>
+        <button id="saveBtn" class="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm">
+          保存
+        </button>
+      </div>
+    </div>
+
+    <!-- 表单内容 -->
+    <div class="p-4">
+      <form id="negotiateForm" class="space-y-4">
+        <!-- 鱼种公司 -->
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <h3 class="text-base font-medium mb-3">鱼种公司</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">选择已有供应商</label>
+              <select class="form-select">
+                <option value="">-- 请选择供应商 --</option>
+                <option value="1">广东海洋鱼种场</option>
+                <option value="2">江苏淡水鱼种基地</option>
+                <option value="3">湖南优质鱼种场</option>
+                <option value="4">福建海鲜养殖场</option>
+                <option value="5">安徽淡水鱼养殖基地</option>
+              </select>
+            </div>
+            <div class="flex items-center">
+              <div class="flex-1 border-t border-gray-200"></div>
+              <span class="px-2 text-xs text-gray-500">或</span>
+              <div class="flex-1 border-t border-gray-200"></div>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">新建供应商</label>
+              <input type="text" placeholder="输入供应商名称" class="form-input mb-2" />
+              <input type="text" placeholder="联系人" class="form-input mb-2" />
+              <input type="text" placeholder="联系人职务" class="form-input mb-2" />
+              <input type="tel" placeholder="联系电话" class="form-input mb-2" />
+              <input type="text" placeholder="供应商地址" class="form-input mb-2" />
+              <textarea placeholder="备注信息" class="form-input" rows="2"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 鱼种信息 -->
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <h3 class="text-base font-medium mb-3">鱼种信息</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">鱼种品种</label>
+              <select id="fishSpecies" class="form-select mb-2">
+                <option value="">-- 请选择品种 --</option>
+                <option value="鲈鱼">鲈鱼</option>
+                <option value="鳜鱼">鳜鱼</option>
+                <option value="鳕鱼">鳕鱼</option>
+                <option value="草鱼">草鱼</option>
+                <option value="鲤鱼">鲤鱼</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">鱼种品系</label>
+              <select id="fishStrain" class="form-select" disabled>
+                <option value="">-- 请先选择品种 --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">价格单位</label>
+              <select id="priceUnit" class="form-select mb-2">
+                <option value="尾">元/尾</option>
+                <option value="斤">元/斤</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">鱼种价格 (<span id="priceUnitLabel">元/尾</span>)</label>
+              <input type="number" step="0.01" placeholder="输入单价" class="form-input" />
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">鱼种数量 (<span id="quantityUnitLabel">尾</span>)</label>
+              <input type="number" placeholder="输入数量" class="form-input" />
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">计数方式</label>
+              <select class="form-select">
+                <option value="">-- 请选择计量方式 --</option>
+                <option value="抽样法">抽样法</option>
+                <option value="打样法">打样法</option>
+                <option value="机器计量">机器计量</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 起塘条件 -->
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <h3 class="text-base font-medium mb-3">起塘条件</h3>
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <input type="checkbox" id="stopFood" class="form-checkbox mr-2" />
+              <label for="stopFood" class="text-sm">停食</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="exercise" class="form-checkbox mr-2" />
+              <label for="exercise" class="text-sm">拉练</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="transport" class="form-checkbox mr-2" />
+              <label for="transport" class="text-sm">代运</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="deworming" class="form-checkbox mr-2" />
+              <label for="deworming" class="text-sm">驱虫</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="sterilization" class="form-checkbox mr-2" />
+              <label for="sterilization" class="text-sm">杀菌</label>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 mb-1">其他条件</label>
+              <textarea placeholder="输入其他起塘条件" class="form-input" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 洽谈时间 -->
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <h3 class="text-base font-medium mb-3">洽谈时间</h3>
+          <div>
+            <input type="date" class="form-input" />
+          </div>
+        </div>
+
+        <!-- 备注 -->
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <h3 class="text-base font-medium mb-3">备注</h3>
+          <div>
+            <textarea placeholder="输入备注信息" class="form-input" rows="3"></textarea>
+          </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <div class="pt-4">
+          <button type="submit" class="w-full bg-primary text-white py-3 rounded-xl font-medium">
+            保存洽谈记录
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 底部导航栏已移除 -->
+
+    <script>
+      // 鱼种品种和品系的数据映射
+      const fishStrainData = {
+        '鲈鱼': ['加州鲈', '优鲈三号', '"加得丰" 鲈', '优鲈1号'],
+        '鳜鱼': ['翘嘴鳜', '大眼鳜', '斑鳜', '长体鳜'],
+        '鳕鱼': ['大西洋鳕', '太平洋鳕', '银鳕', '黑鳕'],
+        '草鱼': ['普通草鱼', '快大草鱼', '抗病草鱼', '优质草鱼'],
+        '鲤鱼': ['镜鲤', '德国鲤', '建鲤', '荷包红鲤'],
+        'other': ['其他品系']
+      };
+
+      // 价格单位变化事件
+      document.getElementById('priceUnit').addEventListener('change', function() {
+        const selectedUnit = this.value;
+        const priceUnitLabel = document.getElementById('priceUnitLabel');
+        const quantityUnitLabel = document.getElementById('quantityUnitLabel');
+        
+        // 更新价格单位标签
+        priceUnitLabel.textContent = `元/${selectedUnit}`;
+        // 更新数量单位标签
+        quantityUnitLabel.textContent = selectedUnit;
+      });
+
+      // 品种选择变化事件
+      document.getElementById('fishSpecies').addEventListener('change', function() {
+        const selectedSpecies = this.value;
+        const strainSelect = document.getElementById('fishStrain');
+        
+        // 清空品系选择框
+        strainSelect.innerHTML = '';
+        
+        if (selectedSpecies && fishStrainData[selectedSpecies]) {
+          // 启用品系选择框
+          strainSelect.disabled = false;
+          
+          // 添加默认选项
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = '-- 请选择品系 --';
+          strainSelect.appendChild(defaultOption);
+          
+          // 添加对应的品系选项
+          fishStrainData[selectedSpecies].forEach(strain => {
+            const option = document.createElement('option');
+            option.value = strain;
+            option.textContent = strain;
+            strainSelect.appendChild(option);
+          });
+        } else {
+          // 禁用品系选择框
+          strainSelect.disabled = true;
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = '-- 请先选择品种 --';
+          strainSelect.appendChild(defaultOption);
+        }
+      });
+
+      // 表单提交处理
+      document.getElementById('negotiateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        // 这里可以添加表单验证和数据处理逻辑
+        alert('洽谈记录保存成功！');
+        window.location.href = 'negotiate.html';
+      });
+      
+      // 顶部保存按钮
+      document.getElementById('saveBtn').addEventListener('click', function() {
+        document.getElementById('negotiateForm').dispatchEvent(new Event('submit'));
+      });
+    </script>
+  </body>
+</html>

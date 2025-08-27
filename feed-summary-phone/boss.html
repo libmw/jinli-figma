@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>渔场管理系统 - 概览</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <script src="../static/chart.js"></script>
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .bg-teal-100 {
+        background-color: #ccfbf1;
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .text-teal-600 {
+        color: #0d9488;
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+      
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .module-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+      
+      .module-item {
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* 下拉刷新动画 */
+      .pull-to-refresh {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -60px;
+        transition: margin-top 0.3s ease;
+      }
+      
+      .pull-to-refresh.active {
+        margin-top: 0;
+      }
+      
+      /* 适配小屏幕的图表 */
+      canvas {
+        max-height: 150px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 下拉刷新指示器 -->
+    <div class="pull-to-refresh" id="pullToRefresh">
+      <div class="flex items-center">
+        <i class="fas fa-sync-alt fa-spin mr-2 text-primary"></i>
+        <span class="text-sm text-gray-600">下拉刷新...</span>
+      </div>
+    </div>
+    
+    <!-- 顶部导航栏 -->
+    <div class="bg-blue-500 text-white p-4 pb-6 rounded-b-3xl relative overflow-hidden">
+      <!-- 顶部状态栏 -->
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center">
+          <span class="text-lg font-bold">1号养殖基地</span>
+          <i class="fas fa-chevron-down ml-1 text-xs"></i>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="#" class="text-white">
+            <i class="fas fa-sitemap"></i>
+          </a>
+          <a href="#" class="text-white">
+            <i class="fas fa-map-marker-alt"></i>
+          </a>
+        </div>
+      </div>
+      
+      <!-- 天气信息 -->
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <i class="fas fa-cloud-sun text-2xl mr-2"></i>
+          <div>
+            <div class="text-lg font-medium">多云</div>
+            <div class="text-xl font-bold">21°C</div>
+          </div>
+        </div>
+        <a href="#" class="bg-blue-400 bg-opacity-50 rounded-full px-3 py-1 text-sm flex items-center">
+          <span>查看7日天气预报</span>
+          <i class="fas fa-chevron-right ml-1 text-xs"></i>
+        </a>
+      </div>
+      
+      
+      <!-- 波浪背景效果 -->
+      <div class="absolute bottom-0 left-0 right-0 h-16 opacity-20 overflow-hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="absolute bottom-0 left-0 w-full" style="min-width: 100%; width: 100vw; transform: translateX(0);">
+          <path fill="#ffffff" fill-opacity="1" d="M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,138.7C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 功能快捷入口 -->
+    <div class="bg-white rounded-xl shadow-sm mx-4 p-3 -mt-4 relative z-10 mb-4">
+      <div class="grid grid-cols-4 gap-2 text-center">
+        <a href="#" class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-1">
+            <i class="fas fa-exclamation-triangle text-red-500"></i>
+          </div>
+          <span class="text-xs">告警信息</span>
+        </a>
+        <a href="#" class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-1">
+            <i class="fas fa-tasks text-blue-500"></i>
+          </div>
+          <span class="text-xs">今日任务</span>
+        </a>
+        <a href="#" class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
+            <i class="fas fa-clipboard-list text-green-500"></i>
+          </div>
+          <span class="text-xs">任务下达</span>
+        </a>
+        <a href="ai-chat.html" class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-1">
+            <i class="fas fa-robot text-purple-500"></i>
+          </div>
+          <span class="text-xs">小鲤助手</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="px-4 py-2">
+
+      <!-- 概览卡片 - 垂直布局 -->
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <!-- 养殖面积 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-4 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-xs">养殖面积</p>
+              <h3 class="text-lg font-bold mt-1">125000 m²</h3>
+              <p class="text-xs text-green-500 mt-1">
+                <i class="fas fa-arrow-up mr-1"></i>利用率 84%
+              </p>
+            </div>
+            <div class="card-icon bg-blue-100 text-primary">
+              <i class="fas fa-water"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 生物量统计 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-4 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-xs">生物量统计</p>
+              <h3 class="text-lg font-bold mt-1">78.5 吨</h3>
+              <p class="text-xs text-green-500 mt-1">
+                <i class="fas fa-arrow-up mr-1"></i>较上月增加 5%
+              </p>
+            </div>
+            <div class="card-icon bg-green-100 text-secondary">
+              <i class="fas fa-fish"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 渔需品剩余统计 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-4 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-xs">渔需品剩余</p>
+              <h3 class="text-lg font-bold mt-1">8.5 吨</h3>
+              <p class="text-xs text-yellow-500 mt-1">
+                <i class="fas fa-exclamation-triangle mr-1"></i>价值 ¥125,000
+              </p>
+            </div>
+            <div class="card-icon bg-yellow-100 text-warning">
+              <i class="fas fa-boxes"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 人员统计 -->
+        <div
+          class="bg-white rounded-xl shadow-sm p-4 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-xs">人员统计</p>
+              <h3 class="text-lg font-bold mt-1">28 人</h3>
+              <p class="text-xs text-green-500 mt-1">
+                <i class="fas fa-user-check mr-1"></i>出勤率 92%
+              </p>
+            </div>
+            <div class="card-icon bg-purple-100 text-info">
+              <i class="fas fa-users"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模块卡片 -->
+      <div class="space-y-4">
+        <!-- 智能监测 -->
+        <div
+          class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover"
+        >
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-base font-bold">智能监测</h3>
+              <span
+                class="bg-blue-100 text-primary text-xs px-2 py-0.5 rounded-full"
+                >实时监控中</span
+              >
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <!-- 传感器状态概览 -->
+              <div class="bg-white rounded-lg p-2 shadow-sm">
+                <div class="flex items-center">
+                  <div
+                    class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-1"
+                  >
+                    <i class="fas fa-microchip text-xs"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs font-medium">传感器</p>
+                  </div>
+                </div>
+                <div class="flex justify-between mt-1 text-xs">
+                  <span class="text-green-500">20在线</span>
+                  <span class="text-red-500">4离线</span>
+                </div>
+              </div>
+              
+              <!-- 智能设备状态概览 -->
+              <div class="bg-white rounded-lg p-2 shadow-sm">
+                <div class="flex items-center">
+                  <div
+                    class="w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-1"
+                  >
+                    <i class="fas fa-cogs text-xs"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs font-medium">智能设备</p>
+                  </div>
+                </div>
+                <div class="flex justify-between mt-1 text-xs">
+                  <span class="text-green-500">8运行</span>
+                  <span class="text-red-500">4故障</span>
+                </div>
+              </div>
+              
+              <!-- DeepAgent状态概览 -->
+              <div class="bg-white rounded-lg p-2 shadow-sm">
+                <div class="flex items-center">
+                  <div
+                    class="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-1"
+                  >
+                    <i class="fas fa-robot text-xs"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs font-medium">DeepAgent</p>
+                  </div>
+                </div>
+                <div class="flex justify-between mt-1 text-xs">
+                  <span class="text-green-500">4运行</span>
+                  <span class="text-gray-500">92%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-2">
+            <a
+              href="monitoring-details.html"
+              class="text-primary text-xs font-medium flex items-center justify-center"
+            >
+              查看监测详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- 预警信息 -->
+        <div
+          class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover"
+        >
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-base font-bold">预警信息</h3>
+              <span
+                class="bg-red-100 text-danger text-xs px-2 py-0.5 rounded-full"
+                >8 条预警</span
+              >
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center">
+                <div
+                  class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-danger mr-2"
+                >
+                  <i class="fas fa-exclamation-triangle text-xs"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-medium">饲料预警</p>
+                  <p class="text-xs text-gray-500">3种饲料库存不足</p>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div
+                  class="w-6 h-6 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-2"
+                >
+                  <i class="fas fa-tools text-xs"></i>
+                </div>
+                <div>
+                  <p class="text-xs font-medium">设备保养预警</p>
+                  <p class="text-xs text-gray-500">3台设备需要保养</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-2">
+            <a
+              href="alert-details.html"
+              class="text-primary text-xs font-medium flex items-center justify-center"
+            >
+              查看全部预警 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 养殖区域 -->
+        <div
+          class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover"
+        >
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-base font-bold">养殖区域</h3>
+              <div class="flex space-x-1">
+                <span
+                  class="bg-green-100 text-secondary text-xs px-2 py-0.5 rounded-full"
+                  >42 活跃</span
+                >
+                <span
+                  class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full"
+                  >8 闲置</span
+                >
+              </div>
+            </div>
+            <div class="mb-3">
+              <canvas id="pondStatusChart" height="100"></canvas>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-gray-50 rounded-lg p-2 text-center">
+                <p class="text-xs text-gray-500">养殖棚</p>
+                <p class="text-base font-bold">15 / 18</p>
+                <p class="text-xs text-green-500">使用率 83%</p>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-2 text-center">
+                <p class="text-xs text-gray-500">养殖池</p>
+                <p class="text-base font-bold">42 / 50</p>
+                <p class="text-xs text-green-500">使用率 84%</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-2">
+            <a
+              href="pond-details.html"
+              class="text-primary text-xs font-medium flex items-center justify-center"
+            >
+              查看养殖区域详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- 养殖批次 -->
+        <div
+          class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover"
+        >
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-base font-bold">养殖批次</h3>
+              <span
+                class="bg-blue-100 text-primary text-xs px-2 py-0.5 rounded-full"
+                >4 个活跃批次</span
+              >
+            </div>
+            <div class="space-y-3">
+              <div class="bg-gray-50 rounded-lg p-3">
+                <div class="flex justify-between items-center mb-1">
+                  <p class="text-xs font-medium">鲈鱼养殖批次</p>
+                  <span class="text-xs text-green-500">进行中</span>
+                </div>
+                <div
+                  class="flex justify-between items-center text-xs text-gray-500 mb-2"
+                >
+                  <span>已养殖 75 天</span>
+                  <span>剩余 105 天</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    class="bg-primary rounded-full h-1.5"
+                    style="width: 42%"
+                  ></div>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-lg p-3">
+                <div class="flex justify-between items-center mb-1">
+                  <p class="text-xs font-medium">鳜鱼养殖批次</p>
+                  <span class="text-xs text-green-500">进行中</span>
+                </div>
+                <div
+                  class="flex justify-between items-center text-xs text-gray-500 mb-2"
+                >
+                  <span>已养殖 90 天</span>
+                  <span>剩余 60 天</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                  <div
+                    class="bg-primary rounded-full h-1.5"
+                    style="width: 60%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-2">
+            <a
+              href="cycle-details.html"
+              class="text-primary text-xs font-medium flex items-center justify-center"
+            >
+              查看养殖批次详情 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 功能导航模块 -->
+      <div class="mt-6 mb-20">
+        <h2 class="text-lg font-bold mb-4">功能导航</h2>
+        
+        <!-- DeepFish 模块 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-3">
+            <div
+              class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2"
+            >
+              <i class="fas fa-fish text-primary"></i>
+            </div>
+            <h3 class="text-base font-bold text-primary">DeepFish</h3>
+          </div>
+
+          <div class="module-grid">
+            <!-- 设备管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-server text-primary"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">设备管理</h4>
+            </a>
+
+            <!-- 监测面板 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-tachometer-alt text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">监测面板</h4>
+            </a>
+
+            <!-- DeepAgent -->
+            <a href="ai-chat.html" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-robot text-purple-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">DeepAgent</h4>
+            </a>
+
+            <!-- 策略管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-cogs text-indigo-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">策略管理</h4>
+            </a>
+
+            <!-- 智能预警系统 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-bell text-red-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">智能预警</h4>
+            </a>
+
+            <!-- 数据分析平台 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-chart-pie text-primary"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">数据分析</h4>
+            </a>
+          </div>
+        </div>
+        
+        <!-- 养殖数据仓 模块 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-3">
+            <div
+              class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-2"
+            >
+              <i class="fas fa-database text-green-600"></i>
+            </div>
+            <h3 class="text-base font-bold text-green-600">养殖数据仓</h3>
+          </div>
+
+          <div class="module-grid">
+            <!-- 循环水养殖管控 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-water text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">循环水养殖</h4>
+            </a>
+
+            <!-- 养殖历史周期数据查看 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-history text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">历史数据</h4>
+            </a>
+
+            <!-- 生长模型 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-chart-line text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">生长模型</h4>
+            </a>
+
+            <!-- 水质分析 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-flask text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">水质分析</h4>
+            </a>
+
+            <!-- 饲料投喂记录 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-utensils text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">饲料投喂</h4>
+            </a>
+
+            <!-- 疾病防控 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-shield-alt text-green-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">疾病防控</h4>
+            </a>
+          </div>
+        </div>
+        
+        <!-- 供销服务 模块 -->
+        <div class="mb-6">
+          <div class="flex items-center mb-3">
+            <div
+              class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2"
+            >
+              <i class="fas fa-shopping-basket text-yellow-600"></i>
+            </div>
+            <h3 class="text-base font-bold text-yellow-600">供销服务</h3>
+          </div>
+
+          <div class="module-grid">
+            <!-- 基本资料 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-file-alt text-yellow-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">基本资料</h4>
+            </a>
+
+            <!-- 商品管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-box text-yellow-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">商品管理</h4>
+            </a>
+
+            <!-- 采购管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-shopping-cart text-yellow-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">采购管理</h4>
+            </a>
+
+            <!-- 仓库管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-warehouse text-yellow-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">仓库管理</h4>
+            </a>
+
+            <!-- 销售管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-store text-yellow-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">销售管理</h4>
+            </a>
+
+            <!-- 财务管理 -->
+            <a href="#" class="bg-white rounded-lg shadow-sm p-2 module-item">
+              <div
+                class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mb-1"
+              >
+                <i class="fas fa-money-bill-wave text-yellow-600"></i>
+              </div>
+              <h4 class="text-xs font-bold text-center">财务管理</h4>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white bottom-nav z-10">
+      <div class="flex justify-around py-2">
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-primary">
+          <i class="fas fa-home text-lg"></i>
+          <span class="text-xs mt-1">首页</span>
+        </a>
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-gray-500">
+          <i class="fas fa-th-large text-lg"></i>
+          <span class="text-xs mt-1">工作台</span>
+        </a>
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-gray-500">
+          <i class="fas fa-chart-line text-lg"></i>
+          <span class="text-xs mt-1">数据分析</span>
+        </a>
+        <a href="#" class="flex flex-col items-center px-3 py-1 text-gray-500">
+          <i class="fas fa-cog text-lg"></i>
+          <span class="text-xs mt-1">基础配置</span>
+        </a>
+      </div>
+    </nav>
+
+    <script>
+      // 养殖区域状态图表
+      const pondStatusCtx = document
+        .getElementById("pondStatusChart")
+        .getContext("2d");
+      const pondStatusChart = new Chart(pondStatusCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["活跃养殖池", "闲置养殖池"],
+          datasets: [
+            {
+              data: [42, 8],
+              backgroundColor: ["#10B981", "#E5E7EB"],
+              borderWidth: 0,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "70%",
+          plugins: {
+            legend: {
+              display: false,
+            },
+          },
+        },
+      });
+      
+      // 下拉刷新功能
+      let touchStartY = 0;
+      let touchEndY = 0;
+      const pullToRefresh = document.getElementById('pullToRefresh');
+      
+      document.addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+      }, false);
+      
+      document.addEventListener('touchmove', function(e) {
+        touchEndY = e.touches[0].clientY;
+        
+        // 只有当页面滚动到顶部时才触发下拉刷新
+        if (window.scrollY === 0 && touchEndY > touchStartY) {
+          const distance = touchEndY - touchStartY;
+          
+          if (distance > 30 && distance < 90) {
+            pullToRefresh.classList.add('active');
+            e.preventDefault(); // 阻止默认滚动
+          }
+        }
+      }, { passive: false });
+      
+      document.addEventListener('touchend', function() {
+        if (pullToRefresh.classList.contains('active')) {
+          // 模拟刷新操作
+          setTimeout(() => {
+            pullToRefresh.classList.remove('active');
+            // 这里可以添加实际的刷新逻辑
+            // location.reload();
+          }, 1500);
+        }
+      }, false);
+    </script>
+  </body>
+</html>

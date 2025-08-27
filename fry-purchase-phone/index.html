@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>鱼种采购系统</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <script src="../static/chart.js"></script>
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .bg-teal-100 {
+        background-color: #ccfbf1;
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .text-teal-600 {
+        color: #0d9488;
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      .card-hover:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+      
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px; /* 移除底部导航栏后减少底部间距 */
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .module-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+      
+      .module-item {
+        aspect-ratio: 1/1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* 下拉刷新动画 */
+      .pull-to-refresh {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: -60px;
+        transition: margin-top 0.3s ease;
+      }
+      
+      .pull-to-refresh.active {
+        margin-top: 0;
+      }
+      
+      /* 适配小屏幕的图表 */
+      canvas {
+        max-height: 150px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 下拉刷新指示器 -->
+    <div class="pull-to-refresh" id="pullToRefresh">
+      <div class="flex items-center">
+        <i class="fas fa-sync-alt fa-spin mr-2 text-primary"></i>
+        <span class="text-sm text-gray-600">下拉刷新...</span>
+      </div>
+    </div>
+    
+    <!-- 顶部导航栏 - 带返回按钮的二级页面 -->
+    <div class="bg-blue-500 text-white p-4 pb-6 rounded-b-3xl relative overflow-hidden">
+      <!-- 顶部状态栏 -->
+      <div class="flex items-center mb-4">
+        <a href="javascript:history.back()" class="text-white mr-2">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <span class="text-lg font-bold">鱼种采购系统</span>
+      </div>
+      
+      <!-- 采购状态信息 -->
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <i class="fas fa-fish text-2xl mr-2"></i>
+          <div>
+            <div class="text-lg font-medium">鱼种采购</div>
+            <div class="text-xl font-bold">
+              3 <span class="text-sm">进行中</span>
+            </div>
+          </div>
+        </div>
+        <a href="#" class="bg-blue-400 bg-opacity-50 rounded-full px-3 py-1 text-sm flex items-center">
+          <span>查看采购历史</span>
+          <i class="fas fa-chevron-right ml-1 text-xs"></i>
+        </a>
+      </div>
+      
+      <!-- 波浪背景效果 -->
+      <div class="absolute bottom-0 left-0 right-0 h-16 opacity-20 overflow-hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="absolute bottom-0 left-0 w-full" style="min-width: 100%; width: 100vw; transform: translateX(0);">
+          <path fill="#ffffff" fill-opacity="1" d="M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,138.7C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 功能快捷入口 -->
+    <div class="bg-white rounded-xl shadow-sm mx-4 p-3 -mt-4 relative z-10 mb-4">
+      <div class="grid grid-cols-2 gap-2 text-center">
+        <a href="negotiate.html" class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-1">
+            <i class="fas fa-comments text-blue-500"></i>
+          </div>
+          <span class="text-xs">洽谈记录</span>
+        </a>
+        <a href="purchase.html" class="flex flex-col items-center">
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-1">
+            <i class="fas fa-shopping-cart text-green-500"></i>
+          </div>
+          <span class="text-xs">开始采购</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="px-4 py-2">
+      <!-- 进行中的采购 -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-4">
+        <div class="p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-base font-bold">进行中的采购</h3>
+            <span class="bg-blue-100 text-primary text-xs px-2 py-0.5 rounded-full">3 个</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center p-2 bg-blue-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-fish"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">草鱼种采购</p>
+                <p class="text-xs text-gray-500">供应商: 广东海洋鱼种场</p>
+                <p class="text-xs text-gray-400">当前阶段: 鱼种运输</p>
+              </div>
+              <a href="purchase-detail.html?id=1" class="bg-blue-100 text-primary text-xs px-2 py-1 rounded-full">查看</a>
+            </div>
+            <div class="flex items-center p-2 bg-blue-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-fish"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">鲈鱼种采购</p>
+                <p class="text-xs text-gray-500">供应商: 江苏淡水鱼种基地</p>
+                <p class="text-xs text-gray-400">当前阶段: 现场准备</p>
+              </div>
+              <a href="purchase-detail.html?id=2" class="bg-blue-100 text-primary text-xs px-2 py-1 rounded-full">查看</a>
+            </div>
+            <div class="flex items-center p-2 bg-blue-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-fish"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">鳜鱼种采购</p>
+                <p class="text-xs text-gray-500">供应商: 湖南优质鱼种场</p>
+                <p class="text-xs text-gray-400">当前阶段: 入池</p>
+              </div>
+              <a href="purchase-detail.html?id=3" class="bg-blue-100 text-primary text-xs px-2 py-1 rounded-full">查看</a>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-2">
+          <a href="purchase.html" class="text-primary text-xs font-medium flex items-center justify-center">
+            查看全部采购记录 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 最近洽谈记录 -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-4">
+        <div class="p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-base font-bold">最近洽谈记录</h3>
+            <span class="bg-green-100 text-secondary text-xs px-2 py-0.5 rounded-full">5 条</span>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center p-2 bg-gray-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">广东海洋鱼种场</p>
+                <p class="text-xs text-gray-500">草鱼种 - 10万尾 - ¥0.15/尾</p>
+                <p class="text-xs text-gray-400">2023-06-15</p>
+              </div>
+              <div class="flex space-x-1">
+                <a href="negotiate-detail.html?id=1" class="bg-green-100 text-secondary text-xs px-2 py-1 rounded-full">查看</a>
+                <a href="purchase-detail.html?negotiate_id=1" class="bg-blue-100 text-primary text-xs px-2 py-1 rounded-full">采购</a>
+              </div>
+            </div>
+            <div class="flex items-center p-2 bg-gray-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">江苏淡水鱼种基地</p>
+                <p class="text-xs text-gray-500">鲈鱼种 - 5万尾 - ¥0.25/尾</p>
+                <p class="text-xs text-gray-400">2023-06-14</p>
+              </div>
+              <div class="flex space-x-1">
+                <a href="negotiate-detail.html?id=2" class="bg-green-100 text-secondary text-xs px-2 py-1 rounded-full">查看</a>
+                <a href="purchase-detail.html?negotiate_id=2" class="bg-blue-100 text-primary text-xs px-2 py-1 rounded-full">采购</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-2">
+          <a href="negotiate.html" class="text-primary text-xs font-medium flex items-center justify-center">
+            查看全部洽谈记录 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 采购统计 -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-4">
+        <div class="p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-base font-bold">采购统计</h3>
+            <span class="text-xs text-gray-500">最近30天</span>
+          </div>
+          <div class="h-40">
+            <canvas id="purchaseStatsChart"></canvas>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-3">
+            <div class="bg-gray-50 rounded-lg p-2 text-center">
+              <p class="text-xs text-gray-500">总采购量</p>
+              <p class="text-base font-bold text-primary">35万尾</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-2 text-center">
+              <p class="text-xs text-gray-500">平均价格</p>
+              <p class="text-base font-bold text-secondary">¥0.18/尾</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-2 text-center">
+              <p class="text-xs text-gray-500">总金额</p>
+              <p class="text-base font-bold text-warning">¥63,000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 供应商列表 -->
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden transition-all card-hover mb-4">
+        <div class="p-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-base font-bold">常用供应商</h3>
+            <a href="supplier-list.html" class="text-primary text-xs">查看全部</a>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center p-2 bg-gray-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">广东海洋鱼种场</p>
+                <p class="text-xs text-gray-500">主营: 草鱼、鲤鱼、鲫鱼</p>
+              </div>
+              <a href="supplier-detail.html?id=1" class="text-primary text-xs"><i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="flex items-center p-2 bg-gray-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">江苏淡水鱼种基地</p>
+                <p class="text-xs text-gray-500">主营: 鲈鱼、黑鱼、鳊鱼</p>
+              </div>
+              <a href="supplier-detail.html?id=2" class="text-primary text-xs"><i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="flex items-center p-2 bg-gray-50 rounded-lg">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium">湖南优质鱼种场</p>
+                <p class="text-xs text-gray-500">主营: 鳜鱼、青鱼、鲢鱼</p>
+              </div>
+              <a href="supplier-detail.html?id=3" class="text-primary text-xs"><i class="fas fa-chevron-right"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部导航栏已移除 -->
+
+    <script>
+      // 采购统计图表
+      const purchaseStatsCtx = document
+        .getElementById("purchaseStatsChart")
+        .getContext("2d");
+      const purchaseStatsChart = new Chart(purchaseStatsCtx, {
+        type: "bar",
+        data: {
+          labels: ["草鱼", "鲈鱼", "鳜鱼", "鲤鱼", "鲫鱼", "黑鱼"],
+          datasets: [
+            {
+              label: "采购数量(万尾)",
+              data: [10, 5, 8, 4, 6, 2],
+              backgroundColor: "#3b82f6",
+              borderWidth: 0,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 2,
+              },
+              grid: {
+                borderDash: [2, 2],
+              },
+            },
+          },
+        },
+      });
+
+      // 下拉刷新功能
+      let touchStartY = 0;
+      let touchEndY = 0;
+      const pullToRefresh = document.getElementById("pullToRefresh");
+
+      document.addEventListener(
+        "touchstart",
+        function (e) {
+          touchStartY = e.touches[0].clientY;
+        },
+        false
+      );
+
+      document.addEventListener(
+        "touchmove",
+        function (e) {
+          touchEndY = e.touches[0].clientY;
+
+          // 只有当页面滚动到顶部时才触发下拉刷新
+          if (window.scrollY === 0 && touchEndY > touchStartY) {
+            const distance = touchEndY - touchStartY;
+
+            if (distance > 30 && distance < 90) {
+              pullToRefresh.classList.add("active");
+              e.preventDefault(); // 阻止默认滚动
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      document.addEventListener(
+        "touchend",
+        function () {
+          if (pullToRefresh.classList.contains("active")) {
+            // 模拟刷新操作
+            setTimeout(() => {
+              pullToRefresh.classList.remove("active");
+              // 这里可以添加实际的刷新逻辑
+              // location.reload();
+            }, 1500);
+          }
+        },
+        false
+      );
+    </script>
+  </body>
+</html>

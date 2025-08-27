@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渔场管理系统 - 养殖区域详情</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <script src="../static/chart.js"></script>
+    
+    <!-- Tailwind配置 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#3b82f6',
+              secondary: '#10b981',
+              success: '#10b981',  // 添加success颜色
+              warning: '#fbbf24',
+              danger: '#ef4444',
+              info: '#6366f1',
+            }
+          }
+        }
+      }
+    </script>
+    
+    <style>
+      /* 自定义样式 */
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+      
+      .monitoring-card {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        background-color: #EBF5FF;
+      }
+
+      .monitoring-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .monitoring-card.normal {
+        border-left: 4px solid var(--color-primary);
+      }
+      
+      .monitoring-card.warning {
+        border-left: 4px solid var(--color-warning);
+      }
+      .monitoring-card.danger {
+        border-left: 4px solid var(--color-danger);
+      }
+      
+      /* 添加success边框样式 */
+      .border-success {
+        border-color: #10b981;
+      }
+      
+      .monitoring-value {
+        position: relative;
+      }
+
+      .device-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .device-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      }
+      .alert-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .alert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+      <div
+        class="container mx-auto px-4 py-3 flex justify-between items-center"
+      >
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-gray-500 hover:text-primary">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <span class="text-2xl font-bold text-primary">渔场管理系统</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-bell text-gray-600"></i>
+          </button>
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-cog text-gray-600"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white"
+            >
+              <i class="fas fa-user"></i>
+            </div>
+            <span class="text-sm font-medium">管理员</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">养殖区域详情</h1>
+        <div class="flex space-x-2">
+          <button
+            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center"
+          >
+            <i class="fas fa-filter mr-2"></i> 筛选
+          </button>
+          <button
+            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center"
+          >
+            <i class="fas fa-download mr-2"></i> 导出
+          </button>
+          <button
+            class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center"
+          >
+            <i class="fas fa-plus mr-2"></i> 添加区域
+          </button>
+        </div>
+      </div>
+
+      <!-- 区域概览 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">养殖单元数量</p>
+              <h3 class="text-2xl font-bold mt-1">1</h3>
+              <p class="text-xs text-gray-500 mt-2">
+                <i class="fas fa-check-circle mr-1 text-secondary"></i>正常运行中
+              </p>
+            </div>
+            <div class="card-icon bg-blue-100 text-primary">
+              <i class="fas fa-cubes text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">监测点数量</p>
+              <h3 class="text-2xl font-bold mt-1">8</h3>
+              <p class="text-xs text-green-500 mt-2">
+                <i class="fas fa-check-circle mr-1"></i>7 个正常 / 1 个异常
+              </p>
+            </div>
+            <div class="card-icon bg-green-100 text-secondary">
+              <i class="fas fa-chart-line text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">智能设备数量</p>
+              <h3 class="text-2xl font-bold mt-1">12</h3>
+              <p class="text-xs text-green-500 mt-2">
+                <i class="fas fa-check-circle mr-1"></i>10 个正常 / 2 个异常
+              </p>
+            </div>
+            <div class="card-icon bg-yellow-100 text-warning">
+              <i class="fas fa-microchip text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-500 text-sm">报警信息</p>
+              <h3 class="text-2xl font-bold mt-1 text-red-500">3</h3>
+              <p class="text-xs text-red-500 mt-2">
+                <i class="fas fa-exclamation-triangle mr-1"></i>需要处理
+              </p>
+            </div>
+            <div class="card-icon bg-red-100 text-danger">
+              <i class="fas fa-bell text-xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 区域基本信息 - 宽度100%的大模块 -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h3 class="text-lg font-bold mb-6">区域基本信息</h3>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <!-- 基本信息卡片 -->
+          <div class="bg-blue-50 rounded-xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-info-circle text-primary"></i>
+              </div>
+              <h4 class="text-lg font-bold">基础信息</h4>
+            </div>
+            <div class="space-y-4">
+              <div class="flex justify-between">
+                <span class="text-gray-500">区域名称</span>
+                <span class="font-medium">A区养殖场</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">区域位置</span>
+                <span class="font-medium">东部沿海区域</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">养殖面积</span>
+                <span class="font-medium">25,000 m²</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">养殖单元</span>
+                <span class="font-medium">A-1 养殖单元</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">养殖池数量</span>
+                <span class="font-medium">8 个</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">养殖鱼种</span>
+                <span class="font-medium">鲈鱼、鳜鱼</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">状态</span>
+                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 负责人信息卡片 -->
+          <div class="bg-green-50 rounded-xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-user text-secondary"></i>
+              </div>
+              <h4 class="text-lg font-bold">负责人信息</h4>
+            </div>
+            <div class="flex items-center mb-4">
+              <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-primary mr-4 shadow-sm">
+                <i class="fas fa-user-tie text-2xl"></i>
+              </div>
+              <div>
+                <h5 class="text-xl font-bold">张明</h5>
+                <p class="text-sm text-gray-500">区域主管</p>
+                <p class="text-sm mt-1"><i class="fas fa-phone-alt mr-2 text-secondary"></i>138****5678</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">工作年限</p>
+                <p class="text-lg font-bold">5 年</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">管理池塘</p>
+                <p class="text-lg font-bold">8 个</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">团队人数</p>
+                <p class="text-lg font-bold">4 人</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">在岗状态</p>
+                <p class="text-lg font-bold text-green-500">在岗</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 区域监测概览卡片 -->
+          <div class="bg-indigo-50 rounded-xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="w-10 h-10 bg-info/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-chart-line text-info"></i>
+              </div>
+              <h4 class="text-lg font-bold">区域监测概览</h4>
+            </div>
+            <div class="h-64 mb-4">
+              <canvas id="monitoringRadarChart"></canvas>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-white rounded-lg p-2 text-center shadow-sm">
+                <p class="text-xs text-gray-500">监测点</p>
+                <p class="text-lg font-bold text-primary">8</p>
+              </div>
+              <div class="bg-white rounded-lg p-2 text-center shadow-sm">
+                <p class="text-xs text-gray-500">设备</p>
+                <p class="text-lg font-bold text-secondary">12</p>
+              </div>
+              <div class="bg-white rounded-lg p-2 text-center shadow-sm">
+                <p class="text-xs text-gray-500">报警</p>
+                <p class="text-lg font-bold text-danger">3</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 实时数据卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- 水质指标卡片 -->
+          <div class="bg-blue-50 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-water text-primary"></i>
+              </div>
+              <h4 class="font-bold">水质指标</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">PH值</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold">7.2</span>
+                  <span class="text-success text-xs ml-2 mb-1">
+                    <i class="fas fa-arrow-up"></i> 0.2
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">正常范围: 6.5-8.5</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">溶氧量</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold">6.5</span>
+                  <span class="text-success text-xs ml-2 mb-1">
+                    <i class="fas fa-arrow-up"></i> 0.3
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">正常范围: 5-8 mg/L</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 温度指标卡片 -->
+          <div class="bg-green-50 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-temperature-high text-secondary"></i>
+              </div>
+              <h4 class="font-bold">温度指标</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">水温</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold">24.5°C</span>
+                  <span class="text-success text-xs ml-2 mb-1">
+                    <i class="fas fa-arrow-up"></i> 0.5
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">正常范围: 22-26°C</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">气温</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold">26.8°C</span>
+                  <span class="text-danger text-xs ml-2 mb-1">
+                    <i class="fas fa-arrow-up"></i> 1.2
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">正常范围: 20-30°C</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 水质化学指标卡片 -->
+          <div class="bg-purple-50 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 bg-info/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-flask text-info"></i>
+              </div>
+              <h4 class="font-bold">化学指标</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">氨氮</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold">0.5</span>
+                  <span class="text-success text-xs ml-2 mb-1">
+                    <i class="fas fa-arrow-down"></i> 0.1
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">正常范围: 0-1.0 mg/L</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">浊度</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold">15</span>
+                  <span class="text-success text-xs ml-2 mb-1">
+                    <i class="fas fa-arrow-down"></i> 2
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">正常范围: 0-30 NTU</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 设备状态卡片 -->
+          <div class="bg-yellow-50 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 bg-warning/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-microchip text-warning"></i>
+              </div>
+              <h4 class="font-bold">设备状态</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">增氧设备</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold text-success">正常</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">运行中: 2/3</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 shadow-sm">
+                <p class="text-xs text-gray-500">监测设备</p>
+                <div class="flex items-end">
+                  <span class="text-xl font-bold text-success">正常</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">运行中: 8/8</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 养殖单元详情 -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-bold">养殖单元详情</h3>
+          <button class="text-primary text-sm font-medium flex items-center">
+            查看更多 <i class="fas fa-arrow-right ml-1 text-xs"></i>
+          </button>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+          <div class="flex flex-col md:flex-row justify-between mb-6">
+            <div class="mb-4 md:mb-0">
+              <h4 class="text-xl font-bold">A-1 养殖单元</h4>
+              <p class="text-sm text-gray-500 mt-1">东部沿海区域</p>
+              <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm hover:shadow-md transition-all">
+                <div class="w-10 h-10 mx-auto bg-blue-100 rounded-full flex items-center justify-center text-primary mb-2">
+                  <i class="fas fa-water text-xl"></i>
+                </div>
+                <p class="text-xs text-gray-500">养殖池</p>
+                <p class="text-lg font-bold">8 个</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm hover:shadow-md transition-all">
+                <div class="w-10 h-10 mx-auto bg-green-100 rounded-full flex items-center justify-center text-secondary mb-2">
+                  <i class="fas fa-chart-line text-xl"></i>
+                </div>
+                <p class="text-xs text-gray-500">监测点</p>
+                <p class="text-lg font-bold">8 个</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm hover:shadow-md transition-all">
+                <div class="w-10 h-10 mx-auto bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-2">
+                  <i class="fas fa-microchip text-xl"></i>
+                </div>
+                <p class="text-xs text-gray-500">智能设备</p>
+                <p class="text-lg font-bold">12 个</p>
+              </div>
+              <div class="bg-white rounded-lg p-3 text-center shadow-sm hover:shadow-md transition-all">
+                <div class="w-10 h-10 mx-auto bg-indigo-100 rounded-full flex items-center justify-center text-info mb-2">
+                  <i class="fas fa-fish text-xl"></i>
+                </div>
+                <p class="text-xs text-gray-500">养殖鱼种</p>
+                <p class="text-lg font-bold">2 种</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 详细信息展示 -->
+          <div class="mb-6">
+            <div class="flex flex-wrap -mx-2">
+              <!-- 养殖池详情 -->
+              <div class="w-1/2 px-2 mb-4">
+                <div class="bg-blue-50 rounded-xl p-3 h-full">
+                  <div class="flex items-center mb-2">
+                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                      <i class="fas fa-water text-xs"></i>
+                    </div>
+                    <h6 class="text-sm font-medium">养殖池详情</h6>
+                  </div>
+                  <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">1</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-1池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">2</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-2池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">3</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-3池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center border border-yellow-200">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mb-1">
+                        <span class="text-xs font-bold">4</span>
+                      </div>
+                      <p class="text-sm text-center text-yellow-700">A-1-4池</p>
+                      <div class="mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <i class="fas fa-wind text-xs mr-1"></i>缺氧
+                        </span>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">5</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-5池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">6</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-6池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">7</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-7池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-primary mb-1">
+                        <span class="text-xs font-bold">8</span>
+                      </div>
+                      <p class="text-sm text-center">A-1-8池</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 养殖鱼种详情 -->
+              <div class="w-1/2 px-2 mb-4">
+                <div class="bg-indigo-50 rounded-xl p-3 h-full">
+                  <div class="flex items-center mb-2">
+                    <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-info mr-2">
+                      <i class="fas fa-fish text-xs"></i>
+                    </div>
+                    <h6 class="text-sm font-medium">养殖鱼种详情</h6>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-info mb-1">
+                        <i class="fas fa-fish text-sm"></i>
+                      </div>
+                      <p class="text-sm text-center">鲈鱼</p>
+                      <p class="text-xs text-green-500 text-center">生长良好</p>
+                      <div class="mt-1 text-center">
+                        <p class="text-xs text-gray-500">12,000尾 | 350克</p>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-info mb-1">
+                        <i class="fas fa-fish text-sm"></i>
+                      </div>
+                      <p class="text-sm text-center">鳜鱼</p>
+                      <p class="text-xs text-green-500 text-center">生长良好</p>
+                      <div class="mt-1 text-center">
+                        <p class="text-xs text-gray-500">8,000尾 | 420克</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-info mb-1">
+                        <i class="fas fa-fish text-sm"></i>
+                      </div>
+                      <p class="text-sm text-center">鳕鱼</p>
+                      <p class="text-xs text-green-500 text-center">生长良好</p>
+                      <div class="mt-1 text-center">
+                        <p class="text-xs text-gray-500">5,000尾 | 280克</p>
+                      </div>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center border border-yellow-200">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 mb-1">
+                        <i class="fas fa-fish text-sm"></i>
+                      </div>
+                      <p class="text-sm text-center text-yellow-700">罗非鱼</p>
+                      <div class="mt-1 text-center">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <i class="fas fa-utensils text-xs mr-1"></i>饥饿
+                        </span>
+                      </div>
+                      <div class="mt-1 text-center">
+                        <p class="text-xs text-yellow-600">10,000尾 | 310克</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 监测点详情 -->
+              <div class="w-1/2 px-2 mb-4">
+                <div class="bg-green-50 rounded-xl p-3 h-full">
+                  <div class="flex items-center mb-2">
+                    <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                      <i class="fas fa-chart-line text-xs"></i>
+                    </div>
+                    <h6 class="text-sm font-medium">监测点详情</h6>
+                  </div>
+                  <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-thermometer-half text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">水温监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-flask text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">PH值监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-wind text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">溶氧监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center border border-red-200">
+                      <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-1">
+                        <i class="fas fa-tint text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center text-red-700">氨氮监测点</p>
+                      <div class="mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                          <i class="fas fa-exclamation-triangle text-xs mr-1"></i>超标
+                        </span>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-cloud text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">浊度监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-bolt text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">电导率监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-sun text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">光照监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-water text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">水位监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-microscope text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">藻类监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center border border-yellow-200">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mb-1">
+                        <i class="fas fa-vial text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center text-yellow-700">硝酸盐监测点</p>
+                      <div class="mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <i class="fas fa-arrow-up text-xs mr-1"></i>偏高
+                        </span>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-secondary mb-1">
+                        <i class="fas fa-atom text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">重金属监测点</p>
+                      <p class="text-xs text-green-500 text-center">正常</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 智能设备详情 -->
+              <div class="w-1/2 px-2 mb-4">
+                <div class="bg-yellow-50 rounded-xl p-3 h-full">
+                  <div class="flex items-center mb-2">
+                    <div class="w-6 h-6 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-2">
+                      <i class="fas fa-microchip text-xs"></i>
+                    </div>
+                    <h6 class="text-sm font-medium">智能设备详情</h6>
+                  </div>
+                  <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-fan text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">增氧机</p>
+                      <p class="text-xs text-green-500 text-center">运行中</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-robot text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">投饵机</p>
+                      <p class="text-xs text-green-500 text-center">运行中</p>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center border border-red-200">
+                      <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 mb-1">
+                        <i class="fas fa-video text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center text-red-700">水下摄像头</p>
+                      <div class="mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                          <i class="fas fa-plug text-xs mr-1"></i>连接断开
+                        </span>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-tint-slash text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">排水泵</p>
+                      <p class="text-xs text-green-500 text-center">待机</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-lightbulb text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">照明系统</p>
+                      <p class="text-xs text-green-500 text-center">运行中</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-filter text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">过滤系统</p>
+                      <p class="text-xs text-green-500 text-center">运行中</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-broadcast-tower text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">无线传感器</p>
+                      <p class="text-xs text-green-500 text-center">在线</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-temperature-high text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">加热器</p>
+                      <p class="text-xs text-green-500 text-center">待机</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-water text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">循环水泵</p>
+                      <p class="text-xs text-green-500 text-center">运行中</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-bell text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">报警系统</p>
+                      <p class="text-xs text-red-500 text-center">报警中</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-2 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center">
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-warning mb-1">
+                        <i class="fas fa-tablet-alt text-xs"></i>
+                      </div>
+                      <p class="text-sm text-center">控制面板</p>
+                      <p class="text-xs text-green-500 text-center">在线</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="text-lg font-medium mb-4">系统状态</h5>
+          
+          <!-- 水质系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                <i class="fas fa-water"></i>
+              </div>
+              <h6 class="text-md font-medium">水质系统</h6>
+              <span class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-success">正常</span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <!-- PH值传感器 -->
+              <div class="border-l-4 border-primary p-4 bg-blue-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-flask text-primary"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">PH值</h3>
+                      <p class="text-sm text-gray-500">实时数据</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-primary mr-1"></span>正常
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">正常范围: 6.5-8.5</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold">7.2</span>
+                    <span class="text-success text-sm">
+                      <i class="fas fa-arrow-up"></i> 0.2
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-primary h-2 rounded-full" style="width: 72%"></div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="phChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+              
+              <!-- 溶氧量传感器 -->
+              <div class="border-l-4 border-secondary p-4 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-wind text-secondary"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">溶氧量</h3>
+                      <p class="text-sm text-gray-500">实时数据</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>正常
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">正常范围: 5.0-8.0 mg/L</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold">6.5</span>
+                    <span class="text-success text-sm">
+                      <i class="fas fa-arrow-up"></i> 0.3
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-secondary h-2 rounded-full" style="width: 65%"></div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="oxygenChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+              
+              <!-- 氨氮传感器 -->
+              <div class="border-l-4 border-info p-4 bg-purple-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-info/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-vial text-info"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">氨氮</h3>
+                      <p class="text-sm text-gray-500">实时数据</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-info mr-1"></span>正常
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">正常范围: 0-1.0 mg/L</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold">0.5</span>
+                    <span class="text-success text-sm">
+                      <i class="fas fa-arrow-down"></i> 0.1
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-info h-2 rounded-full" style="width: 50%"></div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="ammoniaChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+              
+              <!-- 浊度传感器 -->
+              <div class="border-l-4 border-warning p-4 bg-yellow-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-warning/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-eye-slash text-warning"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">浊度</h3>
+                      <p class="text-sm text-gray-500">实时数据</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>正常
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">正常范围: 0-30 NTU</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold">15</span>
+                    <span class="text-success text-sm">
+                      <i class="fas fa-arrow-down"></i> 2
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-warning h-2 rounded-full" style="width: 50%"></div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="turbidityChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+              
+              <!-- 水质监测仪 -->
+              <div class="border-l-4 border-success p-4 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-success/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-flask text-success"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">水质监测仪</h3>
+                      <p class="text-sm text-gray-500">ID: MONITOR-001</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>运行中
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">5分钟/次</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-success h-2 rounded-full" style="width: 85%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>电池</span>
+                    <span>85%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">监测点</p>
+                    <p class="text-sm font-medium">8 个</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">最近更新</p>
+                    <p class="text-sm font-medium">2分钟前</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 温度系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-info mr-2">
+                <i class="fas fa-temperature-high"></i>
+              </div>
+              <h6 class="text-md font-medium">温度系统</h6>
+              <span class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-success">正常</span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <!-- 水温传感器 -->
+              <div class="monitoring-card normal p-3 aspect-square flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-info mb-2">
+                  <i class="fas fa-temperature-high"></i>
+                </div>
+                <p class="font-medium text-center">水温</p>
+                <div class="flex items-center justify-center mt-1">
+                  <span class="text-2xl font-bold">24.5°C</span>
+                </div>
+                <span class="text-success text-xs mt-1">
+                  <i class="fas fa-arrow-up"></i> 0.5
+                </span>
+                <p class="text-xs text-gray-500 mt-1 text-center">正常范围: 22-26°C</p>
+                <div class="mt-2 w-full h-6">
+                  <canvas id="waterTempChartSmall"></canvas>
+                </div>
+              </div>
+              
+              <!-- 环境温度传感器 -->
+              <div class="monitoring-card normal p-3 aspect-square flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-danger mb-2">
+                  <i class="fas fa-thermometer-half"></i>
+                </div>
+                <p class="font-medium text-center">环境温度</p>
+                <div class="flex items-center justify-center mt-1">
+                  <span class="text-2xl font-bold">26.2°C</span>
+                </div>
+                <span class="text-success text-xs mt-1">
+                  <i class="fas fa-arrow-up"></i> 0.8
+                </span>
+                <p class="text-xs text-gray-500 mt-1 text-center">正常范围: 20-30°C</p>
+                <div class="mt-2 w-full h-6">
+                  <canvas id="airTempChartSmall"></canvas>
+                </div>
+              </div>
+              
+              <!-- 自动控制器 -->
+              <div class="bg-yellow-50 rounded-lg p-3 aspect-square flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all">
+                <div class="w-12 h-12 bg-warning/20 rounded-full flex items-center justify-center text-warning mb-2">
+                  <i class="fas fa-microchip"></i>
+                </div>
+                <p class="font-medium text-center">自动控制器</p>
+                <p class="text-xs text-gray-500 text-center">ID: CTRL-001</p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mt-2">
+                  <span class="inline-block w-2 h-2 rounded-full bg-warning mr-1"></span>需要维护
+                </span>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div class="bg-warning h-2 rounded-full" style="width: 78%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-1 w-full">
+                  <span>CPU负载</span>
+                  <span>78%</span>
+                </div>
+                <div class="text-xs text-warning font-medium mt-2">负载过高</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 排污系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-2">
+                <i class="fas fa-trash"></i>
+              </div>
+              <h6 class="text-md font-medium">排污系统</h6>
+              <span class="ml-2 px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">需要维护</span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <!-- 排污量传感器 -->
+              <div class="border-l-4 border-primary p-4 bg-blue-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-tint text-primary"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">排污量</h3>
+                      <p class="text-sm text-gray-500">实时数据</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-primary mr-1"></span>正常
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">正常范围: 50-100 L/h</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold">85</span>
+                    <span class="text-sm text-gray-500">L/h</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="drainageChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+              
+              <!-- 过滤器设备 -->
+              <div class="border-l-4 border-warning p-4 bg-yellow-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-warning/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-filter text-warning"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">过滤器</h3>
+                      <p class="text-sm text-gray-500">ID: FLTR-002</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-warning mr-1"></span>需要维护
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">效率低于85%需维护</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <span class="text-2xl font-bold text-warning">78%</span>
+                      <span class="text-warning text-xs ml-2">
+                        <i class="fas fa-arrow-down"></i> 5%
+                      </span>
+                    </div>
+                    <span class="text-sm text-gray-500">过滤效率</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-warning h-2 rounded-full" style="width: 78%"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">上次清洗</p>
+                    <p class="text-sm font-medium">7天前</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">建议操作</p>
+                    <p class="text-sm font-medium text-warning">清洗滤网</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 排污泵设备 -->
+              <div class="border-l-4 border-danger p-4 bg-red-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-danger/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-water text-danger"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">排污泵 #1</h3>
+                      <p class="text-sm text-gray-500">ID: PUMP-001</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-danger mr-1"></span>故障
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">需要维修</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-danger h-2 rounded-full" style="width: 10%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>负载</span>
+                    <span>10%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">运行时间</p>
+                    <p class="text-sm font-medium">0 小时</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">故障类型</p>
+                    <p class="text-sm font-medium text-danger">电机故障</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 投喂系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                <i class="fas fa-fish"></i>
+              </div>
+              <h6 class="text-md font-medium">投喂系统</h6>
+              <span class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-success">正常</span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <!-- 投喂量传感器 -->
+              <div class="monitoring-card normal p-3">
+                <div class="flex items-center mb-1">
+                  <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                    <i class="fas fa-weight"></i>
+                  </div>
+                  <p class="text-gray-500 text-sm">今日投喂量</p>
+                </div>
+                <div class="flex items-end">
+                  <span class="text-2xl font-bold">125</span>
+                  <span class="text-xs ml-2 mb-1">kg</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">计划投喂: 130 kg</p>
+                <div class="mt-2 h-8">
+                  <canvas id="feedingChartSmall"></canvas>
+                </div>
+              </div>
+              
+              <!-- 饵料系数 -->
+              <div class="monitoring-card normal p-3">
+                <div class="flex items-center mb-1">
+                  <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <p class="text-gray-500 text-sm">饵料系数</p>
+                </div>
+                <div class="flex items-end">
+                  <span class="text-2xl font-bold">1.2</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">目标范围: 1.0-1.5</p>
+                <div class="mt-2 h-8">
+                  <canvas id="fcrChartSmall"></canvas>
+                </div>
+              </div>
+              
+              <!-- 自动投喂机 -->
+              <div class="border-l-4 border-success p-4 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-success/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-utensils text-success"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">自动投喂机</h3>
+                      <p class="text-sm text-gray-500">ID: FEED-001</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>待机中
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">位置: 1-4号池</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-success h-2 rounded-full" style="width: 60%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>饲料容量</span>
+                    <span>60%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">下次投喂</p>
+                    <p class="text-sm font-medium text-success">16:30</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">今日投喂次数</p>
+                    <p class="text-sm font-medium">3 次</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 料塔设备 -->
+              <div class="border-l-4 border-success p-4 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-success/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-silo text-success"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">料塔</h3>
+                      <p class="text-sm text-gray-500">ID: SILO-001</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>状态良好
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">剩余容量: 850 kg</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-success h-2 rounded-full" style="width: 85%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>饲料储量</span>
+                    <span>85%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">可用天数</p>
+                    <p class="text-sm font-medium text-success">6.8天</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">日均消耗</p>
+                    <p class="text-sm font-medium">125 kg</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 增氧系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                <i class="fas fa-wind"></i>
+              </div>
+              <h6 class="text-md font-medium">增氧系统</h6>
+              <span class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-success">正常</span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <!-- 溶氧监测 -->
+              <div class="border-l-4 border-primary p-4 bg-blue-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-tachometer-alt text-primary"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">溶氧监测</h3>
+                      <p class="text-sm text-gray-500">实时数据</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-primary mr-1"></span>正常
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">触发阈值: 5.0 mg/L</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold">6.5</span>
+                    <span class="text-sm text-gray-500">mg/L</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="bg-primary h-2 rounded-full" style="width: 65%"></div>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <canvas id="oxygenMonitorChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+              
+              <!-- 增氧泵1 -->
+              <div class="border-l-4 border-success p-4 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-success/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-fan text-success"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">增氧泵 #1</h3>
+                      <p class="text-sm text-gray-500">ID: AERO-001</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>运行中
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">1号养殖池</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-success h-2 rounded-full" style="width: 85%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>负载</span>
+                    <span>85%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">转速</p>
+                    <p class="text-sm font-medium">1200 RPM</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">运行时间</p>
+                    <p class="text-sm font-medium">8.5 小时</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 增氧泵2 -->
+              <div class="border-l-4 border-success p-4 bg-green-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-success/20 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-fan text-success"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">增氧泵 #2</h3>
+                      <p class="text-sm text-gray-500">ID: AERO-002</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <span class="inline-block w-2 h-2 rounded-full bg-success mr-1"></span>运行中
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">2号养殖池</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-success h-2 rounded-full" style="width: 70%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>负载</span>
+                    <span>70%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">转速</p>
+                    <p class="text-sm font-medium">1200 RPM</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">运行时间</p>
+                    <p class="text-sm font-medium">7.2 小时</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 增氧机3设备 -->
+              <div class="border-l-4 border-gray-300 p-4 bg-gray-50 rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                      <i class="fas fa-fan text-gray-500"></i>
+                    </div>
+                    <div>
+                      <h3 class="font-bold">增氧机 #3</h3>
+                      <p class="text-sm text-gray-500">ID: AERO-003</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                      <span class="inline-block w-2 h-2 rounded-full bg-gray-500 mr-1"></span>待机中
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">3号养殖池</p>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>负载</span>
+                    <span>0%</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">功率</p>
+                    <p class="text-sm font-medium">0.8 kW</p>
+                  </div>
+                  <div class="bg-white/60 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">运行时间</p>
+                    <p class="text-sm font-medium">0 h/天</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="text-lg font-medium mb-4">监测数据</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <!-- PH值 -->
+            <div class="border-l-4 border-primary p-4 bg-blue-50 rounded-lg">
+              <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-flask text-primary"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold">PH值</h3>
+                    <p class="text-sm text-gray-500">实时数据</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span class="inline-block w-2 h-2 rounded-full bg-primary mr-1"></span>正常
+                  </span>
+                  <p class="text-sm text-gray-500 mt-1">正常范围: 6.5-8.5</p>
+                </div>
+              </div>
+              <div class="mt-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <span class="text-3xl font-bold">7.2</span>
+                    <span class="text-success text-sm ml-2">
+                      <i class="fas fa-arrow-up"></i> 0.2
+                    </span>
+                  </div>
+                  <span class="text-sm text-gray-500">当前值</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div class="bg-primary h-2 rounded-full" style="width: 72%"></div>
+                </div>
+              </div>
+              <div class="mt-3">
+                <canvas id="phChart" class="w-full h-12"></canvas>
+              </div>
+            </div>
+
+            <!-- 溶氧量 -->
+            <div class="monitoring-card normal p-4">
+              <div class="flex items-center mb-1">
+                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-secondary mr-2">
+                  <i class="fas fa-wind"></i>
+                </div>
+                <p class="text-gray-500 text-sm">溶氧量</p>
+              </div>
+              <div class="flex items-end">
+                <span class="text-3xl font-bold">6.5</span>
+                <span class="text-success text-sm ml-2 mb-1">
+                  <i class="fas fa-arrow-up"></i> 0.3
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">正常范围: 5.0-8.0 mg/L</p>
+              <div class="mt-3 h-12">
+                <canvas id="oxygenChart"></canvas>
+              </div>
+            </div>
+
+            <!-- 水温 -->
+            <div class="monitoring-card normal p-4">
+              <div class="flex items-center mb-1">
+                <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-info mr-2">
+                  <i class="fas fa-temperature-high"></i>
+                </div>
+                <p class="text-gray-500 text-sm">水温</p>
+              </div>
+              <div class="flex items-end">
+                <span class="text-3xl font-bold">24.5</span>
+                <span class="text-success text-sm ml-2 mb-1">
+                  <i class="fas fa-arrow-up"></i> 0.5
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">正常范围: 22-26°C</p>
+              <div class="mt-3 h-12">
+                <canvas id="tempChart"></canvas>
+              </div>
+            </div>
+
+            <!-- 氨氮 -->
+            <div class="monitoring-card warning p-4">
+              <div class="flex items-center mb-1">
+                <div class="w-6 h-6 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-2">
+                  <i class="fas fa-vial"></i>
+                </div>
+                <p class="text-gray-500 text-sm">氨氮</p>
+              </div>
+              <div class="flex items-end">
+                <span class="text-3xl font-bold">0.4</span>
+                <span class="text-danger text-sm ml-2 mb-1">
+                  <i class="fas fa-arrow-up"></i> 0.1
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">正常范围: 0-0.3 mg/L</p>
+              <div class="mt-3 h-12">
+                <canvas id="ammoniaChart"></canvas>
+              </div>
+            </div>
+
+            <!-- 浊度 -->
+            <div class="monitoring-card normal p-4">
+              <div class="flex items-center mb-1">
+                <div class="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mr-2">
+                  <i class="fas fa-tint"></i>
+                </div>
+                <p class="text-gray-500 text-sm">浊度</p>
+              </div>
+              <div class="flex items-end">
+                <span class="text-3xl font-bold">15</span>
+                <span class="text-success text-sm ml-2 mb-1">
+                  <i class="fas fa-arrow-down"></i> 2
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">正常范围: 0-20 NTU</p>
+              <div class="mt-3 h-12">
+                <canvas id="turbidityChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 监测数据雷达图 -->
+          <div class="bg-white rounded-xl p-4 shadow-sm mb-6">
+            <h5 class="text-lg font-medium mb-4">监测数据分析</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="h-64">
+                <canvas id="monitoringRadarChart"></canvas>
+              </div>
+              <div class="flex flex-col justify-center">
+                <h6 class="text-base font-medium mb-3">监测指标分析</h6>
+                <p class="text-sm text-gray-600 mb-4">根据雷达图分析，当前养殖单元的水质参数整体处于良好状态，其中：</p>
+                <ul class="space-y-2 text-sm text-gray-600">
+                  <li class="flex items-start">
+                    <i class="fas fa-check-circle text-secondary mt-1 mr-2"></i>
+                    <span>PH值、溶氧量、水温和浊度均在理想范围内</span>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-warning mt-1 mr-2"></i>
+                    <span>氨氮含量略高于正常值，建议增加水体循环或减少投喂量</span>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fas fa-info-circle text-primary mt-1 mr-2"></i>
+                    <span>整体水质评级：优良（90分）</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+
+
+          <h5 class="text-lg font-medium mb-4">报警信息</h5>
+          <div class="space-y-4 mb-6">
+            <!-- 报警信息1 -->
+            <div class="alert-card bg-white p-4 border-l-4 border-red-500">
+              <div class="flex justify-between items-start">
+                <div class="flex items-start">
+                  <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 mr-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </div>
+                  <div>
+                    <h6 class="font-medium">排污泵故障</h6>
+                    <p class="text-sm text-gray-500 mt-1">主排污泵电机故障，需要维修</p>
+                    <div class="flex items-center mt-2">
+                      <span class="text-xs text-gray-500 mr-3">设备ID: SP-001</span>
+                      <span class="text-xs text-gray-500 mr-3">位置: 主排污系统</span>
+                      <span class="text-xs text-gray-500">时间: 2023-07-15 08:32</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <button class="px-3 py-1 text-xs rounded border border-primary text-primary hover:bg-primary hover:text-white transition-colors">
+                    处理
+                  </button>
+                  <button class="px-3 py-1 text-xs rounded border border-gray-300 text-gray-500 hover:bg-gray-100 transition-colors">
+                    忽略
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 报警信息2 -->
+            <div class="alert-card bg-white p-4 border-l-4 border-yellow-500">
+              <div class="flex justify-between items-start">
+                <div class="flex items-start">
+                  <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mr-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                  </div>
+                  <div>
+                    <h6 class="font-medium">氨氮含量偏高</h6>
+                    <p class="text-sm text-gray-500 mt-1">3号养殖池氨氮含量超过阈值，建议增加水体循环</p>
+                    <div class="flex items-center mt-2">
+                      <span class="text-xs text-gray-500 mr-3">监测点: WQ-003</span>
+                      <span class="text-xs text-gray-500 mr-3">当前值: 0.4mg/L</span>
+                      <span class="text-xs text-gray-500">时间: 2023-07-15 10:15</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <button class="px-3 py-1 text-xs rounded border border-primary text-primary hover:bg-primary hover:text-white transition-colors">
+                    处理
+                  </button>
+                  <button class="px-3 py-1 text-xs rounded border border-gray-300 text-gray-500 hover:bg-gray-100 transition-colors">
+                    忽略
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 报警信息3 -->
+            <div class="alert-card bg-white p-4 border-l-4 border-yellow-500">
+              <div class="flex justify-between items-start">
+                <div class="flex items-start">
+                  <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mr-3">
+                    <i class="fas fa-exclamation-circle"></i>
+                  </div>
+                  <div>
+                    <h6 class="font-medium">控制器负载过高</h6>
+                    <p class="text-sm text-gray-500 mt-1">中央控制系统CPU负载持续超过75%，建议检查系统</p>
+                    <div class="flex items-center mt-2">
+                      <span class="text-xs text-gray-500 mr-3">设备ID: CC-001</span>
+                      <span class="text-xs text-gray-500 mr-3">当前负载: 78%</span>
+                      <span class="text-xs text-gray-500">时间: 2023-07-15 11:05</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <button class="px-3 py-1 text-xs rounded border border-primary text-primary hover:bg-primary hover:text-white transition-colors">
+                    处理
+                  </button>
+                  <button class="px-3 py-1 text-xs rounded border border-gray-300 text-gray-500 hover:bg-gray-100 transition-colors">
+                    忽略
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="text-lg font-medium mb-4">负责人员</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- 人员1 -->
+            <div class="bg-white rounded-xl shadow-sm p-4">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h6 class="font-medium">张明</h6>
+                  <p class="text-xs text-gray-500">区域主管</p>
+                </div>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">联系电话</span>
+                  <span>138****5678</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">负责区域</span>
+                  <span>A区全部</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">工作状态</span>
+                  <span class="text-green-500">在岗</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 人员2 -->
+            <div class="bg-white rounded-xl shadow-sm p-4">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h6 class="font-medium">李强</h6>
+                  <p class="text-xs text-gray-500">技术员</p>
+                </div>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">联系电话</span>
+                  <span>139****1234</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">负责设备</span>
+                  <span>监测系统</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">工作状态</span>
+                  <span class="text-green-500">在岗</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 人员3 -->
+            <div class="bg-white rounded-xl shadow-sm p-4">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h6 class="font-medium">王芳</h6>
+                  <p class="text-xs text-gray-500">养殖员</p>
+                </div>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">联系电话</span>
+                  <span>135****9876</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">负责池塘</span>
+                  <span>1-4号池</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">工作状态</span>
+                  <span class="text-yellow-500">休假</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 人员4 -->
+            <div class="bg-white rounded-xl shadow-sm p-4">
+              <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div>
+                  <h6 class="font-medium">赵伟</h6>
+                  <p class="text-xs text-gray-500">养殖员</p>
+                </div>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">联系电话</span>
+                  <span>136****4321</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">负责池塘</span>
+                  <span>5-8号池</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">工作状态</span>
+                  <span class="text-green-500">在岗</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h5 class="text-lg font-medium mb-4">任务统计</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-4">
+              <h6 class="font-medium mb-4">任务完成情况</h6>
+              <div class="h-64">
+                <canvas id="taskCompletionChart"></canvas>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4">
+              <h6 class="font-medium mb-4">近期任务</h6>
+              <div class="space-y-4">
+                <div class="flex items-center p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                  <div class="flex-1">
+                    <div class="font-medium">日常水质检测</div>
+                    <div class="text-sm text-gray-600 mt-1">时间: 今天 08:00，负责人: 李强</div>
+                  </div>
+                  <div class="ml-4">
+                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">已完成</span>
+                  </div>
+                </div>
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                  <div class="flex-1">
+                    <div class="font-medium">设备维护检查</div>
+                    <div class="text-sm text-gray-600 mt-1">时间: 今天 14:00，负责人: 李强</div>
+                  </div>
+                  <div class="ml-4">
+                    <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-primary">进行中</span>
+                  </div>
+                </div>
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg border-l-4 border-gray-500">
+                  <div class="flex-1">
+                    <div class="font-medium">鱼类生长监测</div>
+                    <div class="text-sm text-gray-600 mt-1">时间: 明天 09:00，负责人: 张明</div>
+                  </div>
+                  <div class="ml-4">
+                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">待处理</span>
+                  </div>
+                </div>
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg border-l-4 border-gray-500">
+                  <div class="flex-1">
+                    <div class="font-medium">排污泵维修</div>
+                    <div class="text-sm text-gray-600 mt-1">时间: 明天 13:30，负责人: 外部维修</div>
+                  </div>
+                  <div class="ml-4">
+                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">待处理</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-8 py-6">
+      <div class="container mx-auto px-4">
+        <div class="text-center text-gray-500 text-sm">
+          &copy; 2023 渔场管理系统. 保留所有权利.
+        </div>
+      </div>
+    </footer>
+
+    <script>
+
+      // 监测数据小图表
+      function createSmallChart(id, data, color) {
+        const ctx = document.getElementById(id).getContext("2d");
+        return new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: ["", "", "", "", "", "", ""],
+            datasets: [
+              {
+                data: data,
+                borderColor: color,
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.4,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                enabled: false,
+              },
+            },
+            scales: {
+              x: {
+                display: false,
+              },
+              y: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      // 创建各个监测数据小图表
+      createSmallChart("phChart", [7.0, 7.1, 7.3, 7.2, 7.0, 7.2, 7.2], "#3B82F6");
+      createSmallChart("oxygenChart", [6.2, 6.3, 6.4, 6.5, 6.3, 6.4, 6.5], "#10B981");
+      createSmallChart("tempChart", [24.0, 24.2, 24.3, 24.5, 24.4, 24.3, 24.5], "#6366F1");
+      createSmallChart("ammoniaChart", [0.2, 0.25, 0.3, 0.35, 0.38, 0.4, 0.4], "#F59E0B");
+      createSmallChart("turbidityChart", [18, 17, 16, 15, 16, 15, 15], "#8B5CF6");
+
+      // 监测数据雷达图
+      const monitoringRadarCtx = document
+        .getElementById("monitoringRadarChart")
+        .getContext("2d");
+      const monitoringRadarChart = new Chart(monitoringRadarCtx, {
+        type: "radar",
+        data: {
+          labels: ["PH值", "溶氧量", "水温", "氨氮", "浊度"],
+          datasets: [
+            {
+              label: "当前值",
+              data: [85, 90, 88, 65, 80],
+              backgroundColor: "rgba(59, 130, 246, 0.2)",
+              borderColor: "#3B82F6",
+              borderWidth: 2,
+              pointBackgroundColor: "#3B82F6",
+              pointRadius: 4,
+            },
+            {
+              label: "理想值",
+              data: [90, 90, 90, 90, 90],
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              borderColor: "#10B981",
+              borderWidth: 1,
+              pointBackgroundColor: "#10B981",
+              pointRadius: 3,
+              borderDash: [5, 5],
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              angleLines: {
+                color: "rgba(0, 0, 0, 0.1)",
+              },
+              grid: {
+                color: "rgba(0, 0, 0, 0.05)",
+              },
+              pointLabels: {
+                font: {
+                  size: 12,
+                },
+              },
+              suggestedMin: 0,
+              suggestedMax: 100,
+              ticks: {
+                display: false,
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                boxWidth: 10,
+                padding: 20,
+                font: {
+                  size: 12,
+                },
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  if (context.parsed.r !== null) {
+                    label += context.parsed.r + "%";
+                  }
+                  return label;
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // 任务完成情况图表
+      const taskCompletionCtx = document
+        .getElementById("taskCompletionChart")
+        .getContext("2d");
+      const taskCompletionChart = new Chart(taskCompletionCtx, {
+        type: "bar",
+        data: {
+          labels: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+          datasets: [
+            {
+              label: "已完成",
+              data: [5, 4, 6, 5, 3, 2, 0],
+              backgroundColor: "#10B981",
+              barPercentage: 0.6,
+              categoryPercentage: 0.7,
+            },
+            {
+              label: "进行中",
+              data: [1, 2, 1, 2, 2, 1, 0],
+              backgroundColor: "#3B82F6",
+              barPercentage: 0.6,
+              categoryPercentage: 0.7,
+            },
+            {
+              label: "待处理",
+              data: [1, 1, 0, 1, 2, 3, 5],
+              backgroundColor: "#9CA3AF",
+              barPercentage: 0.6,
+              categoryPercentage: 0.7,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                boxWidth: 10,
+                padding: 20,
+                font: {
+                  size: 12,
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              stacked: true,
+              grid: {
+                display: false,
+              },
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              grid: {
+                color: "rgba(0, 0, 0, 0.05)",
+              },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

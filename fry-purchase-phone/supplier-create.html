@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>添加供应商 - 鱼种采购系统</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px; /* 移除底部导航栏后减少底部间距 */
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* 表单样式 */
+      .form-input {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        color: #1f2937;
+        background-color: #fff;
+      }
+      
+      .form-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+      
+      .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.25rem;
+      }
+      
+      .form-error {
+        color: var(--color-danger);
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+      }
+      
+      /* 标签样式 */
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        background-color: #e5e7eb;
+        color: #4b5563;
+        border-radius: 9999px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .tag .tag-remove {
+        margin-left: 0.25rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="bg-blue-500 text-white p-4 sticky top-0 z-10">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="supplier.html" class="mr-2">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-lg font-bold">添加供应商</h1>
+        </div>
+      </div>
+    </div>
+
+    <!-- 表单 -->
+    <div class="p-4">
+      <form id="supplierForm">
+        <!-- 基本信息 -->
+        <div class="bg-white rounded-lg p-4 mb-4">
+          <h2 class="text-base font-bold mb-4">基本信息</h2>
+          
+          <div class="mb-4">
+            <label for="name" class="form-label">供应商名称 <span class="text-danger">*</span></label>
+            <input type="text" id="name" name="name" class="form-input" placeholder="请输入供应商名称" required />
+          </div>
+          
+          <div class="mb-4">
+            <label for="contactPerson" class="form-label">联系人 <span class="text-danger">*</span></label>
+            <input type="text" id="contactPerson" name="contactPerson" class="form-input" placeholder="请输入联系人姓名" required />
+          </div>
+          
+          <div class="mb-4">
+            <label for="phone" class="form-label">联系电话 <span class="text-danger">*</span></label>
+            <input type="tel" id="phone" name="phone" class="form-input" placeholder="请输入联系电话" required />
+          </div>
+          
+          <div class="mb-4">
+            <label for="email" class="form-label">电子邮箱</label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="请输入电子邮箱" />
+          </div>
+          
+          <div class="mb-4">
+            <label for="address" class="form-label">地址</label>
+            <input type="text" id="address" name="address" class="form-input" placeholder="请输入详细地址" />
+          </div>
+        </div>
+        
+        <!-- 经营信息 -->
+        <div class="bg-white rounded-lg p-4 mb-4">
+          <h2 class="text-base font-bold mb-4">经营信息</h2>
+          
+          <div class="mb-4">
+            <label class="form-label">主营品种</label>
+            <div class="flex flex-wrap mb-2" id="speciesTags">
+              <!-- 这里会动态添加标签 -->
+            </div>
+            <div class="flex">
+              <input type="text" id="speciesInput" class="form-input mr-2" placeholder="输入鱼种品种" />
+              <button type="button" id="addSpeciesBtn" class="bg-primary text-white px-3 py-1 rounded text-sm">
+                添加
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="businessLicense" class="form-label">营业执照号</label>
+            <input type="text" id="businessLicense" name="businessLicense" class="form-input" placeholder="请输入营业执照号" />
+          </div>
+          
+          <div class="mb-4">
+            <label for="establishDate" class="form-label">成立日期</label>
+            <input type="date" id="establishDate" name="establishDate" class="form-input" />
+          </div>
+          
+          <div class="mb-4">
+            <label for="scale" class="form-label">规模</label>
+            <select id="scale" name="scale" class="form-input">
+              <option value="">请选择</option>
+              <option value="small">小型（年产量<50万尾）</option>
+              <option value="medium">中型（年产量50-200万尾）</option>
+              <option value="large">大型（年产量>200万尾）</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- 其他信息 -->
+        <div class="bg-white rounded-lg p-4 mb-4">
+          <h2 class="text-base font-bold mb-4">其他信息</h2>
+          
+          <div class="mb-4">
+            <label for="transportService" class="form-label">是否提供运输服务</label>
+            <div class="flex items-center">
+              <label class="inline-flex items-center mr-4">
+                <input type="radio" name="transportService" value="yes" class="mr-1" />
+                <span class="text-sm">是</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="radio" name="transportService" value="no" class="mr-1" checked />
+                <span class="text-sm">否</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="paymentTerms" class="form-label">付款方式</label>
+            <select id="paymentTerms" name="paymentTerms" class="form-input">
+              <option value="">请选择</option>
+              <option value="prepay">预付款</option>
+              <option value="cod">货到付款</option>
+              <option value="credit">账期付款</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="notes" class="form-label">备注</label>
+            <textarea id="notes" name="notes" class="form-input" rows="3" placeholder="请输入备注信息"></textarea>
+          </div>
+        </div>
+        
+        <!-- 提交按钮 -->
+        <div class="flex justify-between">
+          <button type="button" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-full text-sm font-medium" onclick="window.location.href='supplier.html'">
+            取消
+          </button>
+          <button type="submit" class="bg-primary text-white px-6 py-2 rounded-full text-sm font-medium">
+            保存
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 底部导航栏已移除 -->
+
+    <script>
+      // 主营品种标签功能
+      const speciesInput = document.getElementById('speciesInput');
+      const addSpeciesBtn = document.getElementById('addSpeciesBtn');
+      const speciesTags = document.getElementById('speciesTags');
+      const species = [];
+      
+      // 添加品种标签
+      function addSpecies() {
+        const value = speciesInput.value.trim();
+        if (value && !species.includes(value)) {
+          species.push(value);
+          renderSpeciesTags();
+          speciesInput.value = '';
+        }
+      }
+      
+      // 渲染品种标签
+      function renderSpeciesTags() {
+        speciesTags.innerHTML = '';
+        species.forEach((item, index) => {
+          const tag = document.createElement('div');
+          tag.className = 'tag';
+          tag.innerHTML = `
+            ${item}
+            <span class="tag-remove" data-index="${index}">
+              <i class="fas fa-times ml-1"></i>
+            </span>
+          `;
+          speciesTags.appendChild(tag);
+        });
+        
+        // 添加删除标签事件
+        document.querySelectorAll('.tag-remove').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            species.splice(index, 1);
+            renderSpeciesTags();
+          });
+        });
+      }
+      
+      // 添加品种按钮点击事件
+      addSpeciesBtn.addEventListener('click', addSpecies);
+      
+      // 输入框回车事件
+      speciesInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addSpecies();
+        }
+      });
+      
+      // 表单提交事件
+      document.getElementById('supplierForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 表单验证
+        const name = document.getElementById('name').value.trim();
+        const contactPerson = document.getElementById('contactPerson').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        
+        if (!name) {
+          alert('请输入供应商名称');
+          return;
+        }
+        
+        if (!contactPerson) {
+          alert('请输入联系人');
+          return;
+        }
+        
+        if (!phone) {
+          alert('请输入联系电话');
+          return;
+        }
+        
+        // 收集表单数据
+        const formData = {
+          name,
+          contactPerson,
+          phone,
+          email: document.getElementById('email').value.trim(),
+          address: document.getElementById('address').value.trim(),
+          species,
+          businessLicense: document.getElementById('businessLicense').value.trim(),
+          establishDate: document.getElementById('establishDate').value,
+          scale: document.getElementById('scale').value,
+          transportService: document.querySelector('input[name="transportService"]:checked').value,
+          paymentTerms: document.getElementById('paymentTerms').value,
+          notes: document.getElementById('notes').value.trim()
+        };
+        
+        // 这里可以添加实际的表单提交逻辑，例如发送到服务器
+        console.log('表单数据:', formData);
+        
+        // 模拟提交成功后跳转
+        alert('供应商添加成功！');
+        window.location.href = 'supplier.html';
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饲料进货流程图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .flowchart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .flowchart {
+            min-width: 1000px;
+        }
+
+        .step-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .step-node:hover {
+            transform: scale(1.05);
+        }
+
+        .step-node:hover .step-circle {
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        }
+
+        .step-text {
+            font-size: 14px;
+            font-weight: 600;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .step-subtitle {
+            font-size: 11px;
+            font-weight: 400;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            opacity: 0.8;
+        }
+
+        .flow-arrow {
+            stroke: #667eea;
+            stroke-width: 3;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .parallel-flow {
+            stroke: #4ECDC4;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            fill: none;
+            marker-end: url(#arrowhead-parallel);
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .legend h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .legend-line {
+            width: 30px;
+            height: 3px;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .legend-dash {
+            width: 30px;
+            height: 2px;
+            margin-right: 10px;
+            background: repeating-linear-gradient(
+                to right,
+                #4ECDC4,
+                #4ECDC4 5px,
+                transparent 5px,
+                transparent 10px
+            );
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .flowchart-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚛 饲料进货流程图</h1>
+        <p>智能化饲料采购全流程可视化</p>
+    </div>
+
+    <div class="flowchart-container">
+        <svg class="flowchart" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+            <!-- 定义箭头标记 -->
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#667eea" />
+                </marker>
+                <marker id="arrowhead-parallel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#4ECDC4" />
+                </marker>
+                
+                <!-- 渐变定义 -->
+                <linearGradient id="step1Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#FF8E8E;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step2Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4ECDC4;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#44A08D;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step3Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#45B7D1;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#96C93D;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step4Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#F093FB;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#F5576C;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step5Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4FACFE;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#00F2FE;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step6Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#43E97B;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#38F9D7;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step7Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FA709A;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#FEE140;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="step8Gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="parallelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FFA726;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#FFB74D;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+
+            <!-- 步骤1: 库存警报 -->
+            <g class="step-node" onclick="showStepDetails(1)">
+                <circle class="step-circle" cx="100" cy="100" r="40" fill="url(#step1Gradient)" />
+                <text class="step-text" x="100" y="95" fill="white">⚠️</text>
+                <text class="step-text" x="100" y="110" fill="white" font-size="12">库存警报</text>
+                <text class="step-subtitle" x="100" y="160" fill="#333">饲料存量不足</text>
+                <text class="step-subtitle" x="100" y="175" fill="#333">选择类型数量</text>
+            </g>
+
+            <!-- 腾库任务（并行） -->
+            <g class="step-node" onclick="showStepDetails('parallel')">
+                <rect x="60" y="200" width="80" height="50" rx="25" fill="url(#parallelGradient)" />
+                <text class="step-text" x="100" y="220" fill="white" font-size="12">📦</text>
+                <text class="step-text" x="100" y="235" fill="white" font-size="10">腾库任务</text>
+            </g>
+
+            <!-- 步骤2: 选择厂家 -->
+            <g class="step-node" onclick="showStepDetails(2)">
+                <circle class="step-circle" cx="300" cy="100" r="40" fill="url(#step2Gradient)" />
+                <text class="step-text" x="300" y="95" fill="white">🏭</text>
+                <text class="step-text" x="300" y="110" fill="white" font-size="12">选择厂家</text>
+                <text class="step-subtitle" x="300" y="160" fill="#333">对比价格支付</text>
+                <text class="step-subtitle" x="300" y="175" fill="#333">运输成本交期</text>
+            </g>
+
+            <!-- 步骤3: 选择运输车辆 -->
+            <g class="step-node" onclick="showStepDetails(3)">
+                <circle class="step-circle" cx="500" cy="100" r="40" fill="url(#step3Gradient)" />
+                <text class="step-text" x="500" y="95" fill="white">🚛</text>
+                <text class="step-text" x="500" y="110" fill="white" font-size="12">选择车辆</text>
+                <text class="step-subtitle" x="500" y="160" fill="#333">对比运费时间</text>
+                <text class="step-subtitle" x="500" y="175" fill="#333">载重运输质量</text>
+            </g>
+
+            <!-- 步骤4: 选择卸货者 -->
+            <g class="step-node" onclick="showStepDetails(4)">
+                <circle class="step-circle" cx="700" cy="100" r="40" fill="url(#step4Gradient)" />
+                <text class="step-text" x="700" y="95" fill="white">👷</text>
+                <text class="step-text" x="700" y="110" fill="white" font-size="12">选择卸货</text>
+                <text class="step-subtitle" x="700" y="160" fill="#333">对比价格效率</text>
+                <text class="step-subtitle" x="700" y="175" fill="#333">人员质量</text>
+            </g>
+
+            <!-- 步骤5: 车辆到达 -->
+            <g class="step-node" onclick="showStepDetails(5)">
+                <circle class="step-circle" cx="700" cy="300" r="40" fill="url(#step5Gradient)" />
+                <text class="step-text" x="700" y="295" fill="white">📸</text>
+                <text class="step-text" x="700" y="310" fill="white" font-size="12">车辆到达</text>
+                <text class="step-subtitle" x="700" y="360" fill="#333">拍照上传</text>
+                <text class="step-subtitle" x="700" y="375" fill="#333">记录时间成本</text>
+            </g>
+
+            <!-- 步骤6: 卸货流程 -->
+            <g class="step-node" onclick="showStepDetails(6)">
+                <circle class="step-circle" cx="500" cy="300" r="40" fill="url(#step6Gradient)" />
+                <text class="step-text" x="500" y="295" fill="white">📦</text>
+                <text class="step-text" x="500" y="310" fill="white" font-size="12">卸货流程</text>
+                <text class="step-subtitle" x="500" y="360" fill="#333">实时跟踪</text>
+                <text class="step-subtitle" x="500" y="375" fill="#333">记录时间</text>
+            </g>
+
+            <!-- 步骤7: 清点流程 -->
+            <g class="step-node" onclick="showStepDetails(7)">
+                <circle class="step-circle" cx="300" cy="300" r="40" fill="url(#step7Gradient)" />
+                <text class="step-text" x="300" y="295" fill="white">📋</text>
+                <text class="step-text" x="300" y="310" fill="white" font-size="12">清点流程</text>
+                <text class="step-subtitle" x="300" y="360" fill="#333">拍照记录</text>
+                <text class="step-subtitle" x="300" y="375" fill="#333">统计损耗</text>
+            </g>
+
+            <!-- 步骤8: 流程完成 -->
+            <g class="step-node" onclick="showStepDetails(8)">
+                <circle class="step-circle" cx="100" cy="300" r="40" fill="url(#step8Gradient)" />
+                <text class="step-text" x="100" y="295" fill="white">✅</text>
+                <text class="step-text" x="100" y="310" fill="white" font-size="12">流程完成</text>
+                <text class="step-subtitle" x="100" y="360" fill="#333">更新库存</text>
+                <text class="step-subtitle" x="100" y="375" fill="#333">同步数据</text>
+            </g>
+
+            <!-- 主流程箭头 -->
+            <path class="flow-arrow" d="M 140 100 L 260 100" />
+            <path class="flow-arrow" d="M 340 100 L 460 100" />
+            <path class="flow-arrow" d="M 540 100 L 660 100" />
+            <path class="flow-arrow" d="M 700 140 L 700 260" />
+            <path class="flow-arrow" d="M 660 300 L 540 300" />
+            <path class="flow-arrow" d="M 460 300 L 340 300" />
+            <path class="flow-arrow" d="M 260 300 L 140 300" />
+
+            <!-- 并行流程箭头（腾库任务） -->
+            <path class="parallel-flow" d="M 100 140 L 100 200" />
+            <path class="parallel-flow" d="M 140 225 L 260 225 Q 280 225 280 245 L 280 260" />
+
+            <!-- 可调整箭头（车辆和卸货者可随时调整） -->
+            <path class="flow-arrow" d="M 500 140 Q 500 200 600 200 Q 700 200 700 140" stroke-dasharray="3,3" opacity="0.6" />
+            <text x="600" y="195" font-size="10" fill="#666" text-anchor="middle">可随时调整</text>
+
+            <!-- 流程说明 -->
+            <text x="500" y="450" font-size="16" font-weight="600" fill="#333" text-anchor="middle">饲料进货完整流程</text>
+            <text x="500" y="470" font-size="12" fill="#666" text-anchor="middle">从库存警报到流程完成的8个关键步骤</text>
+
+            <!-- 关键节点标注 -->
+            <g>
+                <rect x="50" y="500" width="200" height="80" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1" />
+                <text x="150" y="520" font-size="12" font-weight="600" fill="#333" text-anchor="middle">关键控制点</text>
+                <text x="60" y="540" font-size="10" fill="#666">• 库存警报触发</text>
+                <text x="60" y="555" font-size="10" fill="#666">• 厂家对比选择</text>
+                <text x="60" y="570" font-size="10" fill="#666">• 到达拍照确认</text>
+            </g>
+
+            <g>
+                <rect x="300" y="500" width="200" height="80" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1" />
+                <text x="400" y="520" font-size="12" font-weight="600" fill="#333" text-anchor="middle">并行任务</text>
+                <text x="310" y="540" font-size="10" fill="#666">• 腾库与进货并行</text>
+                <text x="310" y="555" font-size="10" fill="#666">• 车辆卸货可调整</text>
+                <text x="310" y="570" font-size="10" fill="#666">• 实时状态跟踪</text>
+            </g>
+
+            <g>
+                <rect x="550" y="500" width="200" height="80" rx="10" fill="#f8f9fa" stroke="#e0e0e0" stroke-width="1" />
+                <text x="650" y="520" font-size="12" font-weight="600" fill="#333" text-anchor="middle">质量控制</text>
+                <text x="560" y="540" font-size="10" fill="#666">• 运输质量监控</text>
+                <text x="560" y="555" font-size="10" fill="#666">• 卸货质量检查</text>
+                <text x="560" y="570" font-size="10" fill="#666">• 清点损耗统计</text>
+            </g>
+        </svg>
+
+        <div class="legend">
+            <h3>流程图说明</h3>
+            <div class="legend-item">
+                <div class="legend-line" style="background: #667eea;"></div>
+                <span>主要流程路径</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dash"></div>
+                <span>并行任务流程</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E);"></div>
+                <span>触发节点 - 库存警报</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #4ECDC4, #44A08D);"></div>
+                <span>选择节点 - 厂家选择</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                <span>完成节点 - 流程结束</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #FFA726, #FFB74D);"></div>
+                <span>并行任务 - 腾库作业</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showStepDetails(step) {
+            const stepDetails = {
+                1: {
+                    title: "步骤1: 库存警报",
+                    content: "• 饲料存量监控\n• 自动触发警报\n• 选择饲料类型\n• 确定采购数量\n• 生成腾库任务"
+                },
+                2: {
+                    title: "步骤2: 选择厂家",
+                    content: "• 厂家信息对比\n• 价格分析\n• 支付方式对比\n• 运输成本评估\n• 交货期确认"
+                },
+                3: {
+                    title: "步骤3: 选择运输车辆",
+                    content: "• 运费对比\n• 运输时间评估\n• 载重能力\n• 运输质量评价\n• 车辆可用性"
+                },
+                4: {
+                    title: "步骤4: 选择卸货者",
+                    content: "• 卸货价格对比\n• 卸货效率评估\n• 人员数量配置\n• 卸货质量保证\n• 可用时间确认"
+                },
+                5: {
+                    title: "步骤5: 车辆到达确认",
+                    content: "• 拍照上传（司机、车牌、送货单同框）\n• 记录实际运输时间\n• 记录运输成本\n• 确认货物状态\n• 通知卸货队"
+                },
+                6: {
+                    title: "步骤6: 卸货流程",
+                    content: "• 卸货开始确认\n• 实时进度跟踪\n• 记录开始时间\n• 记录结束时间\n• 卸货质量监控"
+                },
+                7: {
+                    title: "步骤7: 清点流程",
+                    content: "• 拍照记录整体状况\n• 统计破损量\n• 统计打湿量\n• 确认实际收货量\n• 质量等级评价"
+                },
+                8: {
+                    title: "步骤8: 流程完成",
+                    content: "• 更新库存数据\n• 同步财务记录\n• 建立质量档案\n• 区块链记录\n• 生成完成报告"
+                },
+                'parallel': {
+                    title: "并行任务: 腾库作业",
+                    content: "• 清理指定库房\n• 准备存储空间\n• 检查库房设施\n• 与进货流程并行\n• 确保及时完成"
+                }
+            };
+
+            const detail = stepDetails[step];
+            if (detail) {
+                alert(`${detail.title}\n\n${detail.content}`);
+            }
+        }
+
+        // 添加交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const stepNodes = document.querySelectorAll('.step-node');
+            
+            stepNodes.forEach(node => {
+                node.addEventListener('mouseenter', function() {
+                    this.style.filter = 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))';
+                });
+                
+                node.addEventListener('mouseleave', function() {
+                    this.style.filter = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔场管理系统 - 养殖批次详情</title>
+    <link href="../static/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/all.min.css">
+    <script src="../static/chart.js"></script>
+    <style>
+        :root {
+            --color-primary: #3B82F6;
+            --color-secondary: #10B981;
+            --color-warning: #FBBF24;
+            --color-danger: #EF4444;
+            --color-info: #6366F1;
+        }
+        .bg-primary { background-color: var(--color-primary); }
+        .bg-secondary { background-color: var(--color-secondary); }
+        .bg-warning { background-color: var(--color-warning); }
+        .bg-danger { background-color: var(--color-danger); }
+        .bg-info { background-color: var(--color-info); }
+        .text-primary { color: var(--color-primary); }
+        .text-secondary { color: var(--color-secondary); }
+        .text-warning { color: var(--color-warning); }
+        .text-danger { color: var(--color-danger); }
+        .text-info { color: var(--color-info); }
+        .border-primary { border-color: var(--color-primary); }
+        .border-secondary { border-color: var(--color-secondary); }
+        .border-warning { border-color: var(--color-warning); }
+        .border-danger { border-color: var(--color-danger); }
+        .border-info { border-color: var(--color-info); }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-gray-500 hover:text-primary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <span class="text-2xl font-bold text-primary">渔场管理系统</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-bell text-gray-600"></i>
+                </button>
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-cog text-gray-600"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="text-sm font-medium">管理员</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">养殖批次详情</h1>
+            <div class="flex space-x-2">
+                <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-filter mr-2"></i> 筛选
+                </button>
+                <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-download mr-2"></i> 导出
+                </button>
+                <button class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center">
+                    <i class="fas fa-plus mr-2"></i> 添加养殖批次
+                </button>
+            </div>
+        </div>
+        
+        <!-- 养殖批次概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">活跃养殖批次</p>
+                        <h3 class="text-2xl font-bold mt-1">4</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>较上月增加 1</p>
+                    </div>
+                    <div class="card-icon bg-blue-100 text-primary">
+                        <i class="fas fa-fish text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">平均养殖天数</p>
+                        <h3 class="text-2xl font-bold mt-1">82 天</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>较上月增加 5 天</p>
+                    </div>
+                    <div class="card-icon bg-green-100 text-secondary">
+                        <i class="fas fa-calendar-alt text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">平均饵料系数</p>
+                        <h3 class="text-2xl font-bold mt-1">1.42</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-down mr-1"></i>较上月降低 0.05</p>
+                    </div>
+                    <div class="card-icon bg-yellow-100 text-warning">
+                        <i class="fas fa-drumstick-bite text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">平均病死率</p>
+                        <h3 class="text-2xl font-bold mt-1">2.1%</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-down mr-1"></i>较上月降低 0.3%</p>
+                    </div>
+                    <div class="card-icon bg-red-100 text-danger">
+                        <i class="fas fa-heartbeat text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 养殖批次列表 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">养殖批次列表</h3>
+                <div class="relative">
+                    <input type="text" placeholder="搜索养殖批次..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">养殖批次</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">鱼类</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">养殖池</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">开始日期</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">已养殖/总天数</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前重量</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">批次-C001</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">鲈鱼</td>
+                            <td class="px-4 py-4 text-sm">A01-P01, A01-P02</td>
+                            <td class="px-4 py-4 text-sm">2025-04-03</td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="mr-2">75/180</span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-primary rounded-full h-1.5" style="width: 42%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">450g/尾</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">查看</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">批次-K001</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">鳜鱼</td>
+                            <td class="px-4 py-4 text-sm">A02-P01, A02-P02</td>
+                            <td class="px-4 py-4 text-sm">2025-03-18</td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="mr-2">90/150</span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-primary rounded-full h-1.5" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">520g/尾</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">查看</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">批次-L001</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">罗非鱼</td>
+                            <td class="px-4 py-4 text-sm">A03-P01, A03-P02</td>
+                            <td class="px-4 py-4 text-sm">2025-03-25</td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="mr-2">83/120</span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-primary rounded-full h-1.5" style="width: 69%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">380g/尾</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">需关注</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">查看</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">批次-J001</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">鳕鱼</td>
+                            <td class="px-4 py-4 text-sm">A04-P01, A04-P02</td>
+                            <td class="px-4 py-4 text-sm">2025-04-15</td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="mr-2">62/120</span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-primary rounded-full h-1.5" style="width: 52%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">280g/尾</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">查看</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">批次-C002</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">鲈鱼</td>
+                            <td class="px-4 py-4 text-sm">B01-P01, B01-P02</td>
+                            <td class="px-4 py-4 text-sm">2025-01-10</td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="mr-2">180/180</span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-secondary rounded-full h-1.5" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">1.2kg/尾</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">已完成</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">查看</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <p class="text-sm text-gray-500">显示 1-5 条，共 12 条</p>
+                <div class="flex space-x-1">
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-primary bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 批次详情 - 鲈鱼养殖批次 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                        <i class="fas fa-fish"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">鲈鱼养殖批次 (批次-C001)</h3>
+                        <p class="text-sm text-gray-500">开始日期: 2025-04-03 | 预计结束: 2025-09-30</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                        <i class="fas fa-edit mr-2"></i> 编辑
+                    </button>
+                    <button class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i> 查看趋势
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 批次进度 -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-sm font-medium">批次进度</p>
+                    <p class="text-sm text-gray-500">已养殖 75 天，剩余 105 天</p>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+                    <div class="bg-primary rounded-full h-2.5" style="width: 42%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>0%</span>
+                    <span>42%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            
+            <!-- 批次数据卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-sm text-gray-500">当前重量</p>
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary">
+                            <i class="fas fa-weight"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold">450g/尾</h4>
+                    <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up mr-1"></i>较上周增加 30g</p>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500">目标重量</span>
+                            <span class="font-medium">1.2kg/尾</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-primary rounded-full h-1.5" style="width: 37.5%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-sm text-gray-500">已消耗饵料</p>
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-warning">
+                            <i class="fas fa-drumstick-bite"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold">5,850 kg</h4>
+                    <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up mr-1"></i>较上周增加 450kg</p>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500">饵料系数</span>
+                            <span class="font-medium">1.35</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">预计总消耗</span>
+                            <span class="font-medium">15,600 kg</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-sm text-gray-500">病死率</p>
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-danger">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold">1.8%</h4>
+                    <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-down mr-1"></i>较上周降低 0.2%</p>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500">目标病死率</span>
+                            <span class="font-medium">≤ 3%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-green-500 rounded-full h-1.5" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-sm text-gray-500">经济效益</p>
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-secondary">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                    <h4 class="text-xl font-bold">已消耗: ¥78,500</h4>
+                    <p class="text-xs text-gray-500 mt-1">预计总收入: ¥195,000</p>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-500">预计利润</span>
+                            <span class="font-medium text-green-500">¥58,000</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">预计利润率</span>
+                            <span class="font-medium text-green-500">29.7%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 生长曲线和饵料消耗 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h4 class="text-base font-bold mb-4">生长曲线</h4>
+                    <div class="h-64">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h4 class="text-base font-bold mb-4">饵料消耗</h4>
+                    <div class="h-64">
+                        <canvas id="feedConsumptionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 水质参数和健康状况 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h4 class="text-base font-bold mb-4">水质参数</h4>
+                    <div class="h-64">
+                        <canvas id="waterQualityChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-6">
+                    <h4 class="text-base font-bold mb-4">健康状况记录</h4>
+                    <div class="overflow-y-auto max-h-64">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">检查项目</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">结果</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">处理措施</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-4 py-3 text-sm">2025-06-10</td>
+                                    <td class="px-4 py-3 text-sm">常规检查</td>
+                                    <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span></td>
+                                    <td class="px-4 py-3 text-sm">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm">2025-05-25</td>
+                                    <td class="px-4 py-3 text-sm">鳃部检查</td>
+                                    <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">轻微异常</span></td>
+                                    <td class="px-4 py-3 text-sm">添加水质改良剂</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm">2025-05-10</td>
+                                    <td class="px-4 py-3 text-sm">常规检查</td>
+                                    <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span></td>
+                                    <td class="px-4 py-3 text-sm">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm">2025-04-25</td>
+                                    <td class="px-4 py-3 text-sm">常规检查</td>
+                                    <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span></td>
+                                    <td class="px-4 py-3 text-sm">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm">2025-04-10</td>
+                                    <td class="px-4 py-3 text-sm">常规检查</td>
+                                    <td class="px-4 py-3 text-sm"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">正常</span></td>
+                                    <td class="px-4 py-3 text-sm">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-8 py-6">
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-500 text-sm">
+                &copy; 2023 渔场管理系统. 保留所有权利.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 生长曲线图表
+        const growthCtx = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: ['4月初', '4月中', '4月底', '5月初', '5月中', '5月底', '6月初', '6月中'],
+                datasets: [{
+                    label: '平均重量 (g)',
+                    data: [50, 120, 180, 250, 320, 380, 420, 450],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `平均重量: ${context.raw}g`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: '重量 (g)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 饵料消耗图表
+        const feedConsumptionCtx = document.getElementById('feedConsumptionChart').getContext('2d');
+        const feedConsumptionChart = new Chart(feedConsumptionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['4月初', '4月中', '4月底', '5月初', '5月中', '5月底', '6月初', '6月中'],
+                datasets: [{
+                    label: '饵料消耗 (kg)',
+                    data: [350, 450, 550, 650, 750, 850, 950, 1300],
+                    backgroundColor: '#FBBF24',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: '饵料消耗 (kg)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 水质参数图表
+        const waterQualityCtx = document.getElementById('waterQualityChart').getContext('2d');
+        const waterQualityChart = new Chart(waterQualityCtx, {
+            type: 'line',
+            data: {
+                labels: ['4月初', '4月中', '4月底', '5月初', '5月中', '5月底', '6月初', '6月中'],
+                datasets: [
+                    {
+                        label: '溶氧量 (mg/L)',
+                        data: [6.8, 6.5, 6.2, 5.9, 5.7, 5.5, 5.8, 6.0],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'pH值',
+                        data: [7.2, 7.3, 7.4, 7.3, 7.2, 7.1, 7.2, 7.3],
+                        borderColor: '#10B981',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: '水温 (°C)',
+                        data: [18, 19, 20, 22, 24, 25, 26, 27],
+                        borderColor: '#F59E0B',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        yAxisID: 'y2'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: '溶氧量 (mg/L)'
+                        },
+                        min: 4,
+                        max: 8,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'pH值'
+                        },
+                        min: 6.5,
+                        max: 8,
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: false,
+                        min: 15,
+                        max: 30
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

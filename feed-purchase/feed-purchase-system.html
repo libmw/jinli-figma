@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔业养殖饲料进货流程系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../static/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1E88E5',
+                        secondary: '#42A5F5',
+                        accent: '#0D47A1',
+                        success: '#4CAF50',
+                        warning: '#FFC107',
+                        danger: '#F44336',
+                        info: '#2196F3',
+                        light: '#E3F2FD',
+                        dark: '#0D47A1'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            }
+            .btn-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary text-white shadow-md fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center">
+                <button id="backBtn" class="mr-4 text-white hover:text-light transition-colors">
+                    <i class="fa fa-arrow-left text-xl"></i>
+                </button>
+                <h1 id="pageTitle" class="text-xl font-bold">饲料进货流程</h1>
+            </div>
+            <div>
+                <button id="notificationBtn" class="text-white hover:text-light transition-colors relative">
+                    <i class="fa fa-bell text-xl"></i>
+                    <span id="notificationBadge" class="absolute -top-1 -right-1 bg-danger text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="container mx-auto px-4 pt-20 pb-20">
+        <!-- 流程状态指示器 -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
+                <div class="absolute top-1/2 left-0 right-0 h-1 bg-primary -translate-y-1/2 z-0 transition-all duration-500" id="progressBar" style="width: 0%"></div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step1Icon" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md">
+                        <i class="fa fa-exclamation-triangle"></i>
+                    </div>
+                    <span class="text-xs mt-2 font-medium">库存报警</span>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step2Icon" class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shadow-md">
+                        <i class="fa fa-archive"></i>
+                    </div>
+                    <span class="text-xs mt-2 font-medium">腾库任务</span>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step3Icon" class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shadow-md">
+                        <i class="fa fa-truck"></i>
+                    </div>
+                    <span class="text-xs mt-2 font-medium">进货流程</span>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step4Icon" class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shadow-md">
+                        <i class="fa fa-camera"></i>
+                    </div>
+                    <span class="text-xs mt-2 font-medium">到货拍照</span>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center">
+                    <div id="step5Icon" class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center shadow-md">
+                        <i class="fa fa-cubes"></i>
+                    </div>
+                    <span class="text-xs mt-2 font-medium">清点入库</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页面内容容器 -->
+        <div id="pageContent">
+            <!-- 库存报警页面 -->
+            <div id="stockAlertPage" class="page active">
+                <div class="bg-white rounded-xl p-5 shadow-lg mb-6">
+                    <div class="flex items-start mb-4">
+                        <div class="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center mr-4">
+                            <i class="fa fa-exclamation-triangle text-warning text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">饲料库存报警</h2>
+                            <p class="text-gray-600">以下饲料库存低于警戒线，请及时补货</p>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">饲料名称</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">当前库存</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">警戒库存</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fa fa-fish text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">虾用配合饲料</div>
+                                                <div class="text-xs text-gray-500">高蛋白型</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">120 袋</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">200 袋</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="startPurchaseProcess('虾用配合饲料（高蛋白型）')">
+                                            发起进货
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fa fa-fish text-green-600"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">鱼类浮性饲料</div>
+                                                <div class="text-xs text-gray-500">幼鱼专用</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">85 袋</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">150 袋</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="startPurchaseProcess('鱼类浮性饲料（幼鱼专用）')">
+                                            发起进货
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fa fa-water text-purple-600"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">蟹类专用饲料</div>
+                                                <div class="text-xs text-gray-500">成蟹期</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-danger">50 袋</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm text-danger">100 袋</div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="startPurchaseProcess('蟹类专用饲料（成蟹期）')">
+                                            发起进货
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 shadow-lg">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">库存预警设置</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">预警通知方式</p>
+                                <p class="text-xs text-gray-500">选择接收库存预警的方式</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">短信</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded" checked>
+                                    <span class="ml-2 text-sm text-gray-700">APP</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-primary rounded">
+                                    <span class="ml-2 text-sm text-gray-700">邮件</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">预警触发阈值</p>
+                                <p class="text-xs text-gray-500">设置库存低于多少时触发预警</p>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="range" min="10" max="30" value="20" class="w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                                <span class="ml-2 text-sm text-gray-700">20%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 腾库任务页面 -->
+            <div id="warehouseTaskPage" class="page hidden">
+                <div class="bg-white rounded-xl p-5 shadow-lg mb-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 rounded-full bg-info/20 flex items-center justify-center mr-4">
+                                <i class="fa fa-archive text-info text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-800">腾库任务</h2>
+                                <p class="text-gray-600">为即将到货的饲料准备存储空间</p>
+                            </div>
+                        </div>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow btn-hover">
+                            <i class="fa fa-plus mr-1"></i> 新增任务
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full bg-success mr-2"></span>
+                                    <h3 class="font-medium text-gray-800">整理A区货架</h3>
+                                </div>
+                                <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">已完成</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">清理并整理A区1-5号货架，为新到的虾用配合饲料腾出空间</p>
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span>负责人：张明</span>
+                                <span>完成时间：2025-07-12 15:30</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full bg-warning mr-2"></span>
+                                    <h3 class="font-medium text-gray-800">转移B区旧饲料</h3>
+                                </div>
+                                <span class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">进行中</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">将B区过期的鱼苗饲料转移至临时存放区，并进行分类处理</p>
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span>负责人：李强</span>
+                                <span>截止时间：2025-07-15 10:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full bg-gray-400 mr-2"></span>
+                                    <h3 class="font-medium text-gray-800">检查C区货架</h3>
+                                </div>
+                                <span class="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded-full">未开始</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">检查C区货架承重能力，确保能承受新到的蟹类专用饲料</p>
+                            <div class="flex items-center justify-between text-xs text-gray-500">
+                                <span>负责人：王芳</span>
+                                <span>截止时间：2025-07-14 18:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 shadow-lg">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">腾库进度统计</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-600">总任务数</span>
+                                <span class="text-xl font-bold text-gray-800">8</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-600">已完成</span>
+                                <span class="text-xl font-bold text-success">3</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-success h-2 rounded-full" style="width: 37.5%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-600">进行中</span>
+                                <span class="text-xl font-bold text-warning">4</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-warning h-2 rounded-full" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-600">未开始</span>
+                                <span class="text-xl font-bold text-gray-400">1</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gray-400 h-2 rounded-full" style="width: 12.5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 进货流程页面 -->
+            <div id="purchaseProcessPage" class="page hidden">
+                <div class="bg-white rounded-xl p-5 shadow-lg mb-6">
+                    <div class="flex items-start mb-4">
+                        <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4">
+                            <i class="fa fa-truck text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">进货流程</h2>
+                            <p class="text-gray-600" id="selectedFeedType">虾用配合饲料（高蛋白型）</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 选择厂家选项卡 -->
+                    <div id="selectManufacturerTab" class="tab-content active">
+                        <h3 class="text-md font-semibold text-gray-800 mb-4">选择饲料供应商</h3>
+                        
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索供应商..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-building text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">海洋生物饲料有限公司</h4>
+                                        <p class="text-sm text-gray-500">广东省广州市</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showManufacturerDetail('海洋生物饲料有限公司')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">单价：</span>¥180/袋
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">支付方式：</span>货到付款
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输成本：</span>¥1.5/袋
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-building text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">南方水产饲料集团</h4>
+                                        <p class="text-sm text-gray-500">福建省厦门市</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showManufacturerDetail('南方水产饲料集团')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">单价：</span>¥175/袋
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">支付方式：</span>预付30%
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输成本：</span>¥2.0/袋
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-building text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">东方渔业科技有限公司</h4>
+                                        <p class="text-sm text-gray-500">浙江省宁波市</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showManufacturerDetail('东方渔业科技有限公司')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">单价：</span>¥185/袋
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">支付方式：</span>全额预付
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输成本：</span>¥1.2/袋
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" onclick="goBack()">
+                                返回
+                            </button>
+                            <button class="px-4 py-2 bg-primary text-white rounded-lg shadow btn-hover" onclick="showSelectVehicleTab()">
+                                下一步
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 选择运输车辆选项卡 -->
+                    <div id="selectVehicleTab" class="tab-content hidden">
+                        <h3 class="text-md font-semibold text-gray-800 mb-4">选择运输车辆</h3>
+                        
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索运输车辆..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-truck text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">粤A-88888</h4>
+                                        <p class="text-sm text-gray-500">载重：10吨 | 车型：厢式货车</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showVehicleDetail('粤A-88888')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运费：</span>¥2000/次
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输时间：</span>约2天
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输质量：</span>98%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-truck text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">闽D-66666</h4>
+                                        <p class="text-sm text-gray-500">载重：8吨 | 车型：冷藏车</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showVehicleDetail('闽D-66666')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运费：</span>¥2200/次
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输时间：</span>约1.5天
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输质量：</span>99%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-truck text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">浙B-99999</h4>
+                                        <p class="text-sm text-gray-500">载重：12吨 | 车型：厢式货车</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showVehicleDetail('浙B-99999')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运费：</span>¥1900/次
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输时间：</span>约3天
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">运输质量：</span>97%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" onclick="showSelectManufacturerTab()">
+                                返回
+                            </button>
+                            <button class="px-4 py-2 bg-primary text-white rounded-lg shadow btn-hover" onclick="showSelectUnloaderTab()">
+                                下一步
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 选择卸货者选项卡 -->
+                    <div id="selectUnloaderTab" class="tab-content hidden">
+                        <h3 class="text-md font-semibold text-gray-800 mb-4">选择卸货人员</h3>
+                        
+                        <div class="mb-4">
+                            <div class="relative">
+                                <input type="text" placeholder="搜索卸货人员..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3 mb-6">
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-user text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">王师傅卸货队</h4>
+                                        <p class="text-sm text-gray-500">团队人数：8人 | 经验：5年</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showUnloaderDetail('王师傅卸货队')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货价格：</span>¥0.8/袋
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货效率：</span>约1500袋/天
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货质量：</span>99%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-user text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">李师傅搬运队</h4>
+                                        <p class="text-sm text-gray-500">团队人数：6人 | 经验：3年</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showUnloaderDetail('李师傅搬运队')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货价格：</span>¥0.7/袋
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货效率：</span>约1200袋/天
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货质量：</span>98%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <div class="flex items-center p-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                                        <i class="fa fa-user text-gray-500"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium text-gray-800">张姐卸货组</h4>
+                                        <p class="text-sm text-gray-500">团队人数：10人 | 经验：7年</p>
+                                    </div>
+                                    <button class="text-primary hover:text-primary/80 text-sm font-medium transition-colors" onclick="showUnloaderDetail('张姐卸货组')">
+                                        查看详情
+                                    </button>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-3 flex justify-between text-sm">
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货价格：</span>¥0.9/袋
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货效率：</span>约1800袋/天
+                                    </div>
+                                    <div class="text-gray-600">
+                                        <span class="font-medium">卸货质量：</span>99.5%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" onclick="showSelectVehicleTab()">
+                                返回
+                            </button>
+                            <button class="px-4 py-2 bg-primary text-white rounded-lg shadow btn-hover" onclick="confirmPurchaseOrder()">
+                                确认进货单
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 到货拍照页面 -->
+            <div id="arrivalPhotoPage" class="page hidden">
+                <div class="bg-white rounded-xl p-5 shadow-lg mb-6">
+                    <div class="flex items-start mb-4">
+                        <div class="w-12 h-12 rounded-full bg-info/20 flex items-center justify-center mr-4">
+                            <i class="fa fa-camera text-info text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">到货拍照确认</h2>
+                            <p class="text-gray-600">请拍摄包含司机、车牌号、送货单的照片</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                            <div class="mb-4">
+                                <i class="fa fa-camera text-4xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-md font-medium text-gray-700 mb-2">点击上传照片</h3>
+                            <p class="text-sm text-gray-500 mb-4">照片需包含司机、车牌号、送货单</p>
+                            <label class="inline-block cursor-pointer">
+                                <span class="bg-primary text-white px-4 py-2 rounded-lg shadow btn-hover">
+                                    <i class="fa fa-upload mr-1"></i> 选择照片
+                                </span>
+                                <input type="file" class="hidden" accept="image/*" id="arrivalPhotoUpload">
+                            </label>
+                        </div>
+                        
+                        <div id="previewContainer" class="hidden mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">预览</h4>
+                            <div class="relative">
+                                <img id="arrivalPhotoPreview" src="" alt="到货照片预览" class="w-full h-auto rounded-lg border border-gray-200">
+                                <button id="removePhotoBtn" class="absolute top-2 right-2 bg-white text-gray-500 hover:text-gray-700 p-1 rounded-full shadow-md">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">运输时间</label>
+                            <input type="text" placeholder="例如: 3天2小时" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">运输成本</label>
+                            <input type="text" placeholder="例如: 2500元" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" onclick="goBack()">
+                            返回
+                        </button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg shadow btn-hover" onclick="startUnloading()">
+                            开始卸货
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 清点入库页面 -->
+            <div id="inventoryCheckPage" class="page hidden">
+                <div class="bg-white rounded-xl p-5 shadow-lg mb-6">
+                    <div class="flex items-start mb-4">
+                        <div class="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center mr-4">
+                            <i class="fa fa-cubes text-success text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">清点入库</h2>
+                            <p class="text-gray-600">请清点货物并记录破损和打湿情况</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">订单数量</label>
+                                <input type="number" value="300" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">实际到货</label>
+                                <input type="number" placeholder="输入实际到货数量" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">破损数量</label>
+                            <input type="number" placeholder="输入破损数量" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">打湿数量</label>
+                            <input type="number" placeholder="输入打湿数量" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                            <textarea rows="3" placeholder="请输入备注信息..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">上传清点照片</h3>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                            <div class="mb-4">
+                                <i class="fa fa-camera text-4xl text-gray-400"></i>
+                            </div>
+                            <h4 class="text-md font-medium text-gray-700 mb-2">点击上传照片</h4>
+                            <p class="text-sm text-gray-500 mb-4">请上传包含清点过程和货物状态的照片</p>
+                            <label class="inline-block cursor-pointer">
+                                <span class="bg-primary text-white px-4 py-2 rounded-lg shadow btn-hover">
+                                    <i class="fa fa-upload mr-1"></i> 选择照片
+                                </span>
+                                <input type="file" class="hidden" accept="image/*" multiple>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors" onclick="goBack()">
+                            返回
+                        </button>
+                        <button class="px-4 py-2 bg-primary text-white rounded-lg shadow btn-hover" onclick="completeInventoryCheck()">
+                            完成清点
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 完成页面 -->
+            <div id="completePage" class="page hidden">
+                <div class="bg-white rounded-xl p-5 shadow-lg mb-6 text-center">
+                    <div class="w-20 h-20 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fa fa-check text-success text-3xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">进货流程已完成</h2>
+                    <p class="text-gray-600 mb-6">感谢您的操作，本次进货流程已全部完成</p>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">进货信息</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">饲料类型：</span>
+                                <span class="font-medium">虾用配合饲料（高蛋白型）</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">数量：</span>
+                                <span class="font-medium">300袋</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">供应商：</span>
+                                <span class="font-medium">海洋生物饲料有限公司</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">运输车辆：</span>
+                                <span class="font-medium">粤A-88888</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">卸货团队：</span>
+                                <span class="font-medium">张姐卸货组</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">到货日期：</span>
+                                <span class="font-medium">2025-07-14</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">实际入库：</span>
+                                <span class="font-medium">295袋</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="px-6 py-3 bg-primary text-white rounded-lg shadow btn-hover" onclick="backToStockAlert()">
+                        返回库存报警页面
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部导航 -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4">
+        <div class="flex justify-around">
+            <a href="#" class="flex flex-col items-center text-primary">
+                <i class="fa fa-home text-xl"></i>
+                <span class="text-xs mt-1">首页</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-calendar text-xl"></i>
+                <span class="text-xs mt-1">任务</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-bar-chart text-xl"></i>
+                <span class="text-xs mt-1">统计</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-400 hover:text-primary transition-colors">
+                <i class="fa fa-cog text-xl"></i>
+                <span class="text-xs mt-1">设置</span>
+            </a>
+        </div>
+    </footer>
+
+    <!-- 模态框 - 厂家详情 -->
+    <div id="manufacturerDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-5 max-w-md w-full mx-4 transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800" id="manufacturerModalTitle">厂家详情</h3>
+                <button onclick="closeModal('manufacturerDetailModal')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fa fa-building text-gray-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-800" id="manufacturerName">海洋生物饲料有限公司</h4>
+                        <p class="text-sm text-gray-500" id="manufacturerLocation">广东省广州市</p>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">产品信息</h4>
+                    <div class="grid grid-cols-

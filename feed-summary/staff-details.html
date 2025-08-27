@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔场管理系统 - 养殖人员详情</title>
+    <link href="../static/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/all.min.css">
+    <script src="../static/chart.js"></script>
+    <style>
+        :root {
+            --color-primary: #3B82F6;
+            --color-secondary: #10B981;
+            --color-warning: #FBBF24;
+            --color-danger: #EF4444;
+            --color-info: #6366F1;
+        }
+        .bg-primary { background-color: var(--color-primary); }
+        .bg-secondary { background-color: var(--color-secondary); }
+        .bg-warning { background-color: var(--color-warning); }
+        .bg-danger { background-color: var(--color-danger); }
+        .bg-info { background-color: var(--color-info); }
+        .text-primary { color: var(--color-primary); }
+        .text-secondary { color: var(--color-secondary); }
+        .text-warning { color: var(--color-warning); }
+        .text-danger { color: var(--color-danger); }
+        .text-info { color: var(--color-info); }
+        .border-primary { border-color: var(--color-primary); }
+        .border-secondary { border-color: var(--color-secondary); }
+        .border-warning { border-color: var(--color-warning); }
+        .border-danger { border-color: var(--color-danger); }
+        .border-info { border-color: var(--color-info); }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-gray-500 hover:text-primary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <span class="text-2xl font-bold text-primary">渔场管理系统</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-bell text-gray-600"></i>
+                </button>
+                <button class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-cog text-gray-600"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="text-sm font-medium">管理员</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">养殖人员详情</h1>
+            <div class="flex space-x-2">
+                <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-filter mr-2"></i> 筛选
+                </button>
+                <button class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center">
+                    <i class="fas fa-download mr-2"></i> 导出
+                </button>
+                <button class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center">
+                    <i class="fas fa-plus mr-2"></i> 添加人员
+                </button>
+            </div>
+        </div>
+        
+        <!-- 人员概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">总人员数量</p>
+                        <h3 class="text-2xl font-bold mt-1">24</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>较上月增加 2 人</p>
+                    </div>
+                    <div class="card-icon bg-blue-100 text-primary">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">本周任务总量</p>
+                        <h3 class="text-2xl font-bold mt-1">68</h3>
+                        <p class="text-xs text-gray-500 mt-2">已完成: 42 | 进行中: 26</p>
+                    </div>
+                    <div class="card-icon bg-green-100 text-secondary">
+                        <i class="fas fa-tasks text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">任务完成率</p>
+                        <h3 class="text-2xl font-bold mt-1">61.8%</h3>
+                        <p class="text-xs text-red-500 mt-2"><i class="fas fa-arrow-down mr-1"></i>较上周下降 3.2%</p>
+                    </div>
+                    <div class="card-icon bg-yellow-100 text-warning">
+                        <i class="fas fa-chart-pie text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 transition-all card-hover">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm">人均任务量</p>
+                        <h3 class="text-2xl font-bold mt-1">2.8</h3>
+                        <p class="text-xs text-green-500 mt-2"><i class="fas fa-arrow-up mr-1"></i>较上周增加 0.3</p>
+                    </div>
+                    <div class="card-icon bg-purple-100 text-info">
+                        <i class="fas fa-user-clock text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 人员分布和任务统计 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold">人员职位分布</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white">全部</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">在职</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">离职</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="staffDistributionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold">任务统计</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white">7天</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">30天</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">季度</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="taskStatisticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 员工任务统计 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">员工任务统计</h3>
+                <div class="relative">
+                    <input type="text" placeholder="搜索员工..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">员工</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">职位</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">未完成任务</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">已完成任务</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">完成率</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-medium">张明</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">养殖主管</td>
+                            <td class="px-4 py-4 text-sm">2</td>
+                            <td class="px-4 py-4 text-sm">8</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-secondary rounded-full h-2" style="width: 80%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium">80%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">分配任务</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-medium">李强</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">饲养员</td>
+                            <td class="px-4 py-4 text-sm">4</td>
+                            <td class="px-4 py-4 text-sm">6</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-secondary rounded-full h-2" style="width: 60%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium">60%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">分配任务</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-medium">王芳</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">水质检测员</td>
+                            <td class="px-4 py-4 text-sm">1</td>
+                            <td class="px-4 py-4 text-sm">9</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-secondary rounded-full h-2" style="width: 90%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium">90%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">分配任务</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-medium">赵伟</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">设备维护员</td>
+                            <td class="px-4 py-4 text-sm">3</td>
+                            <td class="px-4 py-4 text-sm">5</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-warning rounded-full h-2" style="width: 62.5%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium">62.5%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">分配任务</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-medium">刘洋</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">饲养员</td>
+                            <td class="px-4 py-4 text-sm">5</td>
+                            <td class="px-4 py-4 text-sm">3</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-danger rounded-full h-2" style="width: 37.5%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium">37.5%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">分配任务</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <span class="font-medium">陈静</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">数据分析员</td>
+                            <td class="px-4 py-4 text-sm">2</td>
+                            <td class="px-4 py-4 text-sm">7</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                        <div class="bg-secondary rounded-full h-2" style="width: 77.8%"></div>
+                                    </div>
+                                    <span class="text-xs font-medium">77.8%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">分配任务</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <p class="text-sm text-gray-500">显示 1-6 条，共 24 条</p>
+                <div class="flex space-x-1">
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-primary bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">4</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 近期任务列表 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">近期任务列表</h3>
+                <button class="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white">添加任务</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">任务名称</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">负责人</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">开始时间</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">截止时间</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">优先级</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-vial"></i>
+                                    </div>
+                                    <span class="font-medium">水质检测</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                                        <i class="fas fa-user text-xs"></i>
+                                    </div>
+                                    <span>王芳</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">2025-06-15 08:00</td>
+                            <td class="px-4 py-4 text-sm">2025-06-15 17:00</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-danger">高</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">已完成</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">投喂鲈鱼</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                                        <i class="fas fa-user text-xs"></i>
+                                    </div>
+                                    <span>李强</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">2025-06-15 07:00</td>
+                            <td class="px-4 py-4 text-sm">2025-06-15 09:00</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">中</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-secondary">已完成</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <span class="font-medium">增氧机维护</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                                        <i class="fas fa-user text-xs"></i>
+                                    </div>
+                                    <span>赵伟</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">2025-06-15 10:00</td>
+                            <td class="px-4 py-4 text-sm">2025-06-15 16:00</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-danger">高</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-primary">进行中</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <span class="font-medium">数据分析报告</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                                        <i class="fas fa-user text-xs"></i>
+                                    </div>
+                                    <span>陈静</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">2025-06-14 09:00</td>
+                            <td class="px-4 py-4 text-sm">2025-06-16 17:00</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">中</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-primary">进行中</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">鱼类健康检查</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                                        <i class="fas fa-user text-xs"></i>
+                                    </div>
+                                    <span>张明</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">2025-06-16 08:00</td>
+                            <td class="px-4 py-4 text-sm">2025-06-16 12:00</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-danger">高</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">未开始</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                                        <i class="fas fa-fish"></i>
+                                    </div>
+                                    <span class="font-medium">投喂罗非鱼</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-2">
+                                        <i class="fas fa-user text-xs"></i>
+                                    </div>
+                                    <span>刘洋</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-sm">2025-06-16 07:00</td>
+                            <td class="px-4 py-4 text-sm">2025-06-16 09:00</td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning">中</span>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">未开始</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm">
+                                <button class="text-primary hover:text-primary-dark mr-2">详情</button>
+                                <button class="text-gray-500 hover:text-gray-700">编辑</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <p class="text-sm text-gray-500">显示 1-6 条，共 18 条</p>
+                <div class="flex space-x-1">
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-primary bg-primary text-white">1</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">2</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">3</button>
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 员工绩效评估 -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold">员工绩效评估</h3>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white">月度</button>
+                    <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">季度</button>
+                    <button class="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">年度</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">张明</h4>
+                            <p class="text-xs text-gray-500">养殖主管</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">任务完成率</span>
+                                <span class="font-medium">80%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-secondary rounded-full h-2" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">工作质量</span>
+                                <span class="font-medium">92%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-secondary rounded-full h-2" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">团队协作</span>
+                                <span class="font-medium">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-secondary rounded-full h-2" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">综合评分</span>
+                            <span class="text-lg font-bold text-primary">86</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">评价: 优秀，具有良好的管理能力和专业知识</p>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">王芳</h4>
+                            <p class="text-xs text-gray-500">水质检测员</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">任务完成率</span>
+                                <span class="font-medium">90%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-secondary rounded-full h-2" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">工作质量</span>
+                                <span class="font-medium">95%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-secondary rounded-full h-2" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">团队协作</span>
+                                <span class="font-medium">88%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-secondary rounded-full h-2" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">综合评分</span>
+                            <span class="text-lg font-bold text-primary">91</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">评价: 优秀，工作认真负责，检测数据准确</p>
+                    </div>
+                </div>
+                
+                <div class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-primary mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">刘洋</h4>
+                            <p class="text-xs text-gray-500">饲养员</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">任务完成率</span>
+                                <span class="font-medium">37.5%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-danger rounded-full h-2" style="width: 37.5%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">工作质量</span>
+                                <span class="font-medium">65%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-warning rounded-full h-2" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">团队协作</span>
+                                <span class="font-medium">70%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-warning rounded-full h-2" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">综合评分</span>
+                            <span class="text-lg font-bold text-danger">58</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">评价: 需改进，任务完成率低，需加强工作责任心</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-8 py-6">
+        <div class="container mx-auto px-4">
+            <div class="text-center text-gray-500 text-sm">
+                &copy; 2023 渔场管理系统. 保留所有权利.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 人员职位分布图表
+        const staffDistributionCtx = document.getElementById('staffDistributionChart').getContext('2d');
+        const staffDistributionChart = new Chart(staffDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['养殖主管', '饲养员', '水质检测员', '设备维护员', '数据分析员', '其他'],
+                datasets: [{
+                    data: [2, 8, 4, 5, 3, 2],
+                    backgroundColor: [
+                        '#3B82F6',
+                        '#10B981',
+                        '#FBBF24',
+                        '#F59E0B',
+                        '#8B5CF6',
+                        '#6B7280'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((acc, data) => acc + data, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} 人 (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+        
+        // 任务统计图表
+        const taskStatisticsCtx = document.getElementById('taskStatisticsChart').getContext('2d');
+        const taskStatisticsChart = new Chart(taskStatisticsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [
+                    {
+                        label: '已完成任务',
+                        data: [8, 7, 6, 9, 12, 5, 3],
+                        backgroundColor: '#10B981'
+                    },
+                    {
+                        label: '进行中任务',
+                        data: [4, 5, 6, 4, 3, 2, 2],
+                        backgroundColor: '#3B82F6'
+                    },
+                    {
+                        label: '未开始任务',
+                        data: [2, 3, 2, 1, 2, 1, 0],
+                        backgroundColor: '#6B7280'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        title: {
+                            display: true,
+                            text: '任务数量'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

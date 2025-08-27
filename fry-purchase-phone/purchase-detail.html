@@ -1,0 +1,3792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>采购详情 - 鱼种采购系统</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <style>
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 进度条样式 */
+      .progress-bar {
+        height: 8px;
+        background-color: #f3f4f6;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+      }
+
+      /* 步骤样式 */
+      .step-line {
+        width: 2px;
+        background-color: #e5e7eb;
+      }
+
+      .step-active .step-circle {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+        color: white;
+      }
+
+      .step-active .step-line {
+        background-color: var(--color-primary);
+      }
+
+      .step-completed .step-circle {
+        background-color: var(--color-secondary);
+        border-color: var(--color-secondary);
+        color: white;
+      }
+
+      .step-completed .step-line {
+        background-color: var(--color-secondary);
+      }
+
+      /* 图片和视频预览样式 */
+      .image-preview {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      /* 视频预览特殊样式 */
+      video.image-preview {
+        background-color: #000;
+      }
+
+      /* 投喂记录样式 */
+      .feeding-record {
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+      }
+
+      .feeding-record:hover {
+        border-color: var(--color-primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .feeding-image-preview {
+        min-height: 20px;
+      }
+
+      .feeding-image-preview .image-preview {
+        width: 60px;
+        height: 60px;
+        border: 1px solid #e5e7eb;
+      }
+
+      /* 投喂记录列表样式 */
+      #feedingRecordsList:empty::before {
+        content: "暂无投喂记录，点击下方按钮添加";
+        display: block;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 12px;
+        padding: 20px;
+        border: 2px dashed #e5e7eb;
+        border-radius: 8px;
+        background-color: #f9fafb;
+      }
+
+      /* 评分样式 */
+      .rating-star {
+        color: #d1d5db;
+      }
+
+      .rating-star.active {
+        color: #fbbf24;
+      }
+
+      /* 编辑模式相关样式 */
+      .hidden {
+        display: none;
+      }
+
+      /* 过渡效果 */
+      .transition-transform {
+        transition: transform 0.3s ease;
+      }
+
+      /* 表单元素样式 */
+      input:not([type="checkbox"]):not([type="radio"]),
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        font-size: 14px;
+      }
+
+      /* 确保复选框和单选框可见 */
+      input[type="checkbox"],
+      input[type="radio"] {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+      }
+
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1rem;
+        padding-right: 2rem;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="bg-blue-500 text-white p-4 sticky top-0 z-10">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="purchase.html" class="mr-2">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-lg font-bold">采购详情</h1>
+        </div>
+        <div class="flex items-center">
+          <button
+            class="bg-white bg-opacity-30 rounded-full w-8 h-8 flex items-center justify-center"
+          >
+            <i class="fas fa-ellipsis-v text-white"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 供应商信息 (不可编辑) -->
+    <div class="bg-white p-4 mb-3">
+      <h2 class="text-base font-bold mb-3">供应商信息</h2>
+      <div class="flex items-center">
+        <div
+          class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3"
+        >
+          <i class="fas fa-building text-primary text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm font-medium" id="supplier">江南优质鳜鲈鱼种基地</p>
+          <p class="text-xs text-gray-500">
+            已合作3年 · 评分
+            <span class="text-warning"
+              ><i class="fas fa-star"></i><i class="fas fa-star"></i
+              ><i class="fas fa-star"></i><i class="fas fa-star"></i
+              ><i class="fas fa-star-half-alt"></i
+            ></span>
+            4.5/5
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 进度条 -->
+    <div class="bg-white p-4 mb-3">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-base font-bold">当前进度</h2>
+        <div class="text-xs text-primary font-medium">鱼品运输</div>
+      </div>
+      <div class="progress-bar rounded-full overflow-hidden bg-gray-100">
+        <div class="progress-bar-fill bg-primary" style="width: 60%"></div>
+      </div>
+    </div>
+
+    <!-- 基本信息 -->
+    <div class="bg-white p-4 mb-3">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-base font-bold">基本信息</h2>
+        <button
+          id="editModeButton"
+          class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center"
+        >
+          <i class="fas fa-edit text-primary"></i>
+        </button>
+      </div>
+      <!-- 显示模式 -->
+      <div id="infoDisplay" class="grid grid-cols-2 gap-3">
+        <div>
+          <p class="text-xs text-gray-500">鱼种品种</p>
+          <p class="text-sm font-medium" id="fishType">鲈鱼种</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">数量</p>
+          <p class="text-sm font-medium"><span id="quantity">10</span><span>尾</span></p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">单价</p>
+          <p class="text-sm font-medium"><span id="unitPrice">¥0.15</span><span>/尾</span></p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">总金额</p>
+          <p class="text-sm font-medium" id="totalAmount">¥15,000</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">计量方式</p>
+          <p class="text-sm font-medium" id="measureMethod">抽数法</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">创建时间</p>
+          <p class="text-sm font-medium" id="createTime">2023-06-10</p>
+        </div>
+      </div>
+
+      <!-- 编辑模式 (默认隐藏) -->
+      <div id="infoEdit" class="hidden edit-section">
+        <form id="editInfoForm" class="space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-500 block mb-1">鱼种品种</label>
+              <select
+                id="editFishType"
+                class="w-full border rounded p-2 text-sm"
+              >
+                <option value="鲈鱼种">鲈鱼种</option>
+                <option value="鳜鱼种">鳜鱼种</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 block mb-1">数量</label>
+              <div class="flex items-stretch w-full">
+                <input
+                  type="text"
+                  id="editQuantity"
+                  class="border rounded-l px-2 py-2 text-sm h-10"
+                  style="width: calc(100% - 40px);"
+                  value="10"
+                />
+                <span class="bg-gray-100 border-t border-r border-b rounded-r px-2 py-2 text-sm text-gray-600 flex items-center h-10 w-10 justify-center">尾</span>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 block mb-1">单价</label>
+              <div class="flex items-stretch w-full">
+                <input
+                  type="text"
+                  id="editUnitPrice"
+                  class="border rounded-l px-2 py-2 text-sm h-10"
+                  style="width: calc(100% - 40px);"
+                  value="0.15"
+                />
+                <span class="bg-gray-100 border-t border-r border-b rounded-r px-2 py-2 text-sm text-gray-600 flex items-center h-10 w-10 justify-center">/尾</span>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-gray-500 block mb-1">计量方式</label>
+              <select
+                id="editMeasureMethod"
+                class="w-full border rounded p-2 text-sm"
+              >
+                <option value="抽数法">抽数法</option>
+                <option value="打样法">打样法</option>
+                <option value="机器计量">机器计量</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex justify-end space-x-3 mt-4">
+            <button
+              type="button"
+              class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+            >
+              保存
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 采购流程步骤 -->
+    <div class="bg-white p-4 mb-3" id="purchaseFlow">
+      <h2 class="text-base font-bold mb-3">采购流程</h2>
+
+      <!-- 步骤1：现场操作 -->
+      <div class="flex mb-4 step-completed">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+          >
+            1
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold">现场操作</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-secondary mr-2">已完成</span>
+              <button
+                class="step-edit-btn bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center"
+                data-step="1"
+              >
+                <i class="fas fa-pencil-alt text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step1Display">
+            <!-- 鱼种处理 -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <h4 class="text-xs font-bold mb-2">鱼种处理</h4>
+              <div class="mb-2">
+                <p class="text-xs text-gray-500 mb-1">驱虫情况</p>
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./worm_defend.jpg"
+                    class="image-preview"
+                  />
+                  <img
+                    src="./worm_defend2.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div class="mb-2">
+                <p class="text-xs text-gray-500 mb-1">杀菌情况</p>
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./sterilization.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div class="mb-2">
+                <p class="text-xs text-gray-500 mb-1">断食情况</p>
+                <p class="text-xs">已断食48小时</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">鱼种整体状态良好，已完成常规消毒处理</p>
+              </div>
+            </div>
+
+
+
+            <!-- 捕捞 -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <h4 class="text-xs font-bold mb-2">捕捞</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./sample.jpg"
+                    class="image-preview"
+                  />
+                  <img
+                    src="./sample1.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">捕捞作业顺利进行，鱼种活力良好</p>
+              </div>
+            </div>
+
+            <!-- 装鱼 -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <h4 class="text-xs font-bold mb-2">装鱼</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./get_on.jpg"
+                    class="image-preview"
+                  />
+                  <img
+                    src="./get_on1.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">装鱼过程规范，避免鱼种受伤</p>
+              </div>
+            </div>
+
+            <!-- 计量 -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <h4 class="text-xs font-bold mb-2">计量</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./sample.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">计量准确，数量符合采购要求</p>
+              </div>
+            </div>
+
+            <!-- 鱼种上车 -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <h4 class="text-xs font-bold mb-2">鱼种上车</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./get_on.jpg"
+                    class="image-preview"
+                  />
+                  <img
+                    src="./get_on1.jpg"
+                    class="image-preview"
+                  />
+                  <img
+                    src="./get_on2.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">鱼种装车过程顺利，水温控制在适宜范围内</p>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-400 mt-2">2023-06-10 09:30 完成</div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step1Edit">
+            <form id="editStep1Form" class="space-y-4">
+              <!-- 鱼种处理编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">鱼种处理</h4>
+
+                <!-- 驱虫情况 -->
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >驱虫情况</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="wormImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=驱虫1"
+                      class="image-preview"
+                    />
+                    <img
+                      src="https://via.placeholder.com/80x80?text=驱虫2"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="wormImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 杀菌情况 -->
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >杀菌情况</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="sterilizeImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=杀菌1"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="sterilizeImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 断食情况 -->
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >断食情况</label
+                  >
+                  <input
+                    type="text"
+                    id="editFastingStatus"
+                    class="w-full border rounded p-2 text-sm"
+                    value="已断食48小时"
+                  />
+                </div>
+
+                <!-- 备注 -->
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editFishProcessingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+鱼种整体状态良好，已完成常规消毒处理</textarea
+                  >
+                </div>
+              </div>
+
+
+
+              <!-- 捕捞编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">捕捞</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >捕捞照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="catchingImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=捕捞1"
+                      class="image-preview"
+                    />
+                    <img
+                      src="https://via.placeholder.com/80x80?text=捕捞2"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="catchingImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editCatchingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+捕捞作业顺利进行，鱼种活力良好</textarea
+                  >
+                </div>
+              </div>
+
+              <!-- 装鱼编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">装鱼</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >装鱼照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="packingImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=装鱼1"
+                      class="image-preview"
+                    />
+                    <img
+                      src="https://via.placeholder.com/80x80?text=装鱼2"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="packingImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editPackingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+装鱼过程规范，避免鱼种受伤</textarea
+                  >
+                </div>
+              </div>
+
+              <!-- 计量编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">计量</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >计量照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="weighingImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=计量1"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="weighingImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editWeighingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+计量准确，数量符合采购要求</textarea
+                  >
+                </div>
+              </div>
+
+              <!-- 鱼种上车编辑 -->
+              <div class="bg-white border rounded-lg p-3">
+                <h4 class="text-xs font-bold mb-2">鱼种上车</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >上车照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="loadingImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=上车1"
+                      class="image-preview"
+                    />
+                    <img
+                      src="https://via.placeholder.com/80x80?text=上车2"
+                      class="image-preview"
+                    />
+                    <img
+                      src="https://via.placeholder.com/80x80?text=上车3"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="loadingImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editLoadingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+鱼种装车过程顺利，水温控制在适宜范围内</textarea
+                  >
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤2：物流安排 -->
+      <div class="flex mb-4 step-completed">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+          >
+            2
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold">物流安排</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-secondary mr-2">已完成</span>
+              <button
+                class="step-edit-btn bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center"
+                data-step="2"
+              >
+                <i class="fas fa-pencil-alt text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step2Display">
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">车牌号</p>
+                  <p class="text-xs font-medium" id="vehicleNumber">粤A12345</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">公司名称</p>
+                  <p class="text-xs font-medium" id="logisticsCompany">
+                    广州水产物流有限公司
+                  </p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">司机姓名</p>
+                  <p class="text-xs font-medium" id="driverName">张师傅</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">司机电话</p>
+                  <p class="text-xs font-medium" id="driverPhone">
+                    138****5678
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs" id="logisticsNote">
+                  司机有丰富的鱼品运输经验，车辆配备氧气设备
+                </p>
+              </div>
+            </div>
+
+            <!-- 车辆消毒 -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <h4 class="text-xs font-bold mb-2">车辆消毒</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./car_defend.jpg"
+                    class="image-preview"
+                  />
+                  <img
+                    src="./car_defend1.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">运输车辆已进行全面消毒，符合标准要求</p>
+              </div>
+            </div>
+
+            <div class="text-xs text-gray-400 mt-2">2023-06-10 10:15 完成</div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step2Edit">
+            <form id="editStep2Form" class="space-y-4">
+              <div class="bg-white border rounded-lg p-3">
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1"
+                      >车辆来源</label
+                    >
+                    <select
+                      id="vehicleSource"
+                      class="w-full border rounded p-2 text-sm"
+                    >
+                      <option value="自有">自有车辆</option>
+                      <option value="物流公司" selected>物流公司提供</option>
+                      <option value="鱼种公司">鱼种公司提供</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1"
+                      >车牌号</label
+                    >
+                    <input
+                      type="text"
+                      id="editVehicleNumber"
+                      class="w-full border rounded p-2 text-sm"
+                      value="粤A12345"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1"
+                      >公司名称</label
+                    >
+                    <input
+                      type="text"
+                      id="editLogisticsCompany"
+                      class="w-full border rounded p-2 text-sm"
+                      value="广州水产物流有限公司"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1"
+                      >司机姓名</label
+                    >
+                    <input
+                      type="text"
+                      id="editDriverName"
+                      class="w-full border rounded p-2 text-sm"
+                      value="张师傅"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1"
+                      >公司电话</label
+                    >
+                    <input
+                      type="tel"
+                      id="editCompanyPhone"
+                      class="w-full border rounded p-2 text-sm"
+                      value="020-12345678"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1"
+                      >司机电话</label
+                    >
+                    <input
+                      type="tel"
+                      id="editDriverPhone"
+                      class="w-full border rounded p-2 text-sm"
+                      value="13812345678"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editLogisticsNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+司机有丰富的鱼品运输经验，车辆配备氧气设备</textarea
+                  >
+                </div>
+              </div>
+
+              <!-- 车辆消毒编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">车辆消毒</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >消毒照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="disinfectImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=消毒1"
+                      class="image-preview"
+                    />
+                    <img
+                      src="https://via.placeholder.com/80x80?text=消毒2"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="disinfectImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editDisinfectNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+运输车辆已进行全面消毒，符合标准要求</textarea
+                  >
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤3：鱼品运输 -->
+      <div class="flex mb-4 step-active">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+          >
+            3
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold">鱼品运输</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-primary mr-2">进行中</span>
+              <button
+                class="step-edit-btn bg-gray-200 rounded-full w-6 h-6 flex items-center justify-center"
+                data-step="3"
+              >
+                <i class="fas fa-pencil-alt text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step3Display">
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+              <h4 class="text-xs font-bold mb-2">抽查记录 #1</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./sample.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div class="mb-2">
+                <p class="text-xs text-gray-500 mb-1">操作记录</p>
+                <div class="flex space-x-4">
+                  <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                    <span class="text-xs">已换水</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-times-circle text-gray-400 mr-1"></i>
+                    <span class="text-xs text-gray-400">未加药</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">运输2小时后抽查，鱼种活力良好，水质正常</p>
+              </div>
+              <div class="text-xs text-gray-400 mt-1">2023-06-10 12:30</div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <h4 class="text-xs font-bold mb-2">抽查记录 #2</h4>
+              <div class="mb-2">
+                <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                  <img
+                    src="./sample1.jpg"
+                    class="image-preview"
+                  />
+                </div>
+              </div>
+              <div class="mb-2">
+                <p class="text-xs text-gray-500 mb-1">操作记录</p>
+                <div class="flex space-x-4">
+                  <div class="flex items-center">
+                    <i class="fas fa-times-circle text-gray-400 mr-1"></i>
+                    <span class="text-xs text-gray-400">未换水</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                    <span class="text-xs">已加药</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-500 mb-1">备注</p>
+                <p class="text-xs">运输4小时后抽查，鱼种状态稳定，氧气充足</p>
+              </div>
+              <div class="text-xs text-gray-400 mt-1">2023-06-10 14:30</div>
+            </div>
+
+            <div class="flex justify-center mt-3">
+              <button
+                id="addInspectionBtn"
+                class="bg-primary text-white text-xs px-4 py-2 rounded-full"
+              >
+                <i class="fas fa-plus mr-1"></i> 添加抽查记录
+              </button>
+            </div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step3Edit">
+            <form id="editStep3Form" class="space-y-4">
+              <!-- 抽查记录 #1 编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <div class="flex justify-between items-center mb-2">
+                  <h4 class="text-xs font-bold">抽查记录 #1</h4>
+                  <button type="button" class="text-xs text-red-500">
+                    <i class="fas fa-trash-alt"></i> 删除
+                  </button>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >抽查照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="inspection1ImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=抽查1"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="inspection1ImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-2">操作记录</label>
+                  <div class="flex space-x-4">
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="inspection1ChangeWater"
+                        class="mr-2"
+                        checked
+                      />
+                      <span class="text-xs">换水</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="inspection1AddMedicine"
+                        class="mr-2"
+                      />
+                      <span class="text-xs">加药</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editInspection1Note"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+运输2小时后抽查，鱼种活力良好，水质正常</textarea
+                  >
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >抽查时间</label
+                  >
+                  <input
+                    type="datetime-local"
+                    id="editInspection1Time"
+                    class="w-full border rounded p-2 text-sm"
+                    value="2023-06-10T12:30"
+                  />
+                </div>
+              </div>
+
+              <!-- 抽查记录 #2 编辑 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <div class="flex justify-between items-center mb-2">
+                  <h4 class="text-xs font-bold">抽查记录 #2</h4>
+                  <button type="button" class="text-xs text-red-500">
+                    <i class="fas fa-trash-alt"></i> 删除
+                  </button>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >抽查照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="inspection2ImgPreview"
+                  >
+                    <img
+                      src="https://via.placeholder.com/80x80?text=抽查2"
+                      class="image-preview"
+                    />
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="inspection2ImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-2">操作记录</label>
+                  <div class="flex space-x-4">
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="inspection2ChangeWater"
+                        class="mr-2"
+                      />
+                      <span class="text-xs">换水</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="inspection2AddMedicine"
+                        class="mr-2"
+                        checked
+                      />
+                      <span class="text-xs">加药</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editInspection2Note"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  >
+运输4小时后抽查，鱼种状态稳定，氧气充足</textarea
+                  >
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >抽查时间</label
+                  >
+                  <input
+                    type="datetime-local"
+                    id="editInspection2Time"
+                    class="w-full border rounded p-2 text-sm"
+                    value="2023-06-10T14:30"
+                  />
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤4：鱼种下车 -->
+      <div class="flex mb-4">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400"
+          >
+            4
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold text-gray-400">鱼种下车</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-gray-400 mr-2">未开始</span>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step4Display">
+            <div
+              class="border border-dashed border-gray-300 rounded-lg p-3 flex justify-center items-center"
+            >
+              <button
+                id="startStep4Btn"
+                class="text-primary text-xs font-medium"
+              >
+                <i class="fas fa-play-circle mr-1"></i> 开始此步骤
+              </button>
+            </div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step4Edit">
+            <form id="editStep4Form" class="space-y-4">
+              <!-- 车辆到达 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">车辆到达</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >到达照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="arrivalImgPreview"
+                  >
+                    <!-- 默认无图片 -->
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="arrivalImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 鱼种下车 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">下车情况</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >下车照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="unloadingImgPreview"
+                  >
+                    <!-- 默认无图片 -->
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="unloadingImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-2">操作记录</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="unloadingAdjustWater"
+                        class="mr-2"
+                      />
+                      <span class="text-xs">调水</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="unloadingAddSalt"
+                        class="mr-2"
+                      />
+                      <span class="text-xs">施盐</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="unloadingAddMedicine"
+                        class="mr-2"
+                      />
+                      <span class="text-xs">施药</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="unloadingPackBucket"
+                        class="mr-2"
+                      />
+                      <span class="text-xs">装桶</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editUnloadingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >下车工人</label
+                  >
+                  <div class="flex flex-wrap gap-2">
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        class="mr-1"
+                        name="unloadingWorker"
+                        value="张三"
+                      />
+                      <span class="text-xs">张三</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        class="mr-1"
+                        name="unloadingWorker"
+                        value="李四"
+                      />
+                      <span class="text-xs">李四</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        class="mr-1"
+                        name="unloadingWorker"
+                        value="王五"
+                      />
+                      <span class="text-xs">王五</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        class="mr-1"
+                        name="unloadingWorker"
+                        value="赵六"
+                      />
+                      <span class="text-xs">赵六</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤5：入池 -->
+      <div class="flex mb-4">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400"
+          >
+            5
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold text-gray-400">入池</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-gray-400 mr-2">未开始</span>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step5Display">
+            <div
+              class="border border-dashed border-gray-300 rounded-lg p-3 flex justify-center items-center"
+            >
+              <button
+                id="startStep5Btn"
+                class="text-primary text-xs font-medium"
+              >
+                <i class="fas fa-play-circle mr-1"></i> 开始此步骤
+              </button>
+            </div>
+            <!-- 完成后显示的内容 -->
+            <div id="step5CompletedContent" class="hidden">
+              <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                <h4 class="text-xs font-bold mb-2">入池前准备</h4>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  <div>
+                    <p class="text-xs text-gray-500 mb-1">水温 (°C)</p>
+                    <p class="text-xs" id="displayWaterTemp">--</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 mb-1">pH值</p>
+                    <p class="text-xs" id="displayWaterPH">--</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 mb-1">溶解氧 (mg/L)</p>
+                    <p class="text-xs" id="displayWaterOxygen">--</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500 mb-1">氨氮 (mg/L)</p>
+                    <p class="text-xs" id="displayWaterAmmonia">--</p>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <p class="text-xs text-gray-500 mb-1">消毒方式</p>
+                  <p class="text-xs" id="displayDisinfectionMethod">--</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">抗应激准备</p>
+                  <div class="mb-1">
+                    <div class="flex space-x-2 mb-1 overflow-x-auto pb-1" id="displayAntiStressImages">
+                      <!-- 抗应激准备图片将在这里显示 -->
+                    </div>
+                  </div>
+                  <p class="text-xs" id="displayAntiStressNote">--</p>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h4 class="text-xs font-bold mb-2">入池过程</h4>
+                <div class="mb-2">
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="displayPondingImgPreview"
+                  >
+                    <!-- 默认无图片 -->
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <p class="text-xs text-gray-500 mb-1">鱼种正常率</p>
+                  <p class="text-xs" id="displayFryNormalRate">--</p>
+                </div>
+
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">备注</p>
+                  <p class="text-xs" id="displayPondingNote">--</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step5Edit">
+            <form id="editStep5Form" class="space-y-4">
+              <!-- 入池前准备 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">入池前准备</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >水质检测</label
+                  >
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="text-xs text-gray-500 block mb-1"
+                        >水温 (°C)</label
+                      >
+                      <input
+                        type="number"
+                        step="0.1"
+                        id="editWaterTemp"
+                        class="w-full border rounded p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500 block mb-1"
+                        >pH值</label
+                      >
+                      <input
+                        type="number"
+                        step="0.1"
+                        id="editWaterPH"
+                        class="w-full border rounded p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500 block mb-1"
+                        >溶解氧 (mg/L)</label
+                      >
+                      <input
+                        type="number"
+                        step="0.1"
+                        id="editWaterOxygen"
+                        class="w-full border rounded p-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-500 block mb-1"
+                        >氨氮 (mg/L)</label
+                      >
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="editWaterAmmonia"
+                        class="w-full border rounded p-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >消毒方式</label
+                  >
+                  <input
+                    type="text"
+                    id="editDisinfectionMethod"
+                    class="w-full border rounded p-2 text-sm"
+                    placeholder="请输入消毒方式"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >抗应激准备</label
+                  >
+                  <div class="mb-2">
+                    <div
+                      class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                      id="antiStressImgPreview"
+                    >
+                      <!-- 默认无图片 -->
+                    </div>
+                    <div class="flex items-center">
+                      <label
+                        class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                      >
+                        <i class="fas fa-camera mr-1"></i> 上传影像
+                        <input
+                          type="file"
+                          class="hidden"
+                          accept="image/*,video/*"
+                          multiple
+                          id="antiStressImgUpload"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-xs text-gray-500 block mb-1">备注</label>
+                    <textarea
+                      id="editAntiStressNote"
+                      class="w-full border rounded p-2 text-sm"
+                      rows="2"
+                      placeholder="请输入抗应激准备备注"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 入池过程 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">入池过程</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >入池照片</label
+                  >
+                  <div
+                    class="flex space-x-2 mb-2 overflow-x-auto pb-1"
+                    id="pondingImgPreview"
+                  >
+                    <!-- 默认无图片 -->
+                  </div>
+                  <div class="flex items-center">
+                    <label
+                      class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer"
+                    >
+                      <i class="fas fa-camera mr-1"></i> 上传影像
+                      <input
+                        type="file"
+                        class="hidden"
+                        accept="image/*,video/*"
+                        multiple
+                        id="pondingImgUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >鱼种正常率（%）</label
+                  >
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="100"
+                    id="editFryNormalRate"
+                    class="w-full border rounded p-2 text-sm"
+                    placeholder="请输入鱼种正常率"
+                  />
+                </div>
+
+
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1">备注</label>
+                  <textarea
+                    id="editPondingNote"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="2"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤6：投喂 -->
+      <div class="flex mb-4">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400"
+          >
+            6
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold text-gray-400">投喂</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-gray-400 mr-2">未开始</span>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step6Display">
+            <div
+              class="border border-dashed border-gray-300 rounded-lg p-3 flex justify-center items-center"
+            >
+              <span class="text-gray-400 text-xs">请先完成上一步骤</span>
+            </div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step6Edit">
+            <form id="editStep6Form" class="space-y-4">
+              <!-- 投喂记录列表 -->
+              <div id="feedingRecordsList" class="space-y-3">
+                <!-- 投喂记录会动态添加到这里 -->
+              </div>
+
+              <!-- 添加投喂记录按钮 -->
+              <div class="flex justify-center">
+                <button
+                  type="button"
+                  id="addFeedingRecordBtn"
+                  class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm flex items-center"
+                >
+                  <i class="fas fa-plus mr-2"></i>
+                  添加投喂记录
+                </button>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn px-4 py-2 bg-primary text-white rounded-lg text-sm"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步骤7：综合评价 -->
+      <div class="flex mb-4">
+        <div class="flex flex-col items-center mr-4">
+          <div
+            class="step-circle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400"
+          >
+            7
+          </div>
+          <div class="step-line flex-grow mt-2 h-full"></div>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-sm font-bold text-gray-400">综合评价</h3>
+            <div class="flex items-center">
+              <span class="text-xs text-gray-400 mr-2">未开始</span>
+            </div>
+          </div>
+
+          <!-- 显示模式 -->
+          <div class="step-display" id="step7Display">
+            <div
+              class="border border-dashed border-gray-300 rounded-lg p-3 flex justify-center items-center"
+            >
+              <span class="text-gray-400 text-xs">请先完成上一步骤</span>
+            </div>
+          </div>
+
+          <!-- 编辑模式 (默认隐藏) -->
+          <div class="step-edit hidden edit-section" id="step7Edit">
+            <form id="editStep7Form" class="space-y-4">
+              <!-- 综合评分 -->
+              <div class="bg-white border rounded-lg p-3 mb-3">
+                <h4 class="text-xs font-bold mb-2">综合评分</h4>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >鱼种质量评分</label
+                  >
+                  <div class="flex items-center">
+                    <div
+                      id="qualityRating"
+                      class="flex text-xl text-gray-300 cursor-pointer"
+                    >
+                      <i class="fas fa-star mr-1" data-rating="1"></i>
+                      <i class="fas fa-star mr-1" data-rating="2"></i>
+                      <i class="fas fa-star mr-1" data-rating="3"></i>
+                      <i class="fas fa-star mr-1" data-rating="4"></i>
+                      <i class="fas fa-star" data-rating="5"></i>
+                    </div>
+                    <span
+                      id="qualityRatingText"
+                      class="ml-2 text-xs text-gray-500"
+                      >请评分</span
+                    >
+                    <input type="hidden" id="editQualityScore" value="0" />
+                  </div>
+                  <div class="mt-2">
+                    <textarea
+                      id="editQualityComment"
+                      class="w-full border rounded p-2 text-sm"
+                      rows="2"
+                      placeholder="请输入鱼种质量备注..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >物流评分</label
+                  >
+                  <div class="flex items-center">
+                    <div
+                      id="driverRating"
+                      class="flex text-xl text-gray-300 cursor-pointer"
+                    >
+                      <i class="fas fa-star mr-1" data-rating="1"></i>
+                      <i class="fas fa-star mr-1" data-rating="2"></i>
+                      <i class="fas fa-star mr-1" data-rating="3"></i>
+                      <i class="fas fa-star mr-1" data-rating="4"></i>
+                      <i class="fas fa-star" data-rating="5"></i>
+                    </div>
+                    <span
+                      id="driverRatingText"
+                      class="ml-2 text-xs text-gray-500"
+                      >请评分</span
+                    >
+                    <input type="hidden" id="editDriverScore" value="0" />
+                  </div>
+                  <div class="mt-2">
+                    <textarea
+                      id="editDriverComment"
+                      class="w-full border rounded p-2 text-sm"
+                      rows="2"
+                      placeholder="请输入司机评价备注..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >车辆评分</label
+                  >
+                  <div class="flex items-center">
+                    <div
+                      id="vehicleRating"
+                      class="flex text-xl text-gray-300 cursor-pointer"
+                    >
+                      <i class="fas fa-star mr-1" data-rating="1"></i>
+                      <i class="fas fa-star mr-1" data-rating="2"></i>
+                      <i class="fas fa-star mr-1" data-rating="3"></i>
+                      <i class="fas fa-star mr-1" data-rating="4"></i>
+                      <i class="fas fa-star" data-rating="5"></i>
+                    </div>
+                    <span
+                      id="vehicleRatingText"
+                      class="ml-2 text-xs text-gray-500"
+                      >请评分</span
+                    >
+                    <input type="hidden" id="editVehicleScore" value="0" />
+                  </div>
+                  <div class="mt-2">
+                    <textarea
+                      id="editVehicleComment"
+                      class="w-full border rounded p-2 text-sm"
+                      rows="2"
+                      placeholder="请输入车辆评价备注..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >工人评分</label
+                  >
+
+                  <!-- 下车工人评分 -->
+                  <div class="mb-3">
+                    <h5 class="text-xs font-bold mb-2">工人评分</h5>
+                    <div id="unloadingWorkerRatings" class="space-y-3">
+                      <!-- 张三 -->
+                      <div class="bg-gray-50 p-2 rounded">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="text-xs font-medium">张三</span>
+                          <div class="flex items-center">
+                            <div
+                              id="unloadingWorkerRating_张三"
+                              class="flex text-lg text-gray-300 cursor-pointer"
+                            >
+                              <i class="fas fa-star mr-1" data-rating="1"></i>
+                              <i class="fas fa-star mr-1" data-rating="2"></i>
+                              <i class="fas fa-star mr-1" data-rating="3"></i>
+                              <i class="fas fa-star mr-1" data-rating="4"></i>
+                              <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                            <span
+                              id="unloadingWorkerRatingText_张三"
+                              class="ml-2 text-xs text-gray-500"
+                              >请评分</span
+                            >
+                            <input
+                              type="hidden"
+                              id="editUnloadingWorkerScore_张三"
+                              value="0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 李四 -->
+                      <div class="bg-gray-50 p-2 rounded">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="text-xs font-medium">李四</span>
+                          <div class="flex items-center">
+                            <div
+                              id="unloadingWorkerRating_李四"
+                              class="flex text-lg text-gray-300 cursor-pointer"
+                            >
+                              <i class="fas fa-star mr-1" data-rating="1"></i>
+                              <i class="fas fa-star mr-1" data-rating="2"></i>
+                              <i class="fas fa-star mr-1" data-rating="3"></i>
+                              <i class="fas fa-star mr-1" data-rating="4"></i>
+                              <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                            <span
+                              id="unloadingWorkerRatingText_李四"
+                              class="ml-2 text-xs text-gray-500"
+                              >请评分</span
+                            >
+                            <input
+                              type="hidden"
+                              id="editUnloadingWorkerScore_李四"
+                              value="0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 王五 -->
+                      <div class="bg-gray-50 p-2 rounded">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="text-xs font-medium">王五</span>
+                          <div class="flex items-center">
+                            <div
+                              id="unloadingWorkerRating_王五"
+                              class="flex text-lg text-gray-300 cursor-pointer"
+                            >
+                              <i class="fas fa-star mr-1" data-rating="1"></i>
+                              <i class="fas fa-star mr-1" data-rating="2"></i>
+                              <i class="fas fa-star mr-1" data-rating="3"></i>
+                              <i class="fas fa-star mr-1" data-rating="4"></i>
+                              <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                            <span
+                              id="unloadingWorkerRatingText_王五"
+                              class="ml-2 text-xs text-gray-500"
+                              >请评分</span
+                            >
+                            <input
+                              type="hidden"
+                              id="editUnloadingWorkerScore_王五"
+                              value="0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 赵六 -->
+                      <div class="bg-gray-50 p-2 rounded">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="text-xs font-medium">赵六</span>
+                          <div class="flex items-center">
+                            <div
+                              id="unloadingWorkerRating_赵六"
+                              class="flex text-lg text-gray-300 cursor-pointer"
+                            >
+                              <i class="fas fa-star mr-1" data-rating="1"></i>
+                              <i class="fas fa-star mr-1" data-rating="2"></i>
+                              <i class="fas fa-star mr-1" data-rating="3"></i>
+                              <i class="fas fa-star mr-1" data-rating="4"></i>
+                              <i class="fas fa-star" data-rating="5"></i>
+                            </div>
+                            <span
+                              id="unloadingWorkerRatingText_赵六"
+                              class="ml-2 text-xs text-gray-500"
+                              >请评分</span
+                            >
+                            <input
+                              type="hidden"
+                              id="editUnloadingWorkerScore_赵六"
+                              value="0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+                  <div class="mt-2">
+                    <textarea
+                      id="editWorkerComment"
+                      class="w-full border rounded p-2 text-sm"
+                      rows="2"
+                      placeholder="请输入工人评价备注..."
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="text-xs text-gray-500 block mb-1"
+                    >综合评价</label
+                  >
+                  <textarea
+                    id="editOverallComment"
+                    class="w-full border rounded p-2 text-sm"
+                    rows="3"
+                    placeholder="请输入对本次鱼种采购的综合评价..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="flex justify-end space-x-3 mt-4">
+                <button
+                  type="button"
+                  class="cancel-edit-btn px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  class="save-edit-btn flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg text-base font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <i class="fas fa-check-circle"></i>
+                  完成采购
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编辑成功提示 -->
+    <div
+      id="successToast"
+      class="fixed left-0 right-0 bg-green-500 text-white p-3 text-center transition-all duration-300 z-50"
+      style="top: -100px; opacity: 0; visibility: hidden"
+    >
+      修改已保存
+    </div>
+
+    <script>
+      // 获取DOM元素
+      const editModeButton = document.getElementById("editModeButton");
+      const infoDisplay = document.getElementById("infoDisplay");
+      const infoEdit = document.getElementById("infoEdit");
+      const editInfoForm = document.getElementById("editInfoForm");
+      const successToast = document.getElementById("successToast");
+
+      // 显示基本信息编辑表单
+      function showInfoEditForm() {
+        // 将当前显示的值填入表单
+        document.getElementById("editFishType").value =
+          document.getElementById("fishType").textContent;
+        document.getElementById("editQuantity").value =
+          document.getElementById("quantity").textContent;
+        document.getElementById("editUnitPrice").value = document
+          .getElementById("unitPrice")
+          .textContent.replace("¥", "")
+          .replace("/尾", "");
+        document.getElementById("editMeasureMethod").value =
+          document.getElementById("measureMethod").textContent;
+
+        // 切换显示/隐藏
+        infoDisplay.classList.add("hidden");
+        infoEdit.classList.remove("hidden");
+      }
+
+      // 隐藏基本信息编辑表单
+      function hideInfoEditForm() {
+        infoDisplay.classList.remove("hidden");
+        infoEdit.classList.add("hidden");
+      }
+
+      // 保存基本信息编辑内容
+      function saveInfoEdit(e) {
+        e.preventDefault();
+
+        // 获取表单数据
+        const fishType = document.getElementById("editFishType").value;
+        const quantity = document.getElementById("editQuantity").value;
+        const unitPrice = document.getElementById("editUnitPrice").value;
+        const measureMethod =
+          document.getElementById("editMeasureMethod").value;
+
+        // 更新显示内容
+        document.getElementById("fishType").textContent = fishType;
+        document.getElementById("quantity").textContent = quantity;
+        document.getElementById("unitPrice").textContent = `¥${unitPrice}`;
+
+        // 计算总金额
+        const numericQuantity = parseInt(quantity) || 0;
+        const numericPrice = parseFloat(unitPrice) || 0;
+        const totalAmount = (numericQuantity * numericPrice * 1).toLocaleString();
+        document.getElementById("totalAmount").textContent = `¥${totalAmount}`;
+
+        document.getElementById("measureMethod").textContent = measureMethod;
+
+        // 隐藏编辑表单
+        hideInfoEditForm();
+
+        // 显示成功提示
+        showSuccessToast();
+      }
+
+      // 显示成功提示
+      function showSuccessToast() {
+        successToast.style.top = "4rem"; // top-16 (64px)
+        successToast.style.opacity = "1";
+        successToast.style.visibility = "visible";
+        setTimeout(() => {
+          successToast.style.top = "-100px";
+          successToast.style.opacity = "0";
+          successToast.style.visibility = "hidden";
+        }, 2000);
+      }
+
+      // 进入编辑模式 - 显示所有步骤的编辑按钮
+      function enterEditMode() {
+        // 显示所有步骤的编辑按钮
+        document.querySelectorAll(".step-edit-btn").forEach((btn) => {
+          btn.classList.remove("hidden");
+        });
+
+        // 显示基本信息编辑表单
+        showInfoEditForm();
+      }
+
+      // 显示特定步骤的编辑表单
+      function showStepEditForm(stepNumber) {
+        // 获取步骤容器
+        const stepContainer = document
+          .getElementById(`step${stepNumber}Display`)
+          .closest(".flex");
+        const isStartingStep =
+          stepContainer.querySelector('button[id^="startStep"]') !== null;
+
+        // 如果是通过"开始此步骤"按钮点击的，更新步骤状态为"进行中"
+        if (isStartingStep) {
+          // 更新状态文本
+          const statusSpan = stepContainer.querySelector(
+            ".text-xs.text-gray-400"
+          );
+          if (statusSpan) {
+           // statusSpan.textContent = "进行中";
+            //statusSpan.className = "text-xs text-primary mr-2";
+          }
+
+          // 更新步骤圆圈样式
+          const stepCircle = stepContainer.querySelector(".step-circle");
+          if (stepCircle) {
+            stepCircle.className =
+              "step-circle w-8 h-8 rounded-full border-2 border-primary flex items-center justify-center text-xs font-bold text-primary";
+          }
+
+          // 添加active类
+          stepContainer.classList.add("step-active");
+
+          // 更新进度条
+          updateProgressBar();
+        }
+
+        // 隐藏显示模式，显示编辑模式
+        document
+          .getElementById(`step${stepNumber}Display`)
+          .classList.add("hidden");
+
+        // 确保编辑表单存在并可见
+        const editForm = document.getElementById(`step${stepNumber}Edit`);
+        if (editForm) {
+          editForm.classList.remove("hidden");
+
+          // 根据步骤号初始化特定的编辑表单
+          initStepEditForm(stepNumber);
+        } else {
+          console.error(`编辑表单 step${stepNumber}Edit 不存在`);
+        }
+      }
+
+      // 更新进度条函数
+      function updateProgressBar() {
+        // 获取所有步骤（采用与之前相同的方式选择步骤）
+        const purchaseFlowSection = document.querySelector(
+          ".bg-white.p-4.mb-3 h2.text-base.font-bold.mb-3"
+        ).parentElement;
+        const allSteps = Array.from(
+          purchaseFlowSection.querySelectorAll(".flex")
+        ).filter((el) => {
+          return el.querySelector(".step-circle") !== null;
+        });
+        const completedSteps =
+          document.querySelectorAll(".step-completed").length;
+        const activeSteps = document.querySelectorAll(".step-active").length;
+
+        // 计算进度百分比
+        const totalSteps = allSteps.length;
+        const progress =
+          totalSteps > 0
+            ? ((completedSteps + activeSteps * 0.5) / totalSteps) * 100
+            : 0;
+
+        // 更新进度条
+        const progressBarFill = document.querySelector(".progress-bar-fill");
+        if (progressBarFill) {
+          progressBarFill.style.width = `${progress}%`;
+        }
+
+        // 更新进度文本
+        const progressText = document.querySelector(
+          ".text-xs.text-primary.font-medium"
+        );
+        if (progressText) {
+          if (progress === 0) {
+            progressText.textContent = "未开始";
+          } else if (progress < 100) {
+            // 查找当前活动步骤的标题
+            const activeStep = document.querySelector(".step-active");
+            if (activeStep) {
+              const stepTitle = activeStep.querySelector(
+                "h3.text-sm.font-bold"
+              );
+              if (stepTitle) {
+                progressText.textContent = stepTitle.textContent;
+              }
+            }
+          } else {
+            progressText.textContent = "已完成";
+          }
+        }
+      }
+
+      // 初始化特定步骤的编辑表单
+      function initStepEditForm(stepNumber) {
+        switch (parseInt(stepNumber)) {
+          case 1: // 现场操作
+            // 初始化现场操作步骤的表单
+            break;
+
+          case 2: // 物流安排
+            // 初始化物流安排步骤的表单
+            break;
+
+          case 3: // 鱼品运输
+            // 初始化鱼品运输步骤的表单
+            break;
+
+          case 4: // 鱼种下车
+            // 初始化鱼种下车步骤的表单
+            break;
+
+          case 5: // 入池
+            // 初始化入池步骤的表单
+            break;
+
+          case 6: // 投喂
+            // 初始化投喂步骤的表单
+            // 如果没有投喂记录，可以自动添加一条
+            const feedingRecordsList = document.getElementById("feedingRecordsList");
+            if (feedingRecordsList && feedingRecordsList.children.length === 0) {
+              // 可以选择是否自动添加第一条记录
+              // addFeedingRecord();
+            }
+            break;
+
+          case 7: // 综合评价
+            // 初始化综合评价步骤的表单
+            // 设置评分滑块的初始值
+            document.getElementById("qualityScoreValue").textContent =
+              document.getElementById("editQualityScore").value;
+            document.getElementById("driverScoreValue").textContent =
+              document.getElementById("editDriverScore").value;
+            document.getElementById("vehicleScoreValue").textContent =
+              document.getElementById("editVehicleScore").value;
+            break;
+        }
+      }
+
+      // 隐藏特定步骤的编辑表单
+      function hideStepEditForm(stepNumber) {
+        // 显示显示模式，隐藏编辑模式
+        document
+          .getElementById(`step${stepNumber}Display`)
+          .classList.remove("hidden");
+        document
+          .getElementById(`step${stepNumber}Edit`)
+          .classList.add("hidden");
+      }
+
+      // 保存步骤编辑内容
+      function saveStepEdit(e, stepNumber) {
+        e.preventDefault();
+
+        // 根据步骤号处理不同的表单数据
+        switch (parseInt(stepNumber)) {
+          case 1: // 现场操作
+            // 保存鱼种处理信息
+            const fastingStatus =
+              document.getElementById("editFastingStatus").value;
+            const fishProcessingNote = document.getElementById(
+              "editFishProcessingNote"
+            ).value;
+            const catchingNote =
+              document.getElementById("editCatchingNote").value;
+            const packingNote =
+              document.getElementById("editPackingNote").value;
+            const weighingNote =
+              document.getElementById("editWeighingNote").value;
+            const disinfectNote =
+              document.getElementById("editDisinfectNote").value;
+            const loadingNote =
+              document.getElementById("editLoadingNote").value;
+
+            // 这里可以添加更新显示模式的代码
+            // 例如：更新断食情况和备注
+            break;
+
+          case 2: // 物流安排
+            // 保存物流安排信息
+            const vehicleSource =
+              document.getElementById("vehicleSource").value;
+            const vehicleNumber =
+              document.getElementById("editVehicleNumber").value;
+            const logisticsCompany = document.getElementById(
+              "editLogisticsCompany"
+            ).value;
+            const driverName = document.getElementById("editDriverName").value;
+            const companyPhone =
+              document.getElementById("editCompanyPhone").value;
+            const driverPhone =
+              document.getElementById("editDriverPhone").value;
+            const logisticsNote =
+              document.getElementById("editLogisticsNote").value;
+
+            // 更新显示模式
+            document.getElementById("vehicleNumber").textContent =
+              vehicleNumber;
+            document.getElementById("logisticsCompany").textContent =
+              logisticsCompany;
+            document.getElementById("driverName").textContent = driverName;
+            document.getElementById("driverPhone").textContent = driverPhone;
+            document.getElementById("logisticsNote").textContent =
+              logisticsNote;
+            break;
+
+          case 3: // 鱼品运输
+            // 保存鱼品运输信息
+            const inspection1Note = document.getElementById(
+              "editInspection1Note"
+            ).value;
+            const inspection1Time = document.getElementById(
+              "editInspection1Time"
+            ).value;
+            const inspection1ChangeWater = document.getElementById(
+              "inspection1ChangeWater"
+            ).checked;
+            const inspection1AddMedicine = document.getElementById(
+              "inspection1AddMedicine"
+            ).checked;
+            
+            const inspection2Note = document.getElementById(
+              "editInspection2Note"
+            ).value;
+            const inspection2Time = document.getElementById(
+              "editInspection2Time"
+            ).value;
+            const inspection2ChangeWater = document.getElementById(
+              "inspection2ChangeWater"
+            ).checked;
+            const inspection2AddMedicine = document.getElementById(
+              "inspection2AddMedicine"
+            ).checked;
+
+            // 更新显示模式
+            const step3Display = document.getElementById("step3Display");
+            step3Display.innerHTML = `
+              <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                <h4 class="text-xs font-bold mb-2">抽查记录 #1</h4>
+                <div class="mb-2">
+                  <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                    <img src="./sample.jpg" class="image-preview" />
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <p class="text-xs text-gray-500 mb-1">操作记录</p>
+                  <div class="flex space-x-4">
+                    <div class="flex items-center">
+                      <i class="fas ${inspection1ChangeWater ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${inspection1ChangeWater ? '' : 'text-gray-400'}">${inspection1ChangeWater ? '已换水' : '未换水'}</span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas ${inspection1AddMedicine ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${inspection1AddMedicine ? '' : 'text-gray-400'}">${inspection1AddMedicine ? '已加药' : '未加药'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">备注</p>
+                  <p class="text-xs">${inspection1Note}</p>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">${new Date(inspection1Time).toLocaleString('zh-CN', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</div>
+              </div>
+
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h4 class="text-xs font-bold mb-2">抽查记录 #2</h4>
+                <div class="mb-2">
+                  <div class="flex space-x-2 mb-2 overflow-x-auto pb-1">
+                    <img src="./sample1.jpg" class="image-preview" />
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <p class="text-xs text-gray-500 mb-1">操作记录</p>
+                  <div class="flex space-x-4">
+                    <div class="flex items-center">
+                      <i class="fas ${inspection2ChangeWater ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${inspection2ChangeWater ? '' : 'text-gray-400'}">${inspection2ChangeWater ? '已换水' : '未换水'}</span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas ${inspection2AddMedicine ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${inspection2AddMedicine ? '' : 'text-gray-400'}">${inspection2AddMedicine ? '已加药' : '未加药'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">备注</p>
+                  <p class="text-xs">${inspection2Note}</p>
+                </div>
+                <div class="text-xs text-gray-400 mt-1">${new Date(inspection2Time).toLocaleString('zh-CN', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</div>
+              </div>
+
+              <div class="flex justify-center mt-3">
+                <button
+                  id="addInspectionBtn"
+                  class="bg-primary text-white text-xs px-4 py-2 rounded-full"
+                >
+                  <i class="fas fa-plus mr-1"></i> 添加抽查记录
+                </button>
+              </div>
+            `;
+            
+            // 重新绑定添加抽查记录按钮事件
+            const newAddInspectionBtn = document.getElementById("addInspectionBtn");
+            if (newAddInspectionBtn) {
+              newAddInspectionBtn.addEventListener("click", function () {
+                // 先进入编辑模式
+                showStepEditForm(3);
+                // 然后添加新的抽查记录
+                setTimeout(addInspectionRecord, 100);
+              });
+            }
+            break;
+
+          case 4: // 鱼种下车
+            // 保存鱼种下车信息
+            const unloadingNote =
+              document.getElementById("editUnloadingNote").value;
+            const unloadingWorkers = Array.from(
+              document.querySelectorAll('input[name="unloadingWorker"]:checked')
+            ).map((input) => input.value);
+            
+            // 获取新增的checkbox状态
+            const unloadingAdjustWater = document.getElementById("unloadingAdjustWater").checked;
+            const unloadingAddSalt = document.getElementById("unloadingAddSalt").checked;
+            const unloadingAddMedicine = document.getElementById("unloadingAddMedicine").checked;
+            const unloadingPackBucket = document.getElementById("unloadingPackBucket").checked;
+
+            // 更新显示模式 - 如果之前是"未开始"状态，可以更新为"进行中"
+            document.querySelector("#step4Display").innerHTML = `
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <div class="mb-2">
+                  <p class="text-xs text-gray-500 mb-1">下车工人</p>
+                  <p class="text-xs">${unloadingWorkers.join("、")}</p>
+                </div>
+                <div class="mb-2">
+                  <p class="text-xs text-gray-500 mb-1">操作记录</p>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="flex items-center">
+                      <i class="fas ${unloadingAdjustWater ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${unloadingAdjustWater ? '' : 'text-gray-400'}">${unloadingAdjustWater ? '已调水' : '未调水'}</span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas ${unloadingAddSalt ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${unloadingAddSalt ? '' : 'text-gray-400'}">${unloadingAddSalt ? '已施盐' : '未施盐'}</span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas ${unloadingAddMedicine ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${unloadingAddMedicine ? '' : 'text-gray-400'}">${unloadingAddMedicine ? '已施药' : '未施药'}</span>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas ${unloadingPackBucket ? 'fa-check-circle text-green-500' : 'fa-times-circle text-gray-400'} mr-1"></i>
+                      <span class="text-xs ${unloadingPackBucket ? '' : 'text-gray-400'}">${unloadingPackBucket ? '已装桶' : '未装桶'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">备注</p>
+                  <p class="text-xs">${unloadingNote || "无"}</p>
+                </div>
+              </div>
+              <div class="text-xs text-gray-400 mt-2">${new Date().toLocaleString(
+                "zh-CN",
+                {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )} 完成</div>
+            `;
+
+            // 更新状态为"进行中"
+            document
+              .querySelector("#step4Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").textContent = "进行中";
+            document
+              .querySelector("#step4Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").className =
+              "text-xs text-primary mr-2";
+            break;
+
+          case 5: // 入池
+            // 保存入池信息
+            const waterTemp = document.getElementById("editWaterTemp").value;
+            const waterPH = document.getElementById("editWaterPH").value;
+            const waterOxygen =
+              document.getElementById("editWaterOxygen").value;
+            const waterAmmonia =
+              document.getElementById("editWaterAmmonia").value;
+            const disinfectionMethod = document.getElementById(
+              "editDisinfectionMethod"
+            ).value;
+            const antiStressNote = document.getElementById(
+              "editAntiStressNote"
+            ).value;
+            const fryNormalRate =
+              document.getElementById("editFryNormalRate").value;
+            const pondingNote =
+              document.getElementById("editPondingNote").value;
+
+            // 隐藏"开始此步骤"按钮，显示完成内容
+            document
+              .getElementById("startStep5Btn")
+              .parentElement.classList.add("hidden");
+            document
+              .getElementById("step5CompletedContent")
+              .classList.remove("hidden");
+
+            // 更新显示内容
+            document.getElementById("displayWaterTemp").textContent =
+              waterTemp || "--";
+            document.getElementById("displayWaterPH").textContent =
+              waterPH || "--";
+            document.getElementById("displayWaterOxygen").textContent =
+              waterOxygen || "--";
+            document.getElementById("displayWaterAmmonia").textContent =
+              waterAmmonia || "--";
+            document.getElementById("displayDisinfectionMethod").textContent =
+              disinfectionMethod || "--";
+            document.getElementById("displayAntiStressNote").textContent =
+              antiStressNote || "--";
+            document.getElementById("displayFryNormalRate").textContent =
+              fryNormalRate ? `${fryNormalRate}%` : "--";
+            document.getElementById("displayPondingNote").textContent =
+              pondingNote || "无";
+
+            // 更新状态为"进行中"
+            document
+              .querySelector("#step5Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").textContent = "进行中";
+            document
+              .querySelector("#step5Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").className =
+              "text-xs text-primary mr-2";
+            break;
+
+          case 6: // 投喂
+            // 保存投喂记录
+            const feedingRecords = [];
+            const feedingRecordElements = document.querySelectorAll('#feedingRecordsList .feeding-record');
+            
+            feedingRecordElements.forEach((recordElement, index) => {
+              const feedingNormal = recordElement.querySelector('input[name="feedingNormal"]:checked')?.value || '';
+              const feedingNote = recordElement.querySelector('textarea').value || '';
+              const feedingTime = recordElement.querySelector('input[type="datetime-local"]').value || new Date().toISOString().slice(0, 16);
+              
+              feedingRecords.push({
+                id: index + 1,
+                normal: feedingNormal,
+                note: feedingNote,
+                time: feedingTime,
+                images: [] // 这里可以添加图片处理逻辑
+              });
+            });
+
+            // 更新显示模式
+            document.querySelector("#step6Display").innerHTML = `
+              <div class="space-y-3">
+                ${feedingRecords.map(record => `
+                  <div class="bg-gray-50 p-3 rounded-lg">
+                    <h4 class="text-xs font-bold mb-2">投喂记录 #${record.id}</h4>
+                    <div class="mb-2">
+                      <p class="text-xs text-gray-500 mb-1">进食状态</p>
+                      <div class="flex items-center">
+                        <i class="fas ${record.normal === 'normal' ? 'fa-check-circle text-green-500' : record.normal === 'abnormal' ? 'fa-times-circle text-red-500' : 'fa-question-circle text-gray-400'} mr-1"></i>
+                        <span class="text-xs ${record.normal === 'normal' ? 'text-green-600' : record.normal === 'abnormal' ? 'text-red-600' : 'text-gray-600'}">${record.normal === 'normal' ? '正常' : record.normal === 'abnormal' ? '异常' : '未选择'}</span>
+                      </div>
+                    </div>
+                    <div class="mb-2">
+                      <p class="text-xs text-gray-500 mb-1">备注</p>
+                      <p class="text-xs">${record.note || '无'}</p>
+                    </div>
+                    <div class="text-xs text-gray-400">${new Date(record.time).toLocaleString('zh-CN', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}</div>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="text-xs text-gray-400 mt-2">${new Date().toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              })} 完成</div>
+            `;
+
+            // 更新状态为"进行中"
+            document
+              .querySelector("#step6Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").textContent = "进行中";
+            document
+              .querySelector("#step6Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").className =
+              "text-xs text-primary mr-2";
+            break;
+
+          case 7: // 综合评价
+            // 保存综合评价信息
+            const qualityScore =
+              document.getElementById("editQualityScore").value;
+            const qualityComment =
+              document.getElementById("editQualityComment").value;
+            const driverScore =
+              document.getElementById("editDriverScore").value;
+            const driverComment =
+              document.getElementById("editDriverComment").value;
+            const vehicleScore =
+              document.getElementById("editVehicleScore").value;
+            const vehicleComment =
+              document.getElementById("editVehicleComment").value;
+
+            // 获取每个工人的评分
+            const workerNames = ["张三", "李四", "王五", "赵六"];
+            const unloadingWorkerScores = {};
+
+            // 收集下车工人评分
+            workerNames.forEach((name) => {
+              const scoreInput = document.getElementById(
+                `editUnloadingWorkerScore_${name}`
+              );
+              if (scoreInput) {
+                unloadingWorkerScores[name] = parseInt(scoreInput.value) || 0;
+              }
+            });
+
+            const workerComment =
+              document.getElementById("editWorkerComment").value;
+            const overallComment =
+              document.getElementById("editOverallComment").value;
+
+            // 更新显示模式 - 如果之前是"未开始"状态，可以更新为"进行中"
+            document.querySelector("#step7Display").innerHTML = `
+              <div class="bg-gray-50 p-3 rounded-lg">
+
+                <div class="mb-3">
+                  <p class="text-xs text-gray-500 mb-1">鱼种质量评分</p>
+                  <div class="flex items-center mb-1">
+                    <div class="flex text-lg">
+                      ${Array(5)
+                        .fill()
+                        .map(
+                          (_, i) =>
+                            `<i class="fas fa-star ${
+                              i < qualityScore
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            } ${i < 4 ? "mr-1" : ""}"></i>`
+                        )
+                        .join("")}
+                    </div>
+                    <span class="text-xs ml-2 ${
+                      qualityScore <= 2
+                        ? "text-red-500"
+                        : qualityScore === 3
+                        ? "text-orange-500"
+                        : "text-green-500"
+                    }">${
+              ["", "很差", "较差", "一般", "良好", "优秀"][qualityScore]
+            }</span>
+                  </div>
+                  <p class="text-xs">${qualityComment || "无备注"}</p>
+                </div>
+                <div class="mb-3">
+                  <p class="text-xs text-gray-500 mb-1">物流评分</p>
+                  <div class="flex items-center mb-1">
+                    <div class="flex text-lg">
+                      ${Array(5)
+                        .fill()
+                        .map(
+                          (_, i) =>
+                            `<i class="fas fa-star ${
+                              i < driverScore
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            } ${i < 4 ? "mr-1" : ""}"></i>`
+                        )
+                        .join("")}
+                    </div>
+                    <span class="text-xs ml-2 ${
+                      driverScore <= 2
+                        ? "text-red-500"
+                        : driverScore === 3
+                        ? "text-orange-500"
+                        : "text-green-500"
+                    }">${
+              ["", "很差", "较差", "一般", "良好", "优秀"][driverScore]
+            }</span>
+                  </div>
+                  <p class="text-xs">${driverComment || "无备注"}</p>
+                </div>
+                <div class="mb-3">
+                  <p class="text-xs text-gray-500 mb-1">车辆评分</p>
+                  <div class="flex items-center mb-1">
+                    <div class="flex text-lg">
+                      ${Array(5)
+                        .fill()
+                        .map(
+                          (_, i) =>
+                            `<i class="fas fa-star ${
+                              i < vehicleScore
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            } ${i < 4 ? "mr-1" : ""}"></i>`
+                        )
+                        .join("")}
+                    </div>
+                    <span class="text-xs ml-2 ${
+                      vehicleScore <= 2
+                        ? "text-red-500"
+                        : vehicleScore === 3
+                        ? "text-orange-500"
+                        : "text-green-500"
+                    }">${
+              ["", "很差", "较差", "一般", "良好", "优秀"][vehicleScore]
+            }</span>
+                  </div>
+                  <p class="text-xs">${vehicleComment || "无备注"}</p>
+                </div>
+                <div class="mb-3">
+                  <p class="text-xs text-gray-500 mb-1">工人评分</p>
+                  
+                  <!-- 下车工人评分 -->
+                  <div class="mb-2">
+                    <p class="text-xs font-medium mb-1">下车工人评分</p>
+                    <div class="space-y-2">
+                      ${Object.entries(unloadingWorkerScores)
+                        .map(
+                          ([name, score]) => `
+                        <div class="bg-gray-50 p-2 rounded">
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium">${name}</span>
+                            <div class="flex items-center">
+                              <div class="flex text-lg">
+                                ${Array(5)
+                                  .fill()
+                                  .map(
+                                    (_, i) =>
+                                      `<i class="fas fa-star ${
+                                        i < score
+                                          ? "text-yellow-400"
+                                          : "text-gray-300"
+                                      } ${i < 4 ? "mr-1" : ""}"></i>`
+                                  )
+                                  .join("")}
+                              </div>
+                              <span class="text-xs ml-2 ${
+                                score <= 2
+                                  ? "text-red-500"
+                                  : score === 3
+                                  ? "text-orange-500"
+                                  : "text-green-500"
+                              }">${
+                            ["", "很差", "较差", "一般", "良好", "优秀"][score]
+                          }</span>
+                            </div>
+                          </div>
+                        </div>
+                      `
+                        )
+                        .join("")}
+                    </div>
+                  </div>
+                  
+                  <p class="text-xs">${workerComment || "无备注"}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 mb-1">综合评价</p>
+                  <p class="text-xs">${overallComment || "无"}</p>
+                </div>
+              </div>
+              <div class="text-xs text-gray-400 mt-2">${new Date().toLocaleString(
+                "zh-CN",
+                {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )} 完成</div>
+            `;
+
+            // 更新状态为"进行中"
+            document
+              .querySelector("#step7Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").textContent = "进行中";
+            document
+              .querySelector("#step7Display")
+              .closest(".flex")
+              .querySelector(".text-xs.text-gray-400").className =
+              "text-xs text-primary mr-2";
+            break;
+        }
+
+        // 将步骤标记为已完成
+        const stepContainer = document
+          .getElementById(`step${stepNumber}Display`)
+          .closest(".flex");
+
+        // 更新状态文本
+        const statusSpan = stepContainer.querySelector(
+          ".text-xs.text-primary, .text-xs.text-gray-400"
+        );
+        if (statusSpan) {
+          statusSpan.textContent = "已完成";
+          statusSpan.className = "text-xs text-secondary mr-2";
+        }
+
+        // 更新步骤圆圈样式
+        const stepCircle = stepContainer.querySelector(".step-circle");
+        if (stepCircle) {
+          stepCircle.className =
+            "step-circle w-8 h-8 rounded-full bg-secondary border-2 border-secondary flex items-center justify-center text-xs font-bold text-white";
+        }
+
+        // 移除active类，添加completed类
+        stepContainer.classList.remove("step-active");
+        stepContainer.classList.add("step-completed");
+
+        // 更新进度条
+        updateProgressBar();
+
+        // 隐藏编辑表单
+        hideStepEditForm(stepNumber);
+
+        // 显示成功提示
+        showSuccessToast();
+      }
+
+      // 处理图片和视频上传预览
+      function handleImageUpload(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        if (input && preview) {
+          input.addEventListener("change", function () {
+            // 清空预览区域
+            //preview.innerHTML = '';
+
+            if (this.files) {
+              for (let i = 0; i < this.files.length; i++) {
+                const file = this.files[i];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                  if (file.type.startsWith("image/")) {
+                    // 处理图片
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.className = "image-preview";
+                    preview.appendChild(img);
+                  } else if (file.type.startsWith("video/")) {
+                    // 处理视频
+                    const video = document.createElement("video");
+                    video.src = e.target.result;
+                    video.className = "image-preview";
+                    video.controls = true;
+                    video.muted = true;
+                    preview.appendChild(video);
+                  }
+                };
+
+                reader.readAsDataURL(file);
+              }
+            }
+          });
+        }
+      }
+
+      // 处理评分滑块的值显示
+      function setupRangeSliders() {
+        // 设置星星评分逻辑
+        setupStarRating(
+          "qualityRating",
+          "qualityRatingText",
+          "editQualityScore"
+        );
+        setupStarRating("driverRating", "driverRatingText", "editDriverScore");
+        setupStarRating(
+          "vehicleRating",
+          "vehicleRatingText",
+          "editVehicleScore"
+        );
+
+        // 设置下车工人评分
+        setupWorkerRatings(
+          "unloadingWorkerRating",
+          "unloadingWorkerRatingText",
+          "editUnloadingWorkerScore"
+        );
+      }
+
+      // 工人评分设置函数
+      function setupWorkerRatings(
+        ratingIdPrefix,
+        textIdPrefix,
+        scoreInputIdPrefix
+      ) {
+        const workerNames = ["张三", "李四", "王五", "赵六"];
+
+        workerNames.forEach((workerName) => {
+          const ratingId = `${ratingIdPrefix}_${workerName}`;
+          const textId = `${textIdPrefix}_${workerName}`;
+          const scoreInputId = `${scoreInputIdPrefix}_${workerName}`;
+
+          setupStarRating(ratingId, textId, scoreInputId);
+        });
+      }
+
+      // 星星评分设置函数
+      function setupStarRating(ratingId, textId, scoreInputId) {
+        const ratingStars = document.querySelectorAll(`#${ratingId} i`);
+        const ratingText = document.getElementById(textId);
+        const scoreInput = document.getElementById(scoreInputId);
+
+        if (!ratingStars.length || !ratingText || !scoreInput) {
+          console.warn(
+            `星级评分元素未找到: ${ratingId}, ${textId}, ${scoreInputId}`
+          );
+          return;
+        }
+
+        let currentRating = parseInt(scoreInput.value) || 0;
+
+        // 初始化显示
+        updateStarsDisplay(ratingStars, currentRating, false);
+        updateRatingText(ratingText, currentRating);
+
+        ratingStars.forEach((star) => {
+          // 鼠标悬停效果
+          star.addEventListener("mouseover", function () {
+            const rating = parseInt(this.getAttribute("data-rating"));
+            updateStarsDisplay(ratingStars, rating, true);
+          });
+
+          // 鼠标离开效果
+          star.addEventListener("mouseout", function () {
+            updateStarsDisplay(ratingStars, currentRating, false);
+          });
+
+          // 点击选择评分
+          star.addEventListener("click", function () {
+            currentRating = parseInt(this.getAttribute("data-rating"));
+            scoreInput.value = currentRating;
+            updateStarsDisplay(ratingStars, currentRating, false);
+            updateRatingText(ratingText, currentRating);
+          });
+        });
+      }
+
+      // 更新星星显示
+      function updateStarsDisplay(stars, rating, isHover) {
+        stars.forEach((star) => {
+          const starRating = parseInt(star.getAttribute("data-rating"));
+          if (starRating <= rating) {
+            star.classList.add("text-yellow-400");
+            star.classList.remove("text-gray-300");
+          } else {
+            star.classList.remove("text-yellow-400");
+            star.classList.add("text-gray-300");
+          }
+        });
+      }
+
+      // 更新评分文字
+      function updateRatingText(ratingText, rating) {
+        if (rating === 0) {
+          ratingText.textContent = "请评分";
+          ratingText.className = "ml-2 text-xs text-gray-500";
+        } else {
+          const ratingTexts = ["", "很差", "较差", "一般", "良好", "优秀"];
+          ratingText.textContent = ratingTexts[rating];
+
+          // 根据评分设置不同颜色
+          ratingText.className = "ml-2 text-xs ";
+          if (rating <= 2) {
+            ratingText.className += "text-red-500";
+          } else if (rating === 3) {
+            ratingText.className += "text-orange-500";
+          } else {
+            ratingText.className += "text-green-500";
+          }
+        }
+      }
+
+      // 添加抽查记录
+      function addInspectionRecord() {
+        // 获取当前抽查记录数量
+        const inspectionForms = document.querySelectorAll(
+          "#step3Edit .bg-white.border.rounded-lg"
+        );
+        const newIndex = inspectionForms.length + 1;
+
+        // 创建新的抽查记录表单
+        const newInspectionForm = document.createElement("div");
+        newInspectionForm.className = "bg-white border rounded-lg p-3 mb-3";
+        newInspectionForm.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold">抽查记录 #${newIndex}</h4>
+            <button type="button" class="text-xs text-red-500 delete-inspection-btn">
+              <i class="fas fa-trash-alt"></i> 删除
+            </button>
+          </div>
+          
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 block mb-1">抽查照片</label>
+            <div class="flex space-x-2 mb-2 overflow-x-auto pb-1" id="inspection${newIndex}ImgPreview">
+              <!-- 默认无图片 -->
+            </div>
+            <div class="flex items-center">
+              <label class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer">
+                <i class="fas fa-camera mr-1"></i> 上传影像
+                <input type="file" class="hidden" accept="image/*,video/*" multiple id="inspection${newIndex}ImgUpload">
+              </label>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 block mb-2">操作记录</label>
+            <div class="flex space-x-4">
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="inspection${newIndex}ChangeWater"
+                  class="mr-2"
+                />
+                <span class="text-xs">换水</span>
+              </label>
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="inspection${newIndex}AddMedicine"
+                  class="mr-2"
+                />
+                <span class="text-xs">加药</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="text-xs text-gray-500 block mb-1">备注</label>
+            <textarea id="editInspection${newIndex}Note" class="w-full border rounded p-2 text-sm" rows="2"></textarea>
+          </div>
+          
+          <div>
+            <label class="text-xs text-gray-500 block mb-1">抽查时间</label>
+            <input type="datetime-local" id="editInspection${newIndex}Time" class="w-full border rounded p-2 text-sm" value="${new Date()
+          .toISOString()
+          .slice(0, 16)}">
+          </div>
+        `;
+
+        // 将新表单添加到编辑区域
+        const editForm = document.getElementById("editStep3Form");
+        const submitBtns = editForm.querySelector(".flex.justify-end");
+        editForm.insertBefore(newInspectionForm, submitBtns);
+
+        // 设置新的图片上传预览
+        handleImageUpload(
+          `inspection${newIndex}ImgUpload`,
+          `inspection${newIndex}ImgPreview`
+        );
+
+        // 添加删除按钮事件
+        newInspectionForm
+          .querySelector(".delete-inspection-btn")
+          .addEventListener("click", function () {
+            newInspectionForm.remove();
+          });
+      }
+
+      // 获取URL参数函数
+      function getUrlParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      }
+
+      // 事件监听
+      document.addEventListener("DOMContentLoaded", function () {
+        // 确保页面加载时提示是隐藏的
+        successToast.style.top = "-100px";
+        successToast.style.opacity = "0";
+        successToast.style.visibility = "hidden";
+
+        // 检查URL参数negotiate_id
+        const isCreate = !!getUrlParam("negotiate_id");
+        if (isCreate) {
+          // 自动进入编辑状态
+          enterEditMode();
+
+          // 将所有采购流程设置为未开始状态
+          // 移除已完成和进行中的步骤样式
+          document
+            .querySelectorAll(".step-completed, .step-active")
+            .forEach((step) => {
+              step.classList.remove("step-completed", "step-active");
+            });
+            
+          // 将所有步骤圆圈设置为未开始状态的样式
+          document
+            .querySelectorAll(".step-circle")
+            .forEach((circle) => {
+              // 移除可能的其他样式类
+              circle.classList.remove("border-primary", "border-secondary");
+              circle.classList.remove("text-primary", "text-secondary", "text-white");
+              // 添加未开始状态的样式类
+              circle.classList.add("border-gray-300", "text-gray-400");
+            });
+
+          // 更新所有步骤的状态文本
+          document
+            .querySelectorAll(".text-xs.text-secondary, .text-xs.text-primary")
+            .forEach((statusSpan) => {
+              statusSpan.textContent = "未开始";
+              statusSpan.className = "text-xs text-gray-400 mr-2";
+            });
+            
+          // 更新所有步骤的标题为未开始状态的样式
+          document
+            .querySelectorAll("h3.text-sm.font-bold")
+            .forEach((title) => {
+              // 添加未开始状态的样式类
+              title.classList.add("text-gray-400");
+            });
+
+          // 立即处理所有步骤的显示内容，确保隐藏已完成内容
+          document
+            .querySelectorAll(".step-display")
+            .forEach((display, index) => {
+              // 获取步骤编号
+              const stepNumber = index + 1;
+
+              // 清除原有内容，显示"开始此步骤"按钮
+              display.innerHTML = `
+              <div class="border border-dashed border-gray-300 rounded-lg p-3 flex justify-center items-center">
+                <button id="startStep${stepNumber}Btn" class="text-primary text-xs font-medium">
+                  <i class="fas fa-play-circle mr-1"></i> 开始此步骤
+                </button>
+              </div>
+            `;
+
+              // 移除可能存在的完成时间显示
+              const timeDisplay = display.nextElementSibling;
+              if (timeDisplay && timeDisplay.classList.contains("text-xs")) {
+                timeDisplay.remove();
+              }
+            });
+
+          // 更新步骤状态文本
+          // 选择采购流程区域内的所有步骤
+          const purchaseFlowSection = document.querySelector(
+            ".bg-white.p-4.mb-3 h2.text-base.font-bold.mb-3"
+          ).parentElement;
+            console.log('purchaseFlowSection: ', purchaseFlowSection);
+
+          const purchaseSteps = Array.from(
+            purchaseFlowSection.querySelectorAll(".flex")
+          ).filter((el) => {
+            // 只选择包含step-circle的flex元素（这些是流程步骤）
+            return el.querySelector(".step-circle") !== null;
+          });
+
+          console.log("purchaseSteps: ", purchaseSteps);
+
+          purchaseSteps.forEach((stepContainer, index) => {
+            console.log("stepContainer: ", stepContainer);
+            // 获取步骤编号
+            const stepNumber = index + 1;
+
+            // 更新状态文本
+            const statusSpan = stepContainer.querySelector(
+              ".text-xs.text-secondary, .text-xs.text-primary, .text-xs.text-gray-400"
+            );
+            if (statusSpan) {
+              statusSpan.textContent = "未开始";
+              statusSpan.className = "text-xs text-gray-400 mr-2";
+            }
+
+            // 重置步骤圆圈样式
+            const stepCircle = stepContainer.querySelector(".step-circle");
+            console.log("stepCircle: ", stepCircle);
+            if (stepCircle) {
+              stepCircle.className =
+                "step-circle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs font-bold text-gray-400";
+            }
+
+            // 重置步骤线样式
+            const stepLine = stepContainer.querySelector(".step-line");
+            if (stepLine) {
+              stepLine.className = "step-line flex-grow mt-2 h-full";
+            }
+
+            // 移除步骤容器的completed和active类
+            stepContainer.classList.remove("step-completed", "step-active");
+
+            // 显示"开始此步骤"按钮
+            const stepDisplay = stepContainer.querySelector(".step-display");
+            if (stepDisplay) {
+              // 保存原始ID
+              const originalId = stepDisplay.id;
+
+              // 清除原有内容
+              stepDisplay.innerHTML = `
+                <div class="border border-dashed border-gray-300 rounded-lg p-3 flex justify-center items-center">
+                  <button id="startStep${stepNumber}Btn" class="text-primary text-xs font-medium">
+                    <i class="fas fa-play-circle mr-1"></i> 开始此步骤
+                  </button>
+                </div>
+              `;
+
+              // 确保保留原始ID
+              stepDisplay.id = originalId;
+
+              // 移除可能存在的完成时间显示
+              const timeDisplay = stepDisplay.nextElementSibling;
+              if (timeDisplay && timeDisplay.classList.contains("text-xs")) {
+                timeDisplay.remove();
+              }
+
+              // 隐藏可能存在的已完成内容
+              const completedContent = stepContainer.querySelector(
+                '[id$="CompletedContent"]'
+              );
+              if (completedContent) {
+                completedContent.classList.add("hidden");
+              }
+            }
+          });
+
+          // 更新进度条
+          const progressBarFill = document.querySelector(".progress-bar-fill");
+          if (progressBarFill) {
+            progressBarFill.style.width = "0%";
+          }
+
+          // 更新进度条
+          updateProgressBar();
+
+          // 为新创建的"开始此步骤"按钮添加事件监听器
+          setTimeout(() => {
+            // 重新绑定开始步骤按钮事件
+            document.querySelectorAll('[id^="startStep"]').forEach((btn) => {
+              const stepNumber = btn.id
+                .replace("startStep", "")
+                .replace("Btn", "");
+              btn.addEventListener("click", function () {
+                showStepEditForm(stepNumber);
+              });
+            });
+
+            // 确保第一个步骤的编辑按钮可见
+            document.querySelectorAll(".step-edit-btn").forEach((btn) => {
+              btn.classList.remove("hidden");
+            });
+          }, 100);
+        }
+
+        // 顶部编辑按钮 - 进入编辑模式
+        if (editModeButton) {
+          editModeButton.addEventListener("click", enterEditMode);
+        }
+
+        // 基本信息编辑
+        if (editInfoForm) {
+          editInfoForm.addEventListener("submit", saveInfoEdit);
+        }
+
+        // 取消编辑按钮
+        document.querySelectorAll(".cancel-edit-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            // 查找最近的编辑表单
+            const editForm = this.closest(".edit-section");
+            if (editForm) {
+              // 如果是基本信息编辑表单
+              if (editForm.id === "infoEdit") {
+                hideInfoEditForm();
+              } else {
+                // 查找步骤编号
+                const stepMatch = editForm.id.match(/step(\d+)Edit/);
+                if (stepMatch && stepMatch[1]) {
+                  hideStepEditForm(stepMatch[1]);
+                }
+              }
+            }
+          });
+        });
+
+        // 保存编辑按钮
+        document.querySelectorAll(".save-edit-btn").forEach((btn) => {
+          btn.addEventListener("click", function (e) {
+            // 阻止默认表单提交行为
+            e.preventDefault();
+
+            // 查找最近的编辑表单
+            const editForm = this.closest("form");
+            if (editForm) {
+              // 如果是基本信息编辑表单
+              if (editForm.id === "editInfoForm") {
+                saveInfoEdit(e);
+              } else {
+                // 查找步骤编号
+                const stepMatch = editForm.id.match(/editStep(\d+)Form/);
+                if (stepMatch && stepMatch[1]) {
+                  saveStepEdit(e, parseInt(stepMatch[1]));
+                }
+              }
+            }
+          });
+        });
+
+        // 步骤编辑按钮
+        document.querySelectorAll(".step-edit-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const stepNumber = this.getAttribute("data-step");
+            if (stepNumber) {
+              showStepEditForm(stepNumber);
+            }
+          });
+        });
+
+        // 添加抽查记录按钮
+        const addInspectionBtn = document.getElementById("addInspectionBtn");
+        if (addInspectionBtn) {
+          addInspectionBtn.addEventListener("click", function () {
+            // 先显示编辑表单
+            showStepEditForm(3);
+            // 然后添加新的抽查记录
+            setTimeout(addInspectionRecord, 100);
+          });
+        }
+
+        // 开始步骤按钮
+        const startStep4Btn = document.getElementById("startStep4Btn");
+        if (startStep4Btn) {
+          startStep4Btn.addEventListener("click", function () {
+            showStepEditForm(4);
+          });
+        }
+
+        const startStep5Btn = document.getElementById("startStep5Btn");
+        if (startStep5Btn) {
+          startStep5Btn.addEventListener("click", function () {
+            showStepEditForm(5);
+          });
+        }
+
+        // 设置图片上传预览
+        // 现场操作步骤
+        handleImageUpload("wormImgUpload", "wormImgPreview");
+        handleImageUpload("sterilizeImgUpload", "sterilizeImgPreview");
+        handleImageUpload("catchingImgUpload", "catchingImgPreview");
+        handleImageUpload("packingImgUpload", "packingImgPreview");
+        handleImageUpload("weighingImgUpload", "weighingImgPreview");
+        handleImageUpload("disinfectImgUpload", "disinfectImgPreview");
+        handleImageUpload("loadingImgUpload", "loadingImgPreview");
+
+        // 鱼品运输步骤
+        handleImageUpload("inspection1ImgUpload", "inspection1ImgPreview");
+        handleImageUpload("inspection2ImgUpload", "inspection2ImgPreview");
+
+        // 鱼种下车步骤
+        handleImageUpload("arrivalImgUpload", "arrivalImgPreview");
+        handleImageUpload("unloadingImgUpload", "unloadingImgPreview");
+
+        // 入池步骤
+        handleImageUpload("antiStressImgUpload", "antiStressImgPreview");
+        handleImageUpload("pondingImgUpload", "pondingImgPreview");
+
+        // 综合评价步骤
+
+        // 设置评分滑块
+        setupRangeSliders();
+
+        // 单价输入时自动计算总金额
+        const editUnitPrice = document.getElementById("editUnitPrice");
+        if (editUnitPrice) {
+          editUnitPrice.addEventListener("input", function () {
+            const quantity = document.getElementById("editQuantity").value;
+            const unitPrice = this.value;
+
+            // 提取数字部分
+            const numericQuantity = parseInt(quantity) || 0;
+            const numericPrice = parseFloat(unitPrice) || 0;
+
+            // 计算总金额
+            const totalAmount = (
+              numericQuantity * numericPrice * 1
+            ).toLocaleString();
+            document.getElementById(
+              "totalAmount"
+            ).textContent = `¥${totalAmount}`;
+          });
+        }
+
+        // 数量输入时自动计算总金额
+        const editQuantity = document.getElementById("editQuantity");
+        if (editQuantity) {
+          editQuantity.addEventListener("input", function () {
+            const quantity = this.value;
+            const unitPrice = document.getElementById("editUnitPrice").value;
+
+            // 提取数字部分
+            const numericQuantity = parseInt(quantity) || 0;
+            const numericPrice = parseFloat(unitPrice) || 0;
+
+            // 计算总金额
+            const totalAmount = (
+              numericQuantity * numericPrice * 1
+            ).toLocaleString();
+            document.getElementById(
+              "totalAmount"
+            ).textContent = `¥${totalAmount}`;
+          });
+        }
+
+        // 删除抽查记录按钮
+        document.querySelectorAll("#step3Edit .text-red-500").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const inspectionRecord = this.closest(
+              ".bg-white.border.rounded-lg"
+            );
+            if (inspectionRecord) {
+              inspectionRecord.remove();
+            }
+          });
+        });
+
+        // 添加投喂记录按钮
+        const addFeedingRecordBtn = document.getElementById("addFeedingRecordBtn");
+        if (addFeedingRecordBtn) {
+          addFeedingRecordBtn.addEventListener("click", addFeedingRecord);
+        }
+      });
+
+      // 添加投喂记录函数
+      function addFeedingRecord() {
+        const feedingRecordsList = document.getElementById("feedingRecordsList");
+        const recordCount = feedingRecordsList.children.length + 1;
+        const currentTime = new Date().toISOString().slice(0, 16);
+
+        const recordHtml = `
+          <div class="feeding-record bg-white border rounded-lg p-3 mb-3">
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="text-xs font-bold">投喂记录 #${recordCount}</h4>
+              <button type="button" class="text-red-500 text-xs" onclick="removeFeedingRecord(this)">
+                <i class="fas fa-trash mr-1"></i>删除
+              </button>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-xs text-gray-500 block mb-1">投喂影像</label>
+              <div class="flex items-center">
+                <label class="bg-primary text-white text-xs px-3 py-1 rounded cursor-pointer">
+                  <i class="fas fa-camera mr-1"></i> 上传影像
+                  <input
+                    type="file"
+                    class="hidden"
+                    accept="image/*,video/*"
+                    multiple
+                    onchange="handleFeedingImageUpload(this)"
+                  />
+                </label>
+              </div>
+              <div class="feeding-image-preview mt-2 flex space-x-2 overflow-x-auto pb-1"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-xs text-gray-500 block mb-1">进食是否正常</label>
+              <div class="flex space-x-4">
+                <label class="flex items-center">
+                  <input type="radio" name="feedingNormal_${recordCount}" value="normal" class="mr-1" />
+                  <span class="text-xs">正常</span>
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="feedingNormal_${recordCount}" value="abnormal" class="mr-1" />
+                  <span class="text-xs">异常</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="text-xs text-gray-500 block mb-1">投喂时间</label>
+              <input
+                type="datetime-local"
+                class="w-full border rounded p-2 text-sm"
+                value="${currentTime}"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="text-xs text-gray-500 block mb-1">备注</label>
+              <textarea
+                class="w-full border rounded p-2 text-sm"
+                rows="2"
+                placeholder="请输入备注..."
+              ></textarea>
+            </div>
+          </div>
+        `;
+
+        feedingRecordsList.insertAdjacentHTML('beforeend', recordHtml);
+      }
+
+      // 删除投喂记录函数
+      function removeFeedingRecord(button) {
+        const record = button.closest('.feeding-record');
+        if (record) {
+          record.remove();
+          // 重新编号剩余的记录
+          const remainingRecords = document.querySelectorAll('.feeding-record');
+          remainingRecords.forEach((record, index) => {
+            const title = record.querySelector('h4');
+            if (title) {
+              title.textContent = `投喂记录 #${index + 1}`;
+            }
+            // 更新radio按钮的name属性
+            const radioButtons = record.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
+              radio.name = `feedingNormal_${index + 1}`;
+            });
+          });
+        }
+      }
+
+      // 处理投喂影像上传
+      function handleFeedingImageUpload(input) {
+        const previewContainer = input.closest('.feeding-record').querySelector('.feeding-image-preview');
+        
+        if (input.files && input.files.length > 0) {
+          Array.from(input.files).forEach(file => {
+            if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                const mediaElement = file.type.startsWith('image/') 
+                  ? `<img src="${e.target.result}" class="image-preview" />`
+                  : `<video src="${e.target.result}" class="image-preview" controls></video>`;
+                
+                previewContainer.insertAdjacentHTML('beforeend', mediaElement);
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>小鲤AI助手 - 对话</title>
+    <link
+      href="../static/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <style>
+      :root {
+        --color-primary: #007AFF; /* iOS 蓝色 */
+        --color-secondary: #34C759; /* iOS 绿色 */
+        --color-warning: #FF9500; /* iOS 橙色 */
+        --color-danger: #FF3B30; /* iOS 红色 */
+        --color-info: #5856D6; /* iOS 紫色 */
+        --color-gray: #8E8E93; /* iOS 灰色 */
+        --color-light-gray: #F2F2F7; /* iOS 浅灰色背景 */
+        --color-dark-blue: #0A84FF; /* iOS 深蓝色 */
+        --color-teal: #64D2FF; /* iOS 青色 */
+        --color-pink: #FF2D55; /* iOS 粉色 */
+        --color-yellow: #FFCC00; /* iOS 黄色 */
+      }
+      
+      /* 渐变背景色 */
+      .bg-gradient-primary {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-teal));
+      }
+      
+      .bg-gradient-secondary {
+        background: linear-gradient(135deg, var(--color-secondary), #5BDA8A);
+      }
+      
+      .bg-gradient-warning {
+        background: linear-gradient(135deg, var(--color-warning), #FFBD33);
+      }
+      
+      .bg-gradient-danger {
+        background: linear-gradient(135deg, var(--color-danger), var(--color-pink));
+      }
+      
+      .bg-primary {
+        background-color: var(--color-primary);
+      }
+      .bg-secondary {
+        background-color: var(--color-secondary);
+      }
+      .bg-warning {
+        background-color: var(--color-warning);
+      }
+      .bg-danger {
+        background-color: var(--color-danger);
+      }
+      .bg-info {
+        background-color: var(--color-info);
+      }
+      .text-primary {
+        color: var(--color-primary);
+      }
+      .text-secondary {
+        color: var(--color-secondary);
+      }
+      .text-warning {
+        color: var(--color-warning);
+      }
+      .text-danger {
+        color: var(--color-danger);
+      }
+      .text-info {
+        color: var(--color-info);
+      }
+      .border-primary {
+        border-color: var(--color-primary);
+      }
+      .border-secondary {
+        border-color: var(--color-secondary);
+      }
+      .border-warning {
+        border-color: var(--color-warning);
+      }
+      .border-danger {
+        border-color: var(--color-danger);
+      }
+      .border-info {
+        border-color: var(--color-info);
+      }
+
+      /* 全局过渡效果 */
+      .transition-all {
+        transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+      }
+      
+      /* 移动端特定样式 */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        background-color: var(--color-light-gray);
+        font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif;
+        color: #1C1C1E;
+      }
+      
+      /* 磨砂玻璃效果 */
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      
+      .bottom-nav {
+        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background-color: rgba(255, 255, 255, 0.8);
+      }
+      
+      /* 聊天气泡样式 - iOS 风格 */
+      .chat-bubble {
+        max-width: 80%;
+        border-radius: 18px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        position: relative;
+        word-wrap: break-word;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        line-height: 1.4;
+      }
+      
+      .chat-bubble.user {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-dark-blue));
+        color: white;
+        border-bottom-right-radius: 4px;
+        margin-left: auto;
+        box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+      }
+      
+      .chat-bubble.ai {
+        background-color: white;
+        color: #1C1C1E;
+        border-bottom-left-radius: 4px;
+        margin-right: auto;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .chat-bubble.system {
+        background-color: rgba(142, 142, 147, 0.1);
+        color: var(--color-gray);
+        border: none;
+        margin: 16px auto;
+        text-align: center;
+        max-width: 90%;
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        border-radius: 12px;
+      }
+      
+      /* 打字动画效果 - 更现代的样式 */
+      .typing-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        background-color: white;
+        border-radius: 18px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      
+      .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        background-color: var(--color-primary);
+        border-radius: 50%;
+        display: inline-block;
+        margin: 0 2px;
+        opacity: 0.8;
+        animation: typing 1.4s infinite ease-in-out;
+      }
+      
+      .typing-indicator span:nth-child(1) {
+        animation-delay: 0s;
+      }
+      
+      .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      
+      .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      
+      @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.8; }
+        30% { transform: translateY(-4px); opacity: 1; }
+      }
+      
+      /* 任务卡片样式 - iOS 风格卡片 */
+      .task-card {
+        border: none;
+        border-radius: 16px;
+        padding: 16px;
+        margin: 12px 0;
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+      
+      /* 头像样式增强 */
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 2px solid white;
+      }
+      
+      .avatar.user {
+        background: linear-gradient(135deg, #3B82F6, #1E40AF);
+      }
+      
+      .avatar.ai {
+        background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+      }
+      
+      /* 按钮样式增强 */
+      .ios-button {
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      
+      .ios-button:active {
+        transform: scale(0.98);
+      }
+      
+      /* 输入框样式增强 */
+      .ios-input {
+        background-color: rgba(142, 142, 147, 0.12);
+        border: none;
+        border-radius: 16px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s;
+      }
+      
+      .ios-input:focus {
+        background-color: rgba(142, 142, 147, 0.18);
+        box-shadow: 0 0 0 1px var(--color-primary);
+      }
+      
+      /* 标签样式增强 */
+      .ios-tag {
+        border-radius: 12px;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+      }
+      
+      /* 动画效果 */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+      }
+      
+      /* 滚动条美化 */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: rgba(142, 142, 147, 0.3);
+        border-radius: 3px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(142, 142, 147, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 下拉刷新指示器 -->
+    <div class="refresh-indicator flex items-center justify-center overflow-hidden transition-all duration-300 h-0">
+      <div class="refresh-spinner animate-spin text-primary">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+    </div>
+    
+    <!-- 顶部导航栏 -->
+    <div class="bg-white shadow-md sticky top-0 z-10">
+      <div class="flex items-center justify-between p-4">
+        <div class="flex items-center">
+          <a href="index.html" class="mr-3 w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-all text-primary">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <div>
+            <div class="flex items-center">
+              <h1 class="text-lg font-bold text-gray-800">小鲤AI助手</h1>
+              <span class="ml-2 px-2 py-0.5 bg-blue-50 text-primary text-xs rounded-full font-medium">Beta</span>
+            </div>
+            <p class="text-xs text-gray-500">智能对话，高效协作</p>
+          </div>
+        </div>
+        <div class="flex items-center">
+          <div class="flex items-center mr-3 bg-blue-50 px-2 py-1 rounded-full">
+            <div class="w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse"></div>
+            <span class="text-xs text-primary font-medium">在线</span>
+          </div>
+          <button class="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-all mr-2 text-primary">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+          <button class="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-all text-primary relative group">
+            <i class="fas fa-ellipsis-v"></i>
+            <div class="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg p-2 hidden group-hover:block w-48">
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center">
+                <i class="fas fa-history mr-2 text-gray-500"></i> 历史记录
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center">
+                <i class="fas fa-cog mr-2 text-gray-500"></i> 设置
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg flex items-center">
+                <i class="fas fa-question-circle mr-2 text-gray-500"></i> 帮助
+              </a>
+            </div>
+          </button>
+        </div>
+      </div>
+      <!-- 功能标签栏 -->
+      <div class="flex items-center px-4 pb-2 overflow-x-auto hide-scrollbar">
+        <button class="mr-2 px-3 py-1 bg-primary text-white rounded-full text-sm font-medium flex items-center">
+          <i class="fas fa-comment-dots mr-1"></i> 对话
+        </button>
+        <button class="mr-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium flex items-center hover:bg-gray-200 transition-all">
+          <i class="fas fa-tasks mr-1"></i> 任务
+        </button>
+        <button class="mr-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium flex items-center hover:bg-gray-200 transition-all">
+          <i class="fas fa-chart-line mr-1"></i> 数据
+        </button>
+        <button class="mr-2 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium flex items-center hover:bg-gray-200 transition-all">
+          <i class="fas fa-fish mr-1"></i> 养殖
+        </button>
+        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium flex items-center hover:bg-gray-200 transition-all">
+          <i class="fas fa-book mr-1"></i> 知识库
+        </button>
+      </div>
+    </div>
+    
+    <!-- 添加隐藏滚动条的样式 -->
+    <style>
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+
+    <!-- 聊天内容区域 -->
+    <div class="p-4 pb-24" id="chatContainer">
+      <!-- 日期分隔线 -->
+      <div class="flex items-center justify-center my-4">
+        <div class="bg-gray-200 h-px flex-grow"></div>
+        <div class="mx-4 text-xs text-gray-500 font-medium">今天 09:15</div>
+        <div class="bg-gray-200 h-px flex-grow"></div>
+      </div>
+      
+      <!-- 系统消息 -->
+      <div class="chat-bubble system animate-fade-in">
+        <p>欢迎使用小鲤AI助手，我可以帮您创建任务、查询信息和解答问题</p>
+      </div>
+      
+      <!-- 管理者消息 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.1s">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="flex items-center mb-1">
+            <p class="text-sm font-medium">王经理</p>
+            <span class="ml-2 ios-tag bg-blue-100 text-primary text-xs">管理员</span>
+          </div>
+          <div class="chat-bubble user">
+            <p>小鲤，帮我创建一个任务给张师傅，让他今天去给1号养殖棚的鱼打样</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:15</p>
+        </div>
+      </div>
+      
+      <!-- AI回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.2s">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="flex items-center mb-1">
+            <p class="text-sm font-medium">小鲤AI</p>
+            <span class="ml-2 ios-tag bg-purple-100 text-purple-600 text-xs">智能助手</span>
+          </div>
+          <div class="chat-bubble ai">
+            <p>好的，我来帮您创建任务。请问这个任务有什么具体要求吗？比如打样的目的、需要采集哪些数据、任务优先级或截止时间等。</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:15</p>
+        </div>
+      </div>
+      
+      <!-- 管理者回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.3s">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble user">
+            <p>需要检查鱼的生长情况和健康状况，优先级中等，今天下午3点前完成</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:16</p>
+        </div>
+      </div>
+      
+      <!-- AI回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.4s">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>明白了，我将为张师傅创建一个关于1号养殖棚鱼类打样的任务。任务将包括检查鱼的生长情况和健康状况，优先级设为中等，截止时间为今天下午3点。</p>
+            <p class="mt-2">请问需要张师傅记录哪些具体数据？比如体长、体重、外观、活动度等。这些信息将帮助我完善任务描述。</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:16</p>
+        </div>
+      </div>
+      
+      <!-- 管理者回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.5s">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble user">
+            <p>需要记录体长、体重、外观、活动度，并拍照上传。另外让他带上水质检测设备，测量一下水质参数</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:17</p>
+        </div>
+      </div>
+      
+      <!-- AI回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.6s">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>非常好，我已经收集到足够的信息。我现在为张师傅创建任务，包含所有您提到的要求。</p>
+            
+            <!-- 任务卡片 -->
+            <div class="task-card mt-3">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <i class="fas fa-clipboard-check text-primary mr-2"></i>
+                  <h3 class="font-bold text-primary">鱼类打样任务</h3>
+                </div>
+                <span class="ios-tag bg-gradient-warning text-white">中等优先级</span>
+              </div>
+              
+              <div class="text-sm">
+                <div class="flex items-center mb-1">
+                  <i class="fas fa-user-check text-gray-500 w-5"></i>
+                  <p class="ml-2"><strong>负责人:</strong> 张师傅</p>
+                </div>
+                <div class="flex items-center mb-1">
+                  <i class="fas fa-map-marker-alt text-gray-500 w-5"></i>
+                  <p class="ml-2"><strong>地点:</strong> 1号养殖棚</p>
+                </div>
+                <div class="flex items-center mb-1">
+                  <i class="fas fa-clock text-gray-500 w-5"></i>
+                  <p class="ml-2"><strong>截止时间:</strong> 今天下午3点前</p>
+                </div>
+                <p class="mt-2 mb-1"><strong>任务描述:</strong></p>
+                <ul class="list-none pl-2 mt-1 mb-3 text-gray-700">
+                  <li class="flex items-center mb-1">
+                    <i class="fas fa-check-circle text-secondary text-xs mr-2"></i>
+                    检查鱼的生长情况和健康状况
+                  </li>
+                  <li class="flex items-center mb-1">
+                    <i class="fas fa-check-circle text-secondary text-xs mr-2"></i>
+                    记录体长、体重数据
+                  </li>
+                  <li class="flex items-center mb-1">
+                    <i class="fas fa-check-circle text-secondary text-xs mr-2"></i>
+                    观察并记录鱼的外观和活动度
+                  </li>
+                  <li class="flex items-center mb-1">
+                    <i class="fas fa-check-circle text-secondary text-xs mr-2"></i>
+                    拍照上传鱼的状态
+                  </li>
+                  <li class="flex items-center mb-1">
+                    <i class="fas fa-check-circle text-secondary text-xs mr-2"></i>
+                    使用水质检测设备测量水质参数
+                  </li>
+                </ul>
+                <div class="flex items-center mb-1">
+                  <i class="fas fa-tools text-gray-500 w-5"></i>
+                  <p class="ml-2"><strong>所需工具:</strong> 测量工具、相机、水质检测设备</p>
+                </div>
+              </div>
+              
+              <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-xs text-gray-500">任务ID: T20230615-042</span>
+                <span class="ios-tag bg-gradient-secondary text-white">已创建</span>
+              </div>
+            </div>
+            
+            <p class="mt-3">任务已成功创建并分配给张师傅。系统已通过短信和应用内通知提醒他。您还需要添加其他内容或修改任务细节吗？</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:18</p>
+        </div>
+      </div>
+      
+      <!-- 系统消息 -->
+      <div class="chat-bubble system animate-fade-in" style="animation-delay: 0.7s">
+        <div class="flex items-center justify-center">
+          <i class="fas fa-check-circle text-secondary mr-2"></i>
+          <p>任务已成功创建并发送给张师傅</p>
+        </div>
+        <p class="text-xs mt-1">张师傅已收到任务并确认</p>
+      </div>
+      
+      <!-- 管理者回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.8s">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble user">
+            <p>很好，谢谢。请提醒他完成后上传数据到系统</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:19</p>
+        </div>
+      </div>
+      
+      <!-- AI回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 0.9s">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>已添加提醒，我已经向张师傅发送了额外提醒，要求他完成任务后将所有数据上传到系统。</p>
+            <p class="mt-2">任务完成后，系统将自动生成分析报告，并通知您查看。如果您有其他需求，随时告诉我。</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">09:19</p>
+        </div>
+      </div>
+      
+      <!-- 系统消息 -->
+      <div class="chat-bubble system animate-fade-in" style="animation-delay: 1s">
+        <div class="flex items-center justify-center">
+          <i class="fas fa-check-circle text-secondary mr-2"></i>
+          <p>对话已完成</p>
+        </div>
+        <p class="text-xs mt-1">任务执行中，将在完成后通知您</p>
+      </div>
+      
+      <!-- 日期分隔线 -->
+      <div class="flex items-center justify-center my-4">
+        <div class="bg-gray-200 h-px flex-grow"></div>
+        <div class="mx-4 text-xs text-gray-500 font-medium">今天 10:30</div>
+        <div class="bg-gray-200 h-px flex-grow"></div>
+      </div>
+      
+      <!-- 用户询问鱼类生长情况 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 1.1s">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="flex items-center mb-1">
+            <p class="text-sm font-medium">王经理</p>
+            <span class="ml-2 ios-tag bg-blue-100 text-primary text-xs">管理员</span>
+          </div>
+          <div class="chat-bubble user">
+            <p>小鲤，最近鱼类生长情况怎么样？特别是鲈鱼养殖批次C001的情况</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">10:30</p>
+        </div>
+      </div>
+      
+      <!-- AI回复鱼类生长情况 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 1.2s">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="flex items-center mb-1">
+            <p class="text-sm font-medium">小鲤AI</p>
+            <span class="ml-2 ios-tag bg-purple-100 text-purple-600 text-xs">智能助手</span>
+          </div>
+          <div class="chat-bubble ai">
+            <p>王经理，我已为您查询了鲈鱼养殖批次C001的最新生长情况：</p>
+            
+            <!-- 批次数据卡片 -->
+            <div class="task-card mt-3">
+              <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                  <i class="fas fa-fish text-primary mr-2"></i>
+                  <h3 class="font-bold text-primary">鲈鱼养殖批次 (批次-C001)</h3>
+                </div>
+                <span class="ios-tag bg-gradient-primary text-white">进行中</span>
+              </div>
+              
+              <div class="text-sm">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-calendar-alt text-gray-500 w-5"></i>
+                  <p class="ml-2"><strong>时间进度:</strong> 已养殖75天，剩余105天 (总进度42%)</p>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                  <div class="bg-primary rounded-full h-2" style="width: 42%"></div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <div class="bg-white rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center mb-1">
+                      <i class="fas fa-weight text-primary mr-1"></i>
+                      <p><strong>当前重量:</strong> 450g/尾</p>
+                    </div>
+                    <p class="text-xs text-green-500"><i class="fas fa-arrow-up mr-1"></i>较上周增加30g</p>
+                    <p class="text-xs text-gray-500 mt-1">目标重量: 1.2kg/尾 (已达成37.5%)</p>
+                  </div>
+                  
+                  <div class="bg-white rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center mb-1">
+                      <i class="fas fa-drumstick-bite text-warning mr-1"></i>
+                      <p><strong>饵料消耗:</strong> 5,850kg</p>
+                    </div>
+                    <p class="text-xs text-gray-500">饵料系数: 1.35</p>
+                    <p class="text-xs text-gray-500">预计总消耗: 15,600kg</p>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <div class="bg-white rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center mb-1">
+                      <i class="fas fa-heartbeat text-danger mr-1"></i>
+                      <p><strong>健康状况:</strong> 良好</p>
+                    </div>
+                    <p class="text-xs text-green-500">病死率: 1.8% <i class="fas fa-arrow-down ml-1"></i></p>
+                    <p class="text-xs text-gray-500">目标病死率: ≤3%</p>
+                  </div>
+                  
+                  <div class="bg-white rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center mb-1">
+                      <i class="fas fa-coins text-secondary mr-1"></i>
+                      <p><strong>经济效益:</strong></p>
+                    </div>
+                    <p class="text-xs text-gray-500">已投入: ¥78,500</p>
+                    <p class="text-xs text-green-500">预计利润率: 29.7%</p>
+                  </div>
+                </div>
+                
+                <div class="bg-white rounded-lg p-2 shadow-sm mb-3">
+                  <div class="flex items-center mb-1">
+                    <i class="fas fa-notes-medical text-info mr-1"></i>
+                    <p><strong>最近健康检查:</strong></p>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <p class="text-xs">2025-06-10: 常规检查</p>
+                    <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-secondary">正常</span>
+                  </div>
+                  <div class="flex justify-between items-center mt-1">
+                    <p class="text-xs">2025-05-25: 鳃部检查</p>
+                    <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-warning">轻微异常</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">处理措施: 添加水质改良剂</p>
+                </div>
+              </div>
+              
+              <div class="mt-3 pt-3 border-t border-gray-100">
+                <p class="text-sm font-medium">总体评估:</p>
+                <p class="text-sm text-gray-700 mt-1">该批次鲈鱼生长情况良好，体重增长稳定，健康状况正常，经济效益预期达标。水质参数保持在理想范围内，建议继续保持当前饲养管理方案。</p>
+              </div>
+            </div>
+            
+            <p class="mt-3">王经理，您对这批鲈鱼的生长情况还有其他问题吗？或者需要我为您提供其他批次的数据？</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">10:31</p>
+        </div>
+      </div>
+      
+      <!-- 用户回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 1.3s">
+        <div class="avatar user mr-3 flex-shrink-0">
+          <i class="fas fa-user text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble user">
+            <p>谢谢，数据看起来不错。我注意到5月底有一次鳃部轻微异常，现在完全恢复了吗？</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">10:32</p>
+        </div>
+      </div>
+      
+      <!-- AI回复 -->
+      <div class="flex items-start mb-5 animate-fade-in" style="animation-delay: 1.4s">
+        <div class="avatar ai mr-3 flex-shrink-0">
+          <i class="fas fa-robot text-white"></i>
+        </div>
+        <div class="flex-grow">
+          <div class="chat-bubble ai">
+            <p>是的，王经理，鳃部轻微异常的情况已经完全恢复。</p>
+            <p class="mt-2">根据6月10日的常规检查结果显示，在添加水质改良剂后，水质参数恢复到理想范围，鱼类鳃部状态已恢复正常。最近两周的生长速度也证明了这一点，体重增长保持在预期水平，没有异常现象。</p>
+            <p class="mt-2">技术团队已将这次异常情况记录在案，并调整了日常水质监测频率，从每周两次增加到每周三次，以便更早发现并处理类似问题。</p>
+          </div>
+          <p class="text-xs text-gray-500 mt-1 ml-1">10:32</p>
+        </div>
+      </div>
+      
+      <!-- 系统消息 -->
+      <div class="chat-bubble system animate-fade-in" style="animation-delay: 1.5s">
+        <div class="flex items-center justify-center">
+          <i class="fas fa-check-circle text-secondary mr-2"></i>
+          <p>对话已完成</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部输入区域 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 flex items-center glass-effect">
+      <button class="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-all mr-2">
+        <i class="fas fa-plus"></i>
+      </button>
+      <div class="flex-grow bg-gray-100 rounded-full px-4 py-2 flex items-center shadow-sm">
+        <input type="text" placeholder="输入问题或指令..." class="bg-transparent border-none w-full focus:outline-none text-gray-700" id="messageInput">
+        <div class="flex items-center">
+          <button class="ml-1 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-primary transition-all">
+            <i class="fas fa-image"></i>
+          </button>
+          <button class="ml-1 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-primary transition-all">
+            <i class="fas fa-microphone"></i>
+          </button>
+        </div>
+      </div>
+      <button class="ml-2 w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center text-white shadow-md hover:shadow-lg transition-all" id="sendButton">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+
+    <script>
+      // 页面加载完成后滚动到底部并添加动画效果
+      window.onload = function() {
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // 添加渐入动画效果
+        document.querySelectorAll('.animate-fade-in').forEach(function(element, index) {
+          setTimeout(function() {
+            element.style.opacity = '1';
+          }, 100 * index);
+        });
+      };
+      
+      // 发送消息功能
+      const inputField = document.getElementById('messageInput');
+      const sendButton = document.getElementById('sendButton');
+      
+      function sendMessage() {
+        const message = inputField.value.trim();
+        
+        if (message) {
+          // 创建用户消息元素
+          const chatContainer = document.getElementById('chatContainer');
+          const currentTime = new Date();
+          const timeString = currentTime.getHours().toString().padStart(2, '0') + ':' + 
+                          currentTime.getMinutes().toString().padStart(2, '0');
+          
+          const messageDiv = document.createElement('div');
+          messageDiv.className = 'flex items-start mb-5 animate-fade-in';
+          messageDiv.style.opacity = '0';
+          messageDiv.innerHTML = `
+            <div class="avatar user mr-3 flex-shrink-0">
+              <i class="fas fa-user text-white"></i>
+            </div>
+            <div class="flex-grow">
+              <div class="chat-bubble user">
+                <p>${message}</p>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 ml-1">${timeString}</p>
+            </div>
+          `;
+          
+          chatContainer.appendChild(messageDiv);
+          
+          // 添加打字动画效果
+          setTimeout(function() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'flex items-start mb-5 animate-fade-in';
+            typingDiv.style.opacity = '0';
+            typingDiv.innerHTML = `
+              <div class="avatar ai mr-3 flex-shrink-0">
+                <i class="fas fa-robot text-white"></i>
+              </div>
+              <div class="flex-grow">
+                <div class="chat-bubble ai">
+                  <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            `;
+            
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            setTimeout(function() {
+              typingDiv.style.opacity = '1';
+            }, 100);
+            
+            // 模拟AI回复
+            setTimeout(function() {
+              chatContainer.removeChild(typingDiv);
+              
+              const aiReplyDiv = document.createElement('div');
+              aiReplyDiv.className = 'flex items-start mb-5 animate-fade-in';
+              aiReplyDiv.style.opacity = '0';
+              aiReplyDiv.innerHTML = `
+                <div class="avatar ai mr-3 flex-shrink-0">
+                  <i class="fas fa-robot text-white"></i>
+                </div>
+                <div class="flex-grow">
+                  <div class="flex items-center mb-1">
+                    <p class="text-sm font-medium">小鲤AI</p>
+                    <span class="ml-2 ios-tag bg-purple-100 text-purple-600 text-xs">智能助手</span>
+                  </div>
+                  <div class="chat-bubble ai">
+                    <p>我已收到您的消息："${message}"。请问有什么可以帮助您的吗？</p>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1 ml-1">${timeString}</p>
+                </div>
+              `;
+              
+              chatContainer.appendChild(aiReplyDiv);
+              chatContainer.scrollTop = chatContainer.scrollHeight;
+              
+              setTimeout(function() {
+                aiReplyDiv.style.opacity = '1';
+              }, 100);
+            }, 1500);
+          }, 500);
+          
+          // 清空输入框并滚动到底部
+          inputField.value = '';
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+          
+          // 显示发送消息的动画
+          setTimeout(function() {
+            messageDiv.style.opacity = '1';
+          }, 100);
+        }
+      }
+      
+      sendButton.addEventListener('click', sendMessage);
+      
+      inputField.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && inputField.value.trim() !== '') {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>

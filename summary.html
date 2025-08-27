@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔场概览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../static/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="../static/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        success: '#00B42A',
+                        info: '#86909C',
+                        light: '#F2F3F5',
+                        dark: '#1D2129',
+                        'primary-light': '#E8F3FF',
+                        'warning-light': '#FFF2E8',
+                        'danger-light': '#FFECE8',
+                        'success-light': '#E8FFF3',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .card-hover {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #165DFF 0%, #36CFC9 100%);
+            }
+            .animate-pulse-slow {
+                animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter text-dark min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm fixed w-full top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-tint text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-primary">智慧渔场管理系统</h1>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#" class="text-primary font-medium">概览</a>
+                <a href="#" class="text-gray-600 hover:text-primary transition-colors">设备管理</a>
+                <a href="#" class="text-gray-600 hover:text-primary transition-colors">养殖监测</a>
+                <a href="#" class="text-gray-600 hover:text-primary transition-colors">预警管理</a>
+                <a href="#" class="text-gray-600 hover:text-primary transition-colors">数据分析</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="relative p-2 text-gray-600 hover:text-primary transition-colors">
+                    <i class="fa fa-bell-o text-xl"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center">
+                        <i class="fa fa-user-o text-primary"></i>
+                    </div>
+                    <span class="hidden md:inline-block text-sm font-medium">管理员</span>
+                </div>
+                <button class="md:hidden text-gray-600 hover:text-primary transition-colors" id="menu-toggle">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-white border-t animate-fade-in" id="mobile-menu">
+            <div class="container mx-auto px-4 py-2">
+                <a href="#" class="block py-2 text-primary font-medium">概览</a>
+                <a href="#" class="block py-2 text-gray-600 hover:text-primary transition-colors">设备管理</a>
+                <a href="#" class="block py-2 text-gray-600 hover:text-primary transition-colors">养殖监测</a>
+                <a href="#" class="block py-2 text-gray-600 hover:text-primary transition-colors">预警管理</a>
+                <a href="#" class="block py-2 text-gray-600 hover:text-primary transition-colors">数据分析</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 pt-24 pb-12">
+        <!-- 页面标题 -->
+        <div class="mb-8 animate-fade-in">
+            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800">渔场概览</h2>
+            <p class="text-gray-500 mt-2">实时监测和管理您的渔场数据</p>
+        </div>
+        
+        <!-- 时间选择器 -->
+        <div class="flex justify-between items-center mb-8 animate-fade-in" style="animation-delay: 0.1s">
+            <div class="flex space-x-2">
+                <button class="px-4 py-2 bg-primary text-white rounded-md shadow-sm hover:bg-primary/90 transition-colors">今日</button>
+                <button class="px-4 py-2 bg-white text-gray-600 rounded-md shadow-sm hover:bg-gray-50 transition-colors">本周</button>
+                <button class="px-4 py-2 bg-white text-gray-600 rounded-md shadow-sm hover:bg-gray-50 transition-colors">本月</button>
+                <button class="px-4 py-2 bg-white text-gray-600 rounded-md shadow-sm hover:bg-gray-50 transition-colors">自定义</button>
+            </div>
+            <div class="text-sm text-gray-500">
+                最后更新: <span class="font-medium">2025-07-11 15:30</span>
+            </div>
+        </div>
+        
+        <!-- 统计板块 -->
+        <section class="mb-12">
+            <div class="flex justify-between items-center mb-6 animate-fade-in" style="animation-delay: 0.2s">
+                <h3 class="text-xl font-semibold text-gray-800">渔场统计</h3>
+                <a href="#" class="text-primary text-sm hover:underline flex items-center">
+                    查看全部 <i class="fa fa-angle-right ml-1"></i>
+                </a>
+            </div>
+            
+            <!-- 数据概览卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in" style="animation-delay: 0.3s">
+                <!-- 养殖单元卡片 -->
+                <div class="bg-white rounded-xl p-6 card-shadow card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">养殖单元</p>
+                            <h4 class="text-2xl font-bold mt-1">36 / 40</h4>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
+                            <i class="fa fa-cubes text-primary"></i>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mb-2">
+                        <div class="bg-primary h-2 rounded-full" style="width: 90%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">90% 正在运行</p>
+                </div>
+                
+                <!-- 设备运行卡片 -->
+                <div class="bg-white rounded-xl p-6 card-shadow card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">运行设备</p>
+                            <h4 class="text-2xl font-bold mt-1">187 / 210</h4>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-secondary-light flex items-center justify-center">
+                            <i class="fa fa-microchip text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-primary inline-block mr-1"></span>
+                            <span class="text-gray-600">增氧泵: 68</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-secondary inline-block mr-1"></span>
+                            <span class="text-gray-600">热泵: 42</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm mt-1">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-warning inline-block mr-1"></span>
+                            <span class="text-gray-600">微滤机: 23</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-info inline-block mr-1"></span>
+                            <span class="text-gray-600">其他: 54</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 生物总量卡片 -->
+                <div class="bg-white rounded-xl p-6 card-shadow card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">生物总量</p>
+                            <h4 class="text-2xl font-bold mt-1">12.8 吨</h4>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-success-light flex items-center justify-center">
+                            <i class="fa fa-fish text-success"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-primary inline-block mr-1"></span>
+                            <span class="text-gray-600">鲈鱼: 5.2 吨</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-secondary inline-block mr-1"></span>
+                            <span class="text-gray-600">鲤鱼: 3.8 吨</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm mt-1">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-warning inline-block mr-1"></span>
+                            <span class="text-gray-600">草鱼: 2.5 吨</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 rounded-full bg-info inline-block mr-1"></span>
+                            <span class="text-gray-600">其他: 1.3 吨</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 液氧余量卡片 -->
+                <div class="bg-white rounded-xl p-6 card-shadow card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm">液氧余量</p>
+                            <h4 class="text-2xl font-bold mt-1">6.4 / 10 m³</h4>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-warning-light flex items-center justify-center">
+                            <i class="fa fa-tint text-warning"></i>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 mb-2">
+                        <div class="bg-warning h-2 rounded-full" style="width: 64%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500">64% 剩余</p>
+                </div>
+            </div>
+            
+            <!-- 图表区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.4s">
+                <!-- 养殖单元趋势图 -->
+                <div class="bg-white rounded-xl p-6 card-shadow lg:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-semibold text-gray-800">养殖单元运行趋势</h4>
+                        <div class="flex space-x-2">
+                            <button class="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full">日</button>
+                            <button class="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">周</button>
+                            <button class="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">月</button>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="pondTrendChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 生物量分布图 -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-semibold text-gray-800">生物量分布</h4>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fa fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="biomassChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 设备运行状态图 -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-semibold text-gray-800">设备运行状态</h4>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fa fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="equipmentStatusChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 消耗趋势图 -->
+                <div class="bg-white rounded-xl p-6 card-shadow lg:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-semibold text-gray-800">消耗趋势</h4>
+                        <div class="flex space-x-2">
+                            <button class="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full">日</button>
+                            <button class="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">周</button>
+                            <button class="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded-full">月</button>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="consumptionChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 近期任务卡片 -->
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="font-semibold text-gray-800">近期任务</h4>
+                        <span class="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">5个任务</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center mt-1">
+                                <i class="fa fa-calendar text-primary text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-800">池塘23号换水</h5>
+                                <p class="text-xs text-gray-500">今天 16:00 - 18:00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-warning-light flex items-center justify-center mt-1">
+                                <i class="fa fa-wrench text-warning text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-800">增氧泵例行维护</h5>
+                                <p class="text-xs text-gray-500">明天 09:00 - 11:00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-success-light flex items-center justify-center mt-1">
+                                <i class="fa fa-shopping-cart text-success text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-800">饲料补货</h5>
+                                <p class="text-xs text-gray-500">2025-07-13 10:00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-info-light flex items-center justify-center mt-1">
+                                <i class="fa fa-flask text-info text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-800">水质检测</h5>
+                                <p class="text-xs text-gray-500">2025-07-14 14:00</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-danger-light flex items-center justify-center mt-1">
+                                <i class="fa fa-medkit text-danger text-sm"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-medium text-gray-800">鱼病预防</h5>
+                                <p class="text-xs text-gray-500">2025-07-15 10:00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 预警板块 -->
+        <section>
+            <div class="flex justify-between items-center mb-6 animate-fade-in" style="animation-delay: 0.5s">
+                <h3 class="text-xl font-semibold text-gray-800">预警信息</h3>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-danger inline-block mr-1"></span>
+                        <span class="text-sm text-gray-600">紧急 (2)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-warning inline-block mr-1"></span>
+                        <span class="text-sm text-gray-600">警告 (3)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-info inline-block mr-1"></span>
+                        <span class="text-sm text-gray-600">提示 (1)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 预警卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.6s">
+                <!-- 紧急预警 - 饲料即将耗尽 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-danger">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded-full">紧急</span>
+                            <h4 class="font-semibold text-gray-800 mt-2">饲料即将耗尽</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-danger-light flex items-center justify-center">
+                            <i class="fa fa-exclamation-triangle text-danger text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">鲈鱼饲料仅剩余2天用量，请及时补货，避免影响鱼类生长。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">2025-07-11 12:30</span>
+                        <button class="px-3 py-1 bg-danger text-white text-xs rounded-md hover:bg-danger/90 transition-colors">
+                            立即处理
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 紧急预警 - 设备故障 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-danger">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded-full">紧急</span>
+                            <h4 class="font-semibold text-gray-800 mt-2">设备故障</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-danger-light flex items-center justify-center">
+                            <i class="fa fa-bolt text-danger text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">池塘12号增氧泵出现异常，已自动切换备用设备，请尽快维修。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">2025-07-11 10:45</span>
+                        <button class="px-3 py-1 bg-danger text-white text-xs rounded-md hover:bg-danger/90 transition-colors">
+                            立即处理
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 警告预警 - 设备保养 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-warning">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">警告</span>
+                            <h4 class="font-semibold text-gray-800 mt-2">设备保养提醒</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-warning-light flex items-center justify-center">
+                            <i class="fa fa-wrench text-warning text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">空气能热泵已运行30天，建议进行例行保养，延长设备使用寿命。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">2025-07-11 09:15</span>
+                        <button class="px-3 py-1 bg-warning text-white text-xs rounded-md hover:bg-warning/90 transition-colors">
+                            安排保养
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 警告预警 - 水质异常 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-warning">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">警告</span>
+                            <h4 class="font-semibold text-gray-800 mt-2">水质异常</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-warning-light flex items-center justify-center">
+                            <i class="fa fa-tint text-warning text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">池塘8号溶氧量降至4.2mg/L，建议增加增氧设备运行时间。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">2025-07-11 14:20</span>
+                        <button class="px-3 py-1 bg-warning text-white text-xs rounded-md hover:bg-warning/90 transition-colors">
+                            处理异常
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 警告预警 - 天气预警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-warning">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">警告</span>
+                            <h4 class="font-semibold text-gray-800 mt-2">天气预警</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-warning-light flex items-center justify-center">
+                            <i class="fa fa-cloud text-warning text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">据天气预报，未来24小时内将有暴雨，请注意检查防漏设施。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">2025-07-11 08:00</span>
+                        <button class="px-3 py-1 bg-warning text-white text-xs rounded-md hover:bg-warning/90 transition-colors">
+                            查看详情
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 提示预警 - 鱼病预警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-info">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="px-2 py-1 bg-info/10 text-info text-xs rounded-full">提示</span>
+                            <h4 class="font-semibold text-gray-800 mt-2">鱼病预警</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-info-light flex items-center justify-center">
+                            <i class="fa fa-medkit text-info text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4">近期鲤鱼易感染烂鳃病，建议提前做好预防措施。</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">2025-07-10 16:30</span>
+                        <button class="px-3 py-1 bg-info text-white text-xs rounded-md hover:bg-info/90 transition-colors">
+                            预防措施
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer class="bg-white border-t mt-auto">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                    <i class="fa fa-tint text-primary text-xl"></i>
+                    <span class="font-medium text-gray-800">智慧渔场管理系统</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    © 2025 智慧渔场管理系统. 保留所有权利.
+                </div>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                        <i class="fa fa-question-circle"></i> 帮助中心
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                        <i class="fa fa-envelope-o"></i> 联系我们
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+                        <i class="fa fa-shield"></i> 隐私政策
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 10) {
+                navbar.classList.add('py-2', 'shadow');
+                navbar.classList.remove('py-3');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow');
+            }
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 图表初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 养殖单元趋势图
+            const pondTrendCtx = document.getElementById('pondTrendChart').getContext('2d');
+            new Chart(pondTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '现在'],
+                    datasets: [{
+                        label: '运行中',
+                        data: [32, 32, 34, 35, 36, 35, 36],
+                        borderColor: '#165DFF',
+                        backgroundColor: 'rgba(22, 93, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: '维护中',
+                        data: [4, 4, 3, 2, 1, 2, 1],
+                        borderColor: '#86909C',
+                        backgroundColor: 'rgba(134, 144, 156, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 6
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 生物量分布图
+            const biomassCtx = document.getElementById('biomassChart').getContext('2d');
+            new Chart(biomassCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['鲈鱼', '鲤鱼', '草鱼', '其他'],
+                    datasets: [{
+                        data: [5.2, 3.8, 2.5, 1.3],
+                        backgroundColor: [
+                            '#165DFF',
+                            '#36CFC9',
+                            '#FF7D00',
+                            '#86909C'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 6,
+                                padding: 15
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+            
+            // 设备运行状态图
+            const equipmentCtx = document.getElementById('equipmentStatusChart').getContext('2d');
+            new Chart(equipmentCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['增氧泵', '空气能热泵', '微滤机', '水质监测仪', '投饵机'],
+                    datasets: [{
+                        label: '运行中',
+                        data: [68, 42, 23, 35, 19],
+                        backgroundColor: 'rgba(22, 93, 255, 0.2)',
+                        borderColor: '#165DFF',
+                        pointBackgroundColor: '#165DFF',
+                        pointRadius: 4
+                    }, {
+                        label: '故障',
+                        data: [3, 1, 0, 2, 1],
+                        backgroundColor: 'rgba(245, 63, 63, 0.2)',
+                        borderColor: '#F53F3F',
+                        pointBackgroundColor: '#F53F3F',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 6,
+                                padding: 15
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 80,
+                            ticks: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 消耗趋势图
+            const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
+            new Chart(consumptionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '用电量 (kWh)',
+                        data: [1250, 1380, 1290, 1420, 1350, 1280, 1320],
+                        backgroundColor: '#165DFF',
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.5
+                    }, {
+                        label: '用水量 (m³)',
+                        data: [450, 480, 420, 510, 460, 430, 470],
+                        backgroundColor: '#36CFC9',
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 6
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false,
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+    

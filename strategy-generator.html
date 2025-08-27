@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智能策略</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="../static/font-awesome@4.7.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#165DFF",
+              secondary: "#36CFC9",
+              success: "#52C41A",
+              warning: "#FAAD14",
+              danger: "#FF4D4F",
+              dark: "#1D2129",
+              "dark-2": "#4E5969",
+              "light-1": "#F2F3F5",
+              "light-2": "#E5E6EB",
+              "light-3": "#C9CDD4",
+            },
+            fontFamily: {
+              inter: ["Inter", "system-ui", "sans-serif"],
+            },
+            boxShadow: {
+              card: "0 4px 20px rgba(0, 0, 0, 0.08)",
+              "card-hover": "0 8px 30px rgba(0, 0, 0, 0.12)",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .transition-height {
+          transition: max-height 0.3s ease-in-out;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="font-inter bg-gray-50 text-dark overflow-x-hidden">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div
+        class="container mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-2">
+          <div class="bg-primary text-white p-2 rounded-lg">
+            <i class="fa fa-cogs text-xl"></i>
+          </div>
+          <h1 class="text-xl font-bold text-primary">智能策略</h1>
+        </div>
+        <div class="flex items-center space-x-6">
+          <button
+            class="text-dark-2 hover:text-primary transition-colors duration-200"
+          >
+            <i class="fa fa-question-circle"></i>
+            <span class="ml-1 hidden md:inline">帮助</span>
+          </button>
+          <button
+            class="text-dark-2 hover:text-primary transition-colors duration-200"
+          >
+            <i class="fa fa-history"></i>
+            <span class="ml-1 hidden md:inline">历史</span>
+          </button>
+          <button
+            class="text-dark-2 hover:text-primary transition-colors duration-200"
+          >
+            <i class="fa fa-user-circle"></i>
+            <span class="ml-1 hidden md:inline">账户</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main
+      class="container mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6"
+    >
+      <!-- 左侧面板 -->
+      <aside class="lg:col-span-3 space-y-6">
+        <!-- 策略信息卡片 -->
+        <div
+          class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-lg">策略信息</h2>
+            <button
+              class="text-primary hover:text-primary/80 transition-colors"
+            >
+              <i class="fa fa-pencil"></i>
+            </button>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">策略名称</label>
+              <input
+                type="text"
+                value="养殖工厂控制策略"
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">描述</label>
+              <textarea
+                rows="3"
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              >
+基于传感器数据自动控制养殖工厂设备的智能代理</textarea
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 组件库 -->
+        <div
+          class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300"
+        >
+          <h2 class="font-bold text-lg mb-4">组件库</h2>
+          <div class="space-y-3">
+            <div
+              class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200"
+            >
+              <div class="flex items-center">
+                <div class="bg-primary/10 p-2 rounded text-primary">
+                  <i class="fa fa-microchip"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">输入设备</h3>
+                  <p class="text-dark-2 text-xs">温度、湿度、光线传感器等</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-primary"></i>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200"
+            >
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-2 rounded text-secondary">
+                  <i class="fa fa-cubes"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">策略节点</h3>
+                  <p class="text-dark-2 text-xs">条件判断、数据处理等</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-secondary"></i>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200"
+            >
+              <div class="flex items-center">
+                <div class="bg-success/10 p-2 rounded text-success">
+                  <i class="fa fa-plug"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">输出设备</h3>
+                  <p class="text-dark-2 text-xs">灯光、空气能热泵、窗帘等</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-success"></i>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200"
+            >
+              <div class="flex items-center">
+                <div class="bg-warning/10 p-2 rounded text-warning">
+                  <i class="fa fa-bell"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">通知</h3>
+                  <p class="text-dark-2 text-xs">短信、邮件、APP推送</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-warning"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 中间编辑区 -->
+      <section class="lg:col-span-6 space-y-6">
+        <!-- 编辑工具栏 -->
+        <div
+          class="bg-white rounded-xl shadow-card p-4 flex flex-wrap items-center justify-between"
+        >
+          <div class="flex items-center space-x-3 mb-2 sm:mb-0">
+            <button
+              class="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center"
+            >
+              <i class="fa fa-save mr-2"></i>保存
+            </button>
+            <button
+              class="px-3 py-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors flex items-center"
+            >
+              <i class="fa fa-undo mr-2"></i>撤销
+            </button>
+            <button
+              class="px-3 py-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors flex items-center"
+            >
+              <i class="fa fa-repeat mr-2"></i>重做
+            </button>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <input
+                type="text"
+                placeholder="搜索组件..."
+                class="pl-9 pr-3 py-1.5 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              />
+              <i
+                class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-3"
+              ></i>
+            </div>
+            <button
+              class="p-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors"
+            >
+              <i class="fa fa-arrows-alt"></i>
+            </button>
+            <button
+              class="p-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors"
+            >
+              <i class="fa fa-search-plus"></i>
+            </button>
+            <button
+              class="p-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors"
+            >
+              <i class="fa fa-search-minus"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 编辑画布 -->
+        <div
+          class="bg-white rounded-xl shadow-card p-6 h-[500px] overflow-auto relative"
+          id="canvas"
+        >
+          <div
+            class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2UyZTRlNiIgb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjEiLz48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTJlNGU2IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"
+          ></div>
+
+          <!-- 连接线SVG容器 -->
+          <svg
+            class="absolute top-0 left-0 w-full h-full"
+            id="connection-svg"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- 箭头标记定义 -->
+            <defs>
+              <marker
+                id="arrowhead-primary"
+                markerWidth="10"
+                markerHeight="7"
+                refX="9"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon points="0 0, 10 3.5, 0 7" fill="#165DFF" />
+              </marker>
+              <marker
+                id="arrowhead-secondary"
+                markerWidth="10"
+                markerHeight="7"
+                refX="9"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon points="0 0, 10 3.5, 0 7" fill="#36CFC9" />
+              </marker>
+              <marker
+                id="arrowhead-success"
+                markerWidth="10"
+                markerHeight="7"
+                refX="9"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon points="0 0, 10 3.5, 0 7" fill="#52C41A" />
+              </marker>
+              <marker
+                id="arrowhead-warning"
+                markerWidth="10"
+                markerHeight="7"
+                refX="9"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon points="0 0, 10 3.5, 0 7" fill="#FAAD14" />
+              </marker>
+            </defs>
+
+            <!-- 连接线将由JavaScript动态生成 -->
+            <path
+              id="sensor-to-strategy"
+              d=""
+              fill="none"
+              stroke="#165DFF"
+              stroke-width="2"
+              marker-end="url(#arrowhead-primary)"
+            />
+            <path
+              id="strategy-to-ac"
+              d=""
+              fill="none"
+              stroke="#52C41A"
+              stroke-width="2"
+              marker-end="url(#arrowhead-success)"
+            />
+            <path
+              id="strategy-to-alert"
+              d=""
+              fill="none"
+              stroke="#FAAD14"
+              stroke-width="2"
+              marker-end="url(#arrowhead-warning)"
+            />
+          </svg>
+
+          <!-- 输入设备节点 -->
+          <div
+            class="absolute top-10 left-10 bg-white border-2 border-primary rounded-lg shadow-lg p-4 w-64 z-10 node"
+            data-type="input"
+            id="sensor-node"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="bg-primary/10 p-1.5 rounded text-primary mr-2">
+                  <i class="fa fa-thermometer-half"></i>
+                </div>
+                <h3 class="font-medium">温度传感器</h3>
+              </div>
+              <span class="text-xs text-dark-2">ID: TEMP-001</span>
+            </div>
+            <div class="text-sm text-dark-2 mb-3">
+              实时监测养殖池温度变化，提供精确数据
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span>当前温度: <b>28°C</b></span>
+              <div
+                class="connector w-3 h-3 bg-primary rounded-full absolute right-0 top-1/2 transform translate-x-1/2"
+                data-direction="out"
+              ></div>
+            </div>
+          </div>
+
+          <!-- 策略节点 -->
+          <div
+            class="absolute top-24 left-[240px] bg-white border-2 border-secondary rounded-lg shadow-lg p-4 w-64 z-10 node"
+            data-type="strategy"
+            id="strategy-node"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-1.5 rounded text-secondary mr-2">
+                  <i class="fa fa-code-fork"></i>
+                </div>
+                <h3 class="font-medium">温度判断</h3>
+              </div>
+              <span
+                class="px-1.5 py-0.5 bg-secondary/10 text-secondary text-xs rounded-full"
+                >条件</span
+              >
+            </div>
+            <div class="text-sm text-dark-2 mb-3">判断条件: 温度 < 10°C</div>
+            <div class="flex justify-between items-center text-xs">
+              <div
+                class="connector w-3 h-3 bg-secondary rounded-full absolute left-0 top-1/3 transform -translate-x-1/2"
+                data-direction="in"
+              ></div>
+              <div
+                class="connector w-3 h-3 bg-success rounded-full absolute right-0 top-1/3 transform translate-x-1/2"
+                data-direction="out"
+                data-output="true"
+              ></div>
+              <div
+                class="connector w-3 h-3 bg-warning rounded-full absolute right-0 top-2/3 transform translate-x-1/2"
+                data-direction="out"
+                data-output="false"
+              ></div>
+            </div>
+          </div>
+
+          <!-- 输出设备节点 -->
+          <div
+            class="absolute top-10 left-[470px] bg-white border-2 border-success rounded-lg shadow-lg p-4 w-64 z-10 node"
+            data-type="output"
+            id="ac-node"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="bg-success/10 p-1.5 rounded text-success mr-2">
+                  <i class="fa fa-snowflake-o"></i>
+                </div>
+                <h3 class="font-medium">空气能热泵</h3>
+              </div>
+              <span class="text-xs text-dark-2">ID: AC-001</span>
+            </div>
+            <div class="text-sm text-dark-2 mb-3">
+              控制操作: 开启空气能热泵，设置为制热模式
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span>设定温度: <b>24°C</b></span>
+              <div
+                class="connector w-3 h-3 bg-success rounded-full absolute left-0 top-1/2 transform -translate-x-1/2"
+                data-direction="in"
+              ></div>
+            </div>
+          </div>
+
+          <!-- 通知节点 -->
+          <div
+            class="absolute top-36 left-[470px] bg-white border-2 border-warning rounded-lg shadow-lg p-4 w-64 z-10 node"
+            data-type="notification"
+            id="alert-node"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center">
+                <div class="bg-warning/10 p-1.5 rounded text-warning mr-2">
+                  <i class="fa fa-bell"></i>
+                </div>
+                <h3 class="font-medium">温度警报</h3>
+              </div>
+              <span
+                class="px-1.5 py-0.5 bg-warning/10 text-warning text-xs rounded-full"
+                >通知</span
+              >
+            </div>
+            <div class="text-sm text-dark-2 mb-3">通知方式: APP推送</div>
+            <div class="flex justify-between items-center text-sm">
+              <span>消息: <b>温度过低警告</b></span>
+              <div
+                class="connector w-3 h-3 bg-warning rounded-full absolute left-0 top-1/2 transform -translate-x-1/2"
+                data-direction="in"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 节点属性面板 -->
+        <div class="bg-white rounded-xl shadow-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-lg">节点属性</h2>
+            <span
+              class="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+              >温度判断</span
+            >
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">节点名称</label>
+              <input
+                type="text"
+                value="温度判断"
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              />
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">节点类型</label>
+              <select
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              >
+                <option>条件判断</option>
+                <option>数据处理</option>
+                <option>逻辑计算</option>
+                <option>定时任务</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">判断条件</label>
+              <select
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              >
+                <option>大于 (>)</option>
+                <option>小于 (<)</option>
+                <option>等于 (=)</option>
+                <option>大于等于 (>=)</option>
+                <option>小于等于 (<=)</option>
+                <option>不等于 (!=)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">阈值</label>
+              <div class="flex">
+                <input
+                  type="number"
+                  value="26"
+                  class="w-full px-3 py-2 border border-light-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+                />
+                <span
+                  class="inline-flex items-center px-3 py-2 text-dark-2 bg-light-1 border border-l-0 border-light-2 rounded-r-lg"
+                  >°C</span
+                >
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-dark-2 text-sm block mb-1"
+                >判断为真时执行</label
+              >
+              <div
+                class="flex items-center justify-between p-3 border border-light-2 rounded-lg mb-2"
+              >
+                <div class="flex items-center">
+                  <div class="bg-success/10 p-1.5 rounded text-success mr-2">
+                    <i class="fa fa-plug"></i>
+                  </div>
+                  <span>开启空气能热泵 (AC-001)</span>
+                </div>
+                <button
+                  class="text-primary hover:text-primary/80 transition-colors"
+                >
+                  <i class="fa fa-pencil"></i>
+                </button>
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-dark-2 text-sm block mb-1"
+                >判断为假时执行</label
+              >
+              <div
+                class="flex items-center justify-between p-3 border border-light-2 rounded-lg"
+              >
+                <div class="flex items-center">
+                  <div class="bg-warning/10 p-1.5 rounded text-warning mr-2">
+                    <i class="fa fa-bell"></i>
+                  </div>
+                  <span>发送温度过低提醒</span>
+                </div>
+                <button
+                  class="text-primary hover:text-primary/80 transition-colors"
+                >
+                  <i class="fa fa-pencil"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右侧面板 -->
+      <aside class="lg:col-span-3 space-y-6">
+        <!-- 输出参数 -->
+        <div
+          class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-lg">输出参数</h2>
+            <button
+              class="text-primary hover:text-primary/80 transition-colors"
+            >
+              <i class="fa fa-plus"></i>
+            </button>
+          </div>
+          <div class="space-y-3">
+            <div
+              class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="bg-success/10 p-1.5 rounded text-success mr-2">
+                    <i class="fa fa-plug"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">设备控制</h3>
+                    <p class="text-dark-2 text-xs">空气能热泵 (AC-001)</p>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <button
+                    class="text-dark-2 hover:text-primary transition-colors"
+                  >
+                    <i class="fa fa-pencil"></i>
+                  </button>
+                  <button
+                    class="text-dark-2 hover:text-danger transition-colors"
+                  >
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="mt-2 pl-8 text-xs text-dark-2">
+                <div class="flex justify-between mb-1">
+                  <span>操作类型</span>
+                  <span class="font-medium">开启</span>
+                </div>
+                <div class="flex justify-between mb-1">
+                  <span>温度设置</span>
+                  <span class="font-medium">24°C</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>模式</span>
+                  <span class="font-medium">制热</span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="bg-warning/10 p-1.5 rounded text-warning mr-2">
+                    <i class="fa fa-bell"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-medium">通知</h3>
+                    <p class="text-dark-2 text-xs">温度过低提醒</p>
+                  </div>
+                </div>
+                <div class="flex space-x-2">
+                  <button
+                    class="text-dark-2 hover:text-primary transition-colors"
+                  >
+                    <i class="fa fa-pencil"></i>
+                  </button>
+                  <button
+                    class="text-dark-2 hover:text-danger transition-colors"
+                  >
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="mt-2 pl-8 text-xs text-dark-2">
+                <div class="flex justify-between mb-1">
+                  <span>通知类型</span>
+                  <span class="font-medium">APP推送</span>
+                </div>
+                <div class="flex justify-between mb-1">
+                  <span>优先级</span>
+                  <span class="font-medium">高</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>消息内容</span>
+                  <span class="font-medium">养殖池温度低于阈值</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 部署选项 -->
+        <div
+          class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300"
+        >
+          <h2 class="font-bold text-lg mb-4">部署选项</h2>
+          <div class="space-y-3">
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">部署环境</label>
+              <select
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              >
+                <option>开发环境</option>
+                <option>测试环境</option>
+                <option>生产环境</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">执行频率</label>
+              <select
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              >
+                <option>实时 (1秒)</option>
+                <option>每5秒</option>
+                <option>每分钟</option>
+                <option>每5分钟</option>
+                <option>每小时</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">日志级别</label>
+              <select
+                class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
+              >
+                <option>调试 (Debug)</option>
+                <option>信息 (Info)</option>
+                <option>警告 (Warn)</option>
+                <option>错误 (Error)</option>
+                <option>致命 (Fatal)</option>
+              </select>
+            </div>
+            <div class="pt-2">
+              <button
+                class="w-full py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center"
+              >
+                <i class="fa fa-rocket mr-2"></i>部署策略
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-light-2 mt-8 py-4">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="text-dark-2 text-sm mb-2 md:mb-0">
+            © 2025 智能策略 - 智能代理开发平台
+          </div>
+          <div class="flex space-x-4">
+            <a
+              href="#"
+              class="text-dark-2 hover:text-primary transition-colors text-sm"
+              >文档</a
+            >
+            <a
+              href="#"
+              class="text-dark-2 hover:text-primary transition-colors text-sm"
+              >API参考</a
+            >
+            <a
+              href="#"
+              class="text-dark-2 hover:text-primary transition-colors text-sm"
+              >示例</a
+            >
+            <a
+              href="#"
+              class="text-dark-2 hover:text-primary transition-colors text-sm"
+              >联系我们</a
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+      // 节点拖拽和连接线更新功能
+      document.addEventListener("DOMContentLoaded", function () {
+        const nodes = document.querySelectorAll(".node");
+        let activeNode = null;
+        let initialX, initialY, offsetX, offsetY;
+
+        // 初始化连接线
+        updateConnections();
+
+        // 为每个节点添加拖拽事件
+        nodes.forEach((node) => {
+          node.addEventListener("mousedown", dragStart);
+
+          // 防止文本被选中
+          node.addEventListener("selectstart", function (e) {
+            e.preventDefault();
+          });
+        });
+
+        function dragStart(e) {
+          if (e.target.closest("button")) return; // 如果点击的是按钮，不启动拖拽
+
+          e.preventDefault();
+          activeNode = this;
+
+          // 获取鼠标在节点内的相对位置
+          const rect = activeNode.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+
+          // 添加活动状态样式
+          //activeNode.classList.add("ring-2", "ring-primary", "ring-offset-2");
+
+          document.addEventListener("mousemove", drag);
+          document.addEventListener("mouseup", dragEnd);
+        }
+
+        function drag(e) {
+          if (!activeNode) return;
+
+          e.preventDefault();
+
+          // 计算新位置（相对于画布）
+          const canvas = document.getElementById("canvas");
+          const canvasRect = canvas.getBoundingClientRect();
+
+          let newX = e.clientX - canvasRect.left - offsetX;
+          let newY = e.clientY - canvasRect.top - offsetY;
+
+          // 限制在画布内
+          newX = Math.max(
+            0,
+            Math.min(newX, canvasRect.width - activeNode.offsetWidth)
+          );
+          newY = Math.max(
+            0,
+            Math.min(newY, canvasRect.height - activeNode.offsetHeight)
+          );
+
+          // 设置新位置
+          activeNode.style.left = `${newX}px`;
+          activeNode.style.top = `${newY}px`;
+
+          // 更新连接线
+          updateConnections();
+        }
+
+        function dragEnd() {
+          if (!activeNode) return;
+
+          // 移除活动状态样式但保留选中状态
+          activeNode.classList.remove("ring-offset-2");
+          activeNode = null;
+
+          document.removeEventListener("mousemove", drag);
+          document.removeEventListener("mouseup", dragEnd);
+        }
+
+        // 更新连接线函数
+        function updateConnections() {
+          // 获取各节点
+          const sensorNode = document.getElementById("sensor-node");
+          const strategyNode = document.getElementById("strategy-node");
+          const acNode = document.getElementById("ac-node");
+          const alertNode = document.getElementById("alert-node");
+
+          // 获取连接点位置
+          const sensorOut = getConnectorPosition(sensorNode, "out");
+          const strategyIn = getConnectorPosition(strategyNode, "in");
+          const strategyOutTrue = getConnectorPosition(
+            strategyNode,
+            "out",
+            "true"
+          );
+          const strategyOutFalse = getConnectorPosition(
+            strategyNode,
+            "out",
+            "false"
+          );
+          const acIn = getConnectorPosition(acNode, "in");
+          const alertIn = getConnectorPosition(alertNode, "in");
+
+          // 更新路径
+          document
+            .getElementById("sensor-to-strategy")
+            .setAttribute("d", createPath(sensorOut, strategyIn));
+          document
+            .getElementById("strategy-to-ac")
+            .setAttribute("d", createPath(strategyOutTrue, acIn));
+          document
+            .getElementById("strategy-to-alert")
+            .setAttribute("d", createPath(strategyOutFalse, alertIn));
+        }
+
+        // 获取连接点位置
+        function getConnectorPosition(node, direction, output = null) {
+          if (!node) return { x: 0, y: 0 };
+
+          const rect = node.getBoundingClientRect();
+          const canvas = document.getElementById("canvas");
+          const canvasRect = canvas.getBoundingClientRect();
+
+          let connector;
+          let selector = "";
+          if (output !== null) {
+            // 查找特定输出连接点
+            selector = `.connector[data-direction="${direction}"][data-output="${output}"]`;
+            connector = node.querySelector(selector);
+          } else {
+            // 查找普通连接点
+            selector = `.connector[data-direction="${direction}"]`;
+            connector = node.querySelector(selector);
+          }
+
+          console.log(
+            `Node ID: ${
+              node.id
+            }, Direction: ${direction}, Output: ${output}, Selector: ${selector}, Found: ${
+              connector ? "Yes" : "No"
+            }`
+          );
+
+          if (connector) {
+            const connectorRect = connector.getBoundingClientRect();
+            let x =
+              connectorRect.left + connectorRect.width / 2 - canvasRect.left;
+            const y =
+              connectorRect.top + connectorRect.height / 2 - canvasRect.top;
+
+            // 为'in'方向的连接点添加箭头宽度的偏移量
+            if (direction === "in") {
+              const arrowOffset = 10; // 箭头宽度
+              x -= arrowOffset;
+            }
+
+            return { x, y };
+          }
+
+          console.log(
+            `Using fallback for node: ${node.id}, direction: ${direction}`
+          );
+
+          // 如果找不到连接点，使用节点边缘的中点
+          // 为输入节点添加箭头宽度的偏移量
+          if (direction === "out") {
+            return {
+              x: rect.right - canvasRect.left,
+              y: rect.top + rect.height / 2 - canvasRect.top,
+            };
+          } else {
+            // 'in' 方向
+            // 为输入节点添加箭头宽度的偏移量（箭头宽度为10，refX为9，所以需要偏移10个单位）
+            const arrowOffset = 10; // 箭头宽度
+            return {
+              x: rect.left - canvasRect.left - arrowOffset,
+              y: rect.top + rect.height / 2 - canvasRect.top,
+            };
+          }
+        }
+        // 创建贝塞尔曲线路径
+        function createPath(start, end) {
+          const dx = Math.abs(end.x - start.x);
+          const controlPointOffset = dx / 2;
+
+          return `M${
+            start.x
+          },${start.y} C${start.x + controlPointOffset},${start.y} ${end.x - controlPointOffset},${end.y} ${end.x},${end.y}`;
+        }
+
+        // 窗口大小改变时更新连接线
+        window.addEventListener("resize", updateConnections);
+      });
+    </script>
+  </body>
+</html>

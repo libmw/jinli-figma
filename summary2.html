@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渔场管理系统 - 概览</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../static/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="../static/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        info: '#86909C',
+                        light: '#F2F3F5',
+                        dark: '#1D2129',
+                        'primary-light': '#E8F3FF',
+                        'success-light': '#E8FFF3',
+                        'warning-light': '#FFF7E8',
+                        'danger-light': '#FFECE8',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 14px 0 rgba(0, 0, 0, 0.06)',
+                        'hover': '0 6px 16px -8px rgba(0, 0, 0, 0.08), 0 9px 28px 0 rgba(0, 0, 0, 0.05), 0 12px 48px 16px rgba(0, 0, 0, 0.03)',
+                    }
+                },
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-gradient {
+                background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+            }
+            .stat-card {
+                @apply bg-white rounded-xl p-5 shadow-card transition-all duration-300 hover:shadow-hover;
+            }
+            .alert-card {
+                @apply rounded-xl p-4 transition-all duration-300 hover:shadow-md;
+            }
+            .nav-item {
+                @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer;
+            }
+            .nav-item.active {
+                @apply bg-primary-light text-primary font-medium;
+            }
+            .nav-item:not(.active) {
+                @apply hover:bg-light;
+            }
+            .progress-bar {
+                @apply h-2 rounded-full overflow-hidden bg-light;
+            }
+            .progress-value {
+                @apply h-full rounded-full transition-all duration-1000 ease-out;
+            }
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90;
+            }
+            .btn-outline {
+                @apply border border-primary text-primary hover:bg-primary/10;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 text-dark">
+    <div class="flex h-screen overflow-hidden">
+        <!-- 侧边导航 -->
+        <aside class="w-64 bg-white shadow-lg hidden md:block transition-all duration-300 z-20">
+            <div class="p-5 border-b">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+                        <i class="fa fa-tint text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold">渔场管理系统</h1>
+                </div>
+            </div>
+            
+            <nav class="p-4">
+                <div class="nav-item active">
+                    <i class="fa fa-dashboard w-5 text-center"></i>
+                    <span>概览</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-shopping-basket w-5 text-center"></i>
+                    <span>投入品管理</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-bolt w-5 text-center"></i>
+                    <span>能耗管理</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-cutlery w-5 text-center"></i>
+                    <span>智能投饵</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-line-chart w-5 text-center"></i>
+                    <span>生产效率</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-users w-5 text-center"></i>
+                    <span>员工绩效</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-shield w-5 text-center"></i>
+                    <span>自我监管</span>
+                </div>
+                <div class="nav-item">
+                    <i class="fa fa-bell w-5 text-center"></i>
+                    <span>警醒系统</span>
+                </div>
+            </nav>
+            
+            <div class="absolute bottom-0 w-full p-4 border-t">
+                <div class="flex items-center gap-3">
+                    <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <p class="font-medium">张海洋</p>
+                        <p class="text-sm text-info">渔场经理</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- 顶部导航 -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <button class="md:hidden text-xl mr-4" id="mobile-menu-button">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <h2 class="text-xl font-semibold">渔场概览</h2>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <input type="text" placeholder="搜索..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                        
+                        <div class="relative">
+                            <button class="relative text-gray-600 hover:text-primary transition-colors">
+                                <i class="fa fa-bell text-xl"></i>
+                                <span class="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full flex items-center justify-center text-white text-xs">3</span>
+                            </button>
+                        </div>
+                        
+                        <div class="hidden md:flex items-center gap-2">
+                            <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                            <span class="font-medium">张海洋</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- 内容滚动区域 -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+                <div class="container mx-auto">
+                    <!-- 时间选择器 -->
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold">渔场整体情况</h3>
+                            <p class="text-info">更新时间: 2025-07-14 08:30</p>
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <div class="relative">
+                                <select class="appearance-none pl-4 pr-10 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                                    <option>今日</option>
+                                    <option>本周</option>
+                                    <option selected>本月</option>
+                                    <option>本季度</option>
+                                    <option>本年</option>
+                                    <option>自定义</option>
+                                </select>
+                                <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                            </div>
+                            
+                            <button class="btn btn-outline">
+                                <i class="fa fa-download"></i>
+                                <span>导出报告</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 鱼池状态统计卡片 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
+                        <div class="stat-card lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">总鱼池数量</h4>
+                                <div class="w-12 h-12 rounded-lg bg-primary-light flex items-center justify-center text-primary">
+                                    <i class="fa fa-tint"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">15</p>
+                                <p class="text-info mb-1">个</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-success text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 2个
+                                </span>
+                                <span class="text-xs text-info ml-2">较上月新增</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">正常运行</h4>
+                                <div class="w-12 h-12 rounded-lg bg-success-light flex items-center justify-center text-success">
+                                    <i class="fa fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">12</p>
+                                <p class="text-info mb-1">个</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-success text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 1个
+                                </span>
+                                <span class="text-xs text-info ml-2">较昨日</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">需要注意</h4>
+                                <div class="w-12 h-12 rounded-lg bg-warning-light flex items-center justify-center text-warning">
+                                    <i class="fa fa-exclamation-circle"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">2</p>
+                                <p class="text-info mb-1">个</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-danger text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 1个
+                                </span>
+                                <span class="text-xs text-info ml-2">较昨日</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">需要处理</h4>
+                                <div class="w-12 h-12 rounded-lg bg-danger-light flex items-center justify-center text-danger">
+                                    <i class="fa fa-times-circle"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">1</p>
+                                <p class="text-info mb-1">个</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-success text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-down mr-1"></i> 2个
+                                </span>
+                                <span class="text-xs text-info ml-2">较昨日</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 关键指标卡片 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">总生物存量</h4>
+                                <div class="w-10 h-10 rounded-lg bg-primary-light flex items-center justify-center text-primary">
+                                    <i class="fa fa-fish"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">28.5</p>
+                                <p class="text-info mb-1">吨</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-success text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 3.2%
+                                </span>
+                                <span class="text-xs text-info ml-2">较上月</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">饵料转化率</h4>
+                                <div class="w-10 h-10 rounded-lg bg-success-light flex items-center justify-center text-success">
+                                    <i class="fa fa-pie-chart"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">1.72</p>
+                                <p class="text-info mb-1">kg/kg</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-danger text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-down mr-1"></i> 0.5%
+                                </span>
+                                <span class="text-xs text-info ml-2">较上月</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">能耗成本</h4>
+                                <div class="w-10 h-10 rounded-lg bg-warning-light flex items-center justify-center text-warning">
+                                    <i class="fa fa-bolt"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">12,850</p>
+                                <p class="text-info mb-1">元</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-success text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-down mr-1"></i> 4.8%
+                                </span>
+                                <span class="text-xs text-info ml-2">较上月</span>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-info font-medium">死亡率</h4>
+                                <div class="w-10 h-10 rounded-lg bg-danger-light flex items-center justify-center text-danger">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-end gap-2 mb-2">
+                                <p class="text-3xl font-bold">1.2</p>
+                                <p class="text-info mb-1">%</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-success text-sm font-medium flex items-center">
+                                    <i class="fa fa-arrow-down mr-1"></i> 0.3%
+                                </span>
+                                <span class="text-xs text-info ml-2">较上月</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 图表和数据区域 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <!-- 生产趋势图 -->
+                        <div class="lg:col-span-2 bg-white rounded-xl p-5 shadow-card">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="font-semibold text-lg">生产趋势</h4>
+                                <div class="flex gap-2">
+                                    <button class="text-xs px-3 py-1 rounded-full bg-primary-light text-primary">生物存量</button>
+                                    <button class="text-xs px-3 py-1 rounded-full bg-light text-info">饵料消耗</button>
+                                    <button class="text-xs px-3 py-1 rounded-full bg-light text-info">出池量</button>
+                                </div>
+                            </div>
+                            <div class="h-80">
+                                <canvas id="productionChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- 鱼池状态 -->
+                        <div class="bg-white rounded-xl p-5 shadow-card">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="font-semibold text-lg">鱼池状态</h4>
+                                <button class="text-primary text-sm hover:underline">查看全部</button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="p-3 border border-success/20 rounded-lg bg-success/5 flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center text-success mr-3">
+                                        <i class="fa fa-check-circle"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">一号鱼池</h5>
+                                            <span class="text-success text-xs">正常</span>
+                                        </div>
+                                        <p class="text-sm text-info">罗非鱼 | 存量: 8.2吨</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 border border-success/20 rounded-lg bg-success/5 flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center text-success mr-3">
+                                        <i class="fa fa-check-circle"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">二号鱼池</h5>
+                                            <span class="text-success text-xs">正常</span>
+                                        </div>
+                                        <p class="text-sm text-info">鲈鱼 | 存量: 6.5吨</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 border border-warning/20 rounded-lg bg-warning/5 flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-warning/20 flex items-center justify-center text-warning mr-3">
+                                        <i class="fa fa-exclamation-circle"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">三号鱼池</h5>
+                                            <span class="text-warning text-xs">需要注意</span>
+                                        </div>
+                                        <p class="text-sm text-info">鲤鱼 | 存量: 4.3吨</p>
+                                        <p class="text-xs text-warning mt-1">DO值偏低，建议增加曝气</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 border border-success/20 rounded-lg bg-success/5 flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center text-success mr-3">
+                                        <i class="fa fa-check-circle"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">四号鱼池</h5>
+                                            <span class="text-success text-xs">正常</span>
+                                        </div>
+                                        <p class="text-sm text-info">草鱼 | 存量: 5.4吨</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 border border-danger/20 rounded-lg bg-danger/5 flex items-center">
+                                    <div class="w-12 h-12 rounded-lg bg-danger/20 flex items-center justify-center text-danger mr-3">
+                                        <i class="fa fa-times-circle"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">五号鱼池</h5>
+                                            <span class="text-danger text-xs">需要处理</span>
+                                        </div>
+                                        <p class="text-sm text-info">鲫鱼 | 存量: 4.1吨</p>
+                                        <p class="text-xs text-danger mt-1">水温异常，建议检查温控系统</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 投入品库存和预警 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- 投入品库存 -->
+                        <div class="bg-white rounded-xl p-5 shadow-card">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="font-semibold text-lg">投入品库存</h4>
+                                <button class="text-primary text-sm hover:underline">查看详情</button>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="text-left text-info border-b">
+                                            <th class="pb-3 font-medium">名称</th>
+                                            <th class="pb-3 font-medium">类型</th>
+                                            <th class="pb-3 font-medium">当前库存</th>
+                                            <th class="pb-3 font-medium">状态</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b hover:bg-light/50">
+                                            <td class="py-3">高蛋白鱼饲料</td>
+                                            <td class="py-3">饵料</td>
+                                            <td class="py-3">12.5吨</td>
+                                            <td class="py-3">
+                                                <span class="px-2 py-1 rounded-full bg-success/10 text-success text-xs">充足</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-light/50">
+                                            <td class="py-3">增氧剂</td>
+                                            <td class="py-3">水产投入品</td>
+                                            <td class="py-3">48袋</td>
+                                            <td class="py-3">
+                                                <span class="px-2 py-1 rounded-full bg-success/10 text-success text-xs">充足</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-light/50">
+                                            <td class="py-3">鱼苗</td>
+                                            <td class="py-3">种苗</td>
+                                            <td class="py-3">8,500尾</td>
+                                            <td class="py-3">
+                                                <span class="px-2 py-1 rounded-full bg-warning/10 text-warning text-xs">低库存</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-light/50">
+                                            <td class="py-3">水质调节剂</td>
+                                            <td class="py-3">水产投入品</td>
+                                            <td class="py-3">12箱</td>
+                                            <td class="py-3">
+                                                <span class="px-2 py-1 rounded-full bg-warning/10 text-warning text-xs">低库存</span>
+                                            </td>
+                                        </tr>
+                                        <tr class="hover:bg-light/50">
+                                            <td class="py-3">水泵配件</td>
+                                            <td class="py-3">配件</td>
+                                            <td class="py-3">3件</td>
+                                            <td class="py-3">
+                                                <span class="px-2 py-1 rounded-full bg-danger/10 text-danger text-xs">急需补货</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 系统预警 -->
+                        <div class="bg-white rounded-xl p-5 shadow-card">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="font-semibold text-lg">系统预警</h4>
+                                <button class="text-primary text-sm hover:underline">全部标记为已读</button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="alert-card bg-danger-light">
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 rounded-full bg-danger/20 flex items-center justify-center text-danger mr-3 mt-0.5">
+                                            <i class="fa fa-exclamation-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">紧急：五号鱼池水温异常</h5>
+                                            <p class="text-sm text-info mt-1">当前水温29.5°C，超出正常范围(24-26°C)，可能影响鱼类健康</p>
+                                            <div class="flex items-center mt-2 text-xs text-info">
+                                                <span>10分钟前</span>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-primary hover:underline">查看详情</button>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-info hover:underline">处理</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-card bg-warning-light">
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-warning mr-3 mt-0.5">
+                                            <i class="fa fa-bell"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">提醒：设备维护计划</h5>
+                                            <p class="text-sm text-info mt-1">曝气设备已运行30天，建议进行例行维护以确保正常运行</p>
+                                            <div class="flex items-center mt-2 text-xs text-info">
+                                                <span>2小时前</span>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-primary hover:underline">查看详情</button>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-info hover:underline">安排维护</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-card bg-info-light">
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 rounded-full bg-info/20 flex items-center justify-center text-info mr-3 mt-0.5">
+                                            <i class="fa fa-info-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">通知：备灾演练</h5>
+                                            <p class="text-sm text-info mt-1">本月备灾演练时间已确定，将于7月20日上午10点进行</p>
+                                            <div class="flex items-center mt-2 text-xs text-info">
+                                                <span>昨天</span>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-primary hover:underline">查看详情</button>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-info hover:underline">确认参加</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-card bg-warning-light">
+                                    <div class="flex items-start">
+                                        <div class="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-warning mr-3 mt-0.5">
+                                            <i class="fa fa-bell"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-medium">提醒：饵料库存低</h5>
+                                            <p class="text-sm text-info mt-1">高蛋白鱼饲料库存仅剩下12.5吨，预计15天后需要补货</p>
+                                            <div class="flex items-center mt-2 text-xs text-info">
+                                                <span>2天前</span>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-primary hover:underline">查看详情</button>
+                                                <span class="mx-2">•</span>
+                                                <button class="text-info hover:underline">采购</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 生产日志和员工绩效 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 生产日志 -->
+                        <div class="bg-white rounded-xl p-5 shadow-card">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="font-semibold text-lg">生产日志</h4>
+                                <button class="text-primary text-sm hover:underline">查看全部</button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="flex">
+                                    <div class="mr-4 relative">
+                                        <div class="w-2 h-2 rounded-full bg-success absolute top-0 left-1/2 -translate-x-1/2"></div>
+                                        <div class="w-0.5 h-full bg-gray-200 absolute top-2 left-1/2 -translate-x-1/2"></div>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium">完成一号鱼池投饵</h5>
+                                        <p class="text-sm text-info mt-1">自动投饵系统完成一号鱼池投饵，使用高蛋白饲料250公斤</p>
+                                        <div class="flex items-center mt-2 text-xs text-info">
+                                            <span>今天 08:30</span>
+                                            <span class="mx-2">•</span>
+                                            <span>操作人: 李技术员</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex">
+                                    <div class="mr-4 relative">
+                                        <div class="w-2 h-2 rounded-full bg-success absolute top-0 left-1/2 -translate-x-1/2"></div>
+                                        <div class="w-0.5 h-full bg-gray-200 absolute top-2 left-1/2 -translate-x-1/2"></div>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium">水质检测完成</h5>
+                                        <p class="text-sm text-info mt-1">三号鱼池水质检测完成，各项指标正常，DO值6.5mg/L，pH值7.2</p>
+                                        <div class="flex items-center mt-2 text-xs text-info">
+                                            <span>今天 07:45</span>
+                                            <span class="mx-2">•</span>
+                                            <span>操作人: 王技术员</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex">
+                                    <div class="mr-4 relative">
+                                        <div class="w-2 h-2 rounded-full bg-warning absolute top-0 left-1/2 -translate-x-1/2"></div>
+                                        <div class="w-0.5 h-full bg-gray-200 absolute top-2 left-1/2 -translate-x-1/2"></div>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium">处理五号鱼池异常</h5>
+                                        <p class="text-sm text-info mt-1">发现五号鱼池水温异常，已启动温控系统进行调节，当前水温29.5°C</p>
+                                        <div class="flex items-center mt-2 text-xs text-info">
+                                            <span>今天 06:15</span>
+                                            <span class="mx-2">•</span>
+                                            <span>操作人: 张技术员</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex">
+                                    <div class="mr-4 relative">
+                                        <div class="w-2 h-2 rounded-full bg-success absolute top-0 left-1/2 -translate-x-1/2"></div>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-medium">完成死鱼处理</h5>
+                                        <p class="text-sm text-info mt-1">处理死鱼共计12.5公斤，已按照规定进行无害化处理</p>
+                                        <div class="flex items-center mt-2 text-xs text-info">
+                                            <span>昨天 17:30</span>
+                                            <span class="mx-2">•</span>
+                                            <span>操作人: 陈工人</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 员工绩效 -->
+                        <div class="bg-white rounded-xl p-5 shadow-card">
+                            <div class="flex items-center justify-between mb-5">
+                                <h4 class="font-semibold text-lg">员工绩效</h4>
+                                <div class="relative">
+                                    <select class="appearance-none pl-3 pr-8 py-1 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                                        <option>本月</option>
+                                        <option>上月</option>
+                                        <option>本季度</option>
+                                        <option>本年</option>
+                                    </select>
+                                    <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center">
+                                    <img src="https://picsum.photos/id/1001/40/40" alt="李技术员头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">李技术员</h5>
+                                            <span class="text-success font-medium">95分</span>
+                                        </div>
+                                        <div class="progress-bar mt-1">
+                                            <div class="progress-value bg-success" style="width: 95%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <img src="https://picsum.photos/id/1002/40/40" alt="王技术员头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">王技术员</h5>
+                                            <span class="text-success font-medium">92分</span>
+                                        </div>
+                                        <div class="progress-bar mt-1">
+                                            <div class="progress-value bg-success" style="width: 92%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <img src="https://picsum.photos/id/1003/40/40" alt="张技术员头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">张技术员</h5>
+                                            <span class="text-warning font-medium">87分</span>
+                                        </div>
+                                        <div class="progress-bar mt-1">
+                                            <div class="progress-value bg-warning" style="width: 87%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <img src="https://picsum.photos/id/1004/40/40" alt="陈工人头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">陈工人</h5>
+                                            <span class="text-success font-medium">90分</span>
+                                        </div>
+                                        <div class="progress-bar mt-1">
+                                            <div class="progress-value bg-success" style="width: 90%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center">
+                                    <img src="https://picsum.photos/id/1005/40/40" alt="刘工人头像" class="w-10 h-10 rounded-full object-cover mr-3">
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h5 class="font-medium">刘工人</h5>
+                                            <span class="text-info font-medium">85分</span>
+                                        </div>
+                                        <div class="progress-bar mt-1">
+                                            <div class="progress-value bg-info" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 移动端侧边栏遮罩 -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-10 hidden md:hidden"></div>
+    
+    <script>
+        // 初始化生产趋势图表
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('productionChart').getContext('2d');
+            
+            const productionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月'],
+                    datasets: [{
+                        label: '生物存量 (吨)',
+                        data: [22.1, 23.5, 24.8, 25.3, 26.7, 27.8, 28.5],
+                        borderColor: '#165DFF',
+                        backgroundColor: 'rgba(22, 93, 255, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1D2129',
+                            bodyColor: '#1D2129',
+                            borderColor: 'rgba(22, 93, 255, 0.2)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `生物存量: ${context.raw} 吨`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: false,
+                            min: 20,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    elements: {
+                        point: {
+                            radius: 3,
+                            hoverRadius: 6
+                        }
+                    }
+                }
+            });
+            
+            // 移动端菜单切换
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.querySelector('aside');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            mobileMenuButton.addEventListener('click', function() {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('hidden');
+            });
+            
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.add('hidden');
+                sidebarOverlay.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
+    
