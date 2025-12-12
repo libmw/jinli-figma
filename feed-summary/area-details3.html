@@ -114,6 +114,310 @@
       }
     </style>
   </head>
+  <script>
+    // Mock chart data generation function
+    function generateMockData(points = 24, min = 0, max = 100) {
+      const data = [];
+      for (let i = 0; i < points; i++) {
+        data.push(Math.random() * (max - min) + min);
+      }
+      return data;
+    }
+
+    // Generate time labels for 24 hours
+    function generateTimeLabels() {
+      const labels = [];
+      for (let i = 0; i < 24; i++) {
+        labels.push(i.toString().padStart(2, '0') + ':00');
+      }
+      return labels;
+    }
+
+    // Initialize all monitoring charts after DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Water quality monitoring charts
+      if (document.getElementById('phChartSmall')) {
+        new Chart(document.getElementById('phChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 6.8, 7.6),
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('oxygenChartSmall')) {
+        new Chart(document.getElementById('oxygenChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 5.5, 7.5),
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('ammoniaChartSmall')) {
+        new Chart(document.getElementById('ammoniaChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 0.3, 0.7),
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('turbidityChartSmall')) {
+        new Chart(document.getElementById('turbidityChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 2, 8),
+              borderColor: '#8b5cf6',
+              backgroundColor: 'rgba(139, 92, 246, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('waterTempChartSmall')) {
+        new Chart(document.getElementById('waterTempChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 23.5, 25.5),
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('airTempChartSmall')) {
+        new Chart(document.getElementById('airTempChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 24.5, 27.5),
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('drainageChartSmall')) {
+        new Chart(document.getElementById('drainageChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 75, 95),
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('feedingChartSmall')) {
+        new Chart(document.getElementById('feedingChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 110, 135),
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      if (document.getElementById('fcrChartSmall')) {
+        new Chart(document.getElementById('fcrChartSmall'), {
+          type: 'line',
+          data: {
+            labels: generateTimeLabels(),
+            datasets: [{
+              data: generateMockData(24, 1.0, 1.4),
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 1,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: { point: { radius: 0 } }
+          }
+        });
+      }
+
+      // Monitoring radar chart
+      if (document.getElementById('monitoringRadarChart')) {
+        new Chart(document.getElementById('monitoringRadarChart'), {
+          type: 'radar',
+          data: {
+            labels: ['水温', 'PH值', '溶氧', '氨氮', '浊度', '盐度'],
+            datasets: [{
+              label: '当前值',
+              data: [85, 92, 78, 88, 95, 82],
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.2)',
+              borderWidth: 2
+            }, {
+              label: '标准值',
+              data: [90, 90, 85, 90, 90, 85],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            },
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100
+              }
+            }
+          }
+        });
+      }
+    });
+  </script>
   <body class="bg-gray-50">
     <!-- 顶部导航栏 -->
     <nav class="bg-white shadow-sm sticky top-0 z-10">
@@ -233,7 +537,7 @@
           <div class="flex justify-between items-start">
             <div>
               <p class="text-gray-500 text-sm">负责人</p>
-              <h3 class="text-xl font-bold mt-1">张明</h3>
+              <h3 class="text-xl font-bold mt-1">张金龙</h3>
               <p class="text-xs text-gray-500 mt-2">
                 <i class="fas fa-user mr-1 text-secondary"></i>区域主管 | 团队:
                 4人
@@ -1860,7 +2164,7 @@
                     <p class="text-sm text-gray-500 mt-1">
                       AI模型: FeedingV2.0
                     </p>
-                    <p class="text-xs text-gray-400">上线时间: 2023-06-15</p>
+                    <p class="text-xs text-gray-400">上线时间: 2025-06-15</p>
                   </div>
                 </div>
                 <div class="mt-4">
@@ -2634,7 +2938,7 @@
                         >位置: 主排污系统</span
                       >
                       <span class="text-xs text-gray-500"
-                        >时间: 2023-07-15 08:32</span
+                        >时间: 2025-07-15 08:32</span
                       >
                     </div>
                   </div>
@@ -2676,7 +2980,7 @@
                         >当前值: 0.4mg/L</span
                       >
                       <span class="text-xs text-gray-500"
-                        >时间: 2023-07-15 10:15</span
+                        >时间: 2025-07-15 10:15</span
                       >
                     </div>
                   </div>
@@ -2718,7 +3022,7 @@
                         >当前负载: 78%</span
                       >
                       <span class="text-xs text-gray-500"
-                        >时间: 2023-07-15 11:05</span
+                        >时间: 2025-07-15 11:05</span
                       >
                     </div>
                   </div>

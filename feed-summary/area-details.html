@@ -233,7 +233,7 @@
           <div class="flex justify-between items-start">
             <div>
               <p class="text-gray-500 text-sm">负责人</p>
-              <h3 class="text-xl font-bold mt-1">张明</h3>
+              <h3 class="text-xl font-bold mt-1">罗一兵</h3>
               <p class="text-xs text-gray-500 mt-2">
                 <i class="fas fa-user mr-1 text-secondary"></i>区域主管 | 团队:
                 4人
@@ -824,6 +824,51 @@
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <!-- 溶解氧传感器 -->
+              <div
+                class="border-l border-secondary p-3 bg-green-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-secondary/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-wind text-secondary text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">溶解氧</h3>
+                      <p class="text-xs text-gray-500">实时</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-secondary mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">6.8</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.3
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-secondary h-1.5 rounded-full"
+                      style="width: 68%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 5.0-8.0 mg/L</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="oxygenChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
               <!-- PH值传感器 -->
               <div
                 class="border-l border-primary p-3 bg-blue-50 rounded-md shadow-sm"
@@ -865,7 +910,7 @@
                   <p class="text-xs text-gray-500 mt-1">范围: 6.5-8.5</p>
                 </div>
                 <div class="mt-2 px-1">
-                  <canvas id="phChartSmall" class="w-full h-6"></canvas>
+                  <canvas id="phChartSmall" class="w-full h-12"></canvas>
                 </div>
               </div>
 
@@ -910,11 +955,56 @@
                   <p class="text-xs text-gray-500 mt-1">范围: 0-1.0 mg/L</p>
                 </div>
                 <div class="mt-2 px-1">
-                  <canvas id="ammoniaChartSmall" class="w-full h-6"></canvas>
+                  <canvas id="ammoniaChartSmall" class="w-full h-12"></canvas>
                 </div>
               </div>
 
-              <!-- 浊度传感器 -->
+              <!-- 水温传感器 -->
+              <div
+                class="border-l border-info p-3 bg-indigo-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-info/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-temperature-high text-info text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">水温</h3>
+                      <p class="text-xs text-gray-500">实时</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-info mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">24.5°C</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.5
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-info h-1.5 rounded-full"
+                      style="width: 60%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 22-26°C</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="waterTempChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
+              <!-- 盐度传感器 -->
               <div
                 class="border-l border-warning p-3 bg-yellow-50 rounded-md shadow-sm"
               >
@@ -923,10 +1013,10 @@
                     <div
                       class="w-6 h-6 bg-warning/20 rounded-md flex items-center justify-center mr-1"
                     >
-                      <i class="fas fa-eye-slash text-warning text-xs"></i>
+                      <i class="fas fa-tint text-warning text-xs"></i>
                     </div>
                     <div>
-                      <h3 class="text-sm font-bold">浊度</h3>
+                      <h3 class="text-sm font-bold">盐度</h3>
                       <p class="text-xs text-gray-500">实时</p>
                     </div>
                   </div>
@@ -934,193 +1024,32 @@
                     class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
                   >
                     <span
-                      class="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1"
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-warning mr-1"
                     ></span
                     >正常
                   </span>
                 </div>
                 <div class="mt-1.5">
                   <div class="flex items-center justify-between">
-                    <span class="text-lg font-bold">15</span>
+                    <span class="text-lg font-bold">3.2‰</span>
                     <span class="text-success text-xs">
-                      <i class="fas fa-arrow-down"></i> 2
+                      <i class="fas fa-arrow-down"></i> 0.1
                     </span>
                   </div>
                   <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                     <div
                       class="bg-warning h-1.5 rounded-full"
-                      style="width: 50%"
+                      style="width: 32%"
                     ></div>
                   </div>
-                  <p class="text-xs text-gray-500 mt-1">范围: 0-30 NTU</p>
+                  <p class="text-xs text-gray-500 mt-1">范围: 0-10‰</p>
                 </div>
                 <div class="mt-2 px-1">
-                  <canvas id="turbidityChartSmall" class="w-full h-6"></canvas>
+                  <canvas id="salinityChartSmall" class="w-full h-12"></canvas>
                 </div>
               </div>
 
-              
-
-             
-              <!-- 自动控制器 -->
-              <div
-                class="border-l border-warning p-3 bg-yellow-50 rounded-md shadow-sm"
-              >
-                <div class="flex justify-between items-start">
-                  <div class="flex items-center">
-                    <div
-                      class="w-6 h-6 bg-warning/20 rounded-md flex items-center justify-center mr-1"
-                    >
-                      <i class="fas fa-microchip text-warning text-xs"></i>
-                    </div>
-                    <div>
-                      <h3 class="text-sm font-bold">自动控制器</h3>
-                      <p class="text-xs text-gray-500">ID: CTRL-001</p>
-                    </div>
-                  </div>
-                  <span
-                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
-                  >
-                    <span
-                      class="inline-block w-1.5 h-1.5 rounded-full bg-warning mr-1"
-                    ></span
-                    >需维护
-                  </span>
-                </div>
-                <div class="mt-1.5">
-                  <div class="w-full bg-gray-200 rounded-full h-1.5">
-                    <div
-                      class="bg-warning h-1.5 rounded-full"
-                      style="width: 78%"
-                    ></div>
-                  </div>
-                  <div class="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>CPU负载</span>
-                    <span>78%</span>
-                  </div>
-                </div>
-                <div class="mt-1.5 text-xs text-warning font-medium">
-                  <i class="fas fa-exclamation-triangle mr-1 text-xs"></i
-                  >负载过高
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 排污系统 -->
-          <div class="mb-6">
-            <div class="flex items-center mb-3">
-              <div
-                class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-warning mr-2"
-              >
-                <i class="fas fa-trash"></i>
-              </div>
-              <h6 class="text-md font-medium">排污系统</h6>
-              <span
-                class="ml-2 px-2 py-1 text-xs rounded-full bg-yellow-100 text-warning"
-                >需要维护</span
-              >
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <!-- 排污量传感器 -->
-              <div
-                class="border-l border-primary p-3 bg-blue-50 rounded-md shadow-sm"
-              >
-                <div class="flex justify-between items-start">
-                  <div class="flex items-center">
-                    <div
-                      class="w-6 h-6 bg-primary/20 rounded-md flex items-center justify-center mr-1"
-                    >
-                      <i class="fas fa-tint text-primary text-xs"></i>
-                    </div>
-                    <div>
-                      <h3 class="text-sm font-bold">排污量</h3>
-                      <p class="text-xs text-gray-500">实时</p>
-                    </div>
-                  </div>
-                  <span
-                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                  >
-                    <span
-                      class="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1"
-                    ></span
-                    >正常
-                  </span>
-                </div>
-                <div class="mt-1.5">
-                  <div class="flex items-center justify-between">
-                    <span class="text-lg font-bold">85</span>
-                    <span class="text-xs text-gray-500">L/h</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                    <div
-                      class="bg-primary h-1.5 rounded-full"
-                      style="width: 85%"
-                    ></div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1">范围: 50-100 L/h</p>
-                </div>
-                <div class="mt-2 px-1">
-                  <canvas id="drainageChartSmall" class="w-full h-6"></canvas>
-                </div>
-              </div>
-
-              <!-- 过滤器设备 -->
-              <div
-                class="border-l border-warning p-3 bg-yellow-50 rounded-md shadow-sm"
-              >
-                <div class="flex justify-between items-start">
-                  <div class="flex items-center">
-                    <div
-                      class="w-6 h-6 bg-warning/20 rounded-md flex items-center justify-center mr-1"
-                    >
-                      <i class="fas fa-filter text-warning text-xs"></i>
-                    </div>
-                    <div>
-                      <h3 class="text-sm font-bold">微滤机</h3>
-                      <p class="text-xs text-gray-500">ID: FLTR-002</p>
-                    </div>
-                  </div>
-                  <span
-                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
-                  >
-                    <span
-                      class="inline-block w-1.5 h-1.5 rounded-full bg-warning mr-1"
-                    ></span
-                    >需维护
-                  </span>
-                </div>
-                <div class="mt-1.5">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <span class="text-lg font-bold text-warning">78%</span>
-                      <span class="text-warning text-xs ml-1">
-                        <i class="fas fa-arrow-down"></i> 5%
-                      </span>
-                    </div>
-                    <span class="text-xs text-gray-500">过滤效率</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                    <div
-                      class="bg-warning h-1.5 rounded-full"
-                      style="width: 78%"
-                    ></div>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-1 mt-1.5">
-                  <div class="bg-white/60 rounded-md p-1.5">
-                    <p class="text-xs text-gray-500">上次清洗</p>
-                    <p class="text-xs font-medium">7天前</p>
-                  </div>
-                  <div class="bg-white/60 rounded-md p-1.5">
-                    <p class="text-xs text-gray-500">建议</p>
-                    <p class="text-xs font-medium text-warning">清洗滤网</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 排污泵设备 -->
+              <!-- 亚盐传感器 -->
               <div
                 class="border-l border-danger p-3 bg-red-50 rounded-md shadow-sm"
               >
@@ -1129,11 +1058,11 @@
                     <div
                       class="w-6 h-6 bg-danger/20 rounded-md flex items-center justify-center mr-1"
                     >
-                      <i class="fas fa-water text-danger text-xs"></i>
+                      <i class="fas fa-flask-vial text-danger text-xs"></i>
                     </div>
                     <div>
-                      <h3 class="text-sm font-bold">排污泵 #1</h3>
-                      <p class="text-xs text-gray-500">ID: PUMP-001</p>
+                      <h3 class="text-sm font-bold">亚盐</h3>
+                      <p class="text-xs text-gray-500">实时</p>
                     </div>
                   </div>
                   <span
@@ -1142,30 +1071,26 @@
                     <span
                       class="inline-block w-1.5 h-1.5 rounded-full bg-danger mr-1"
                     ></span
-                    >故障
+                    >偏高
                   </span>
                 </div>
                 <div class="mt-1.5">
-                  <div class="w-full bg-gray-200 rounded-full h-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">0.15</span>
+                    <span class="text-danger text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.05
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                     <div
                       class="bg-danger h-1.5 rounded-full"
-                      style="width: 10%"
+                      style="width: 75%"
                     ></div>
                   </div>
-                  <div class="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>负载</span>
-                    <span>10%</span>
-                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 0-0.2 mg/L</p>
                 </div>
-                <div class="grid grid-cols-2 gap-1 mt-1.5">
-                  <div class="bg-white/60 rounded-md p-1.5">
-                    <p class="text-xs text-gray-500">运行时间</p>
-                    <p class="text-xs font-medium">0 小时</p>
-                  </div>
-                  <div class="bg-white/60 rounded-md p-1.5">
-                    <p class="text-xs text-gray-500">故障</p>
-                    <p class="text-xs font-medium text-danger">电机故障</p>
-                  </div>
+                <div class="mt-2 px-1">
+                  <canvas id="nitriteChartSmall" class="w-full h-12"></canvas>
                 </div>
               </div>
             </div>
@@ -1226,7 +1151,7 @@
                   <p class="text-xs text-gray-500 mt-1">计划: 130 kg</p>
                 </div>
                 <div class="mt-2 px-1">
-                  <canvas id="feedingChartSmall" class="w-full h-6"></canvas>
+                  <canvas id="feedingChartSmall" class="w-full h-12"></canvas>
                 </div>
               </div>
 
@@ -1269,7 +1194,7 @@
                   <p class="text-xs text-gray-500 mt-1">范围: 1.0-1.5</p>
                 </div>
                 <div class="mt-2 px-1">
-                  <canvas id="fcrChartSmall" class="w-full h-6"></canvas>
+                  <canvas id="fcrChartSmall" class="w-full h-12"></canvas>
                 </div>
               </div>
 
@@ -1312,6 +1237,22 @@
                   <div class="bg-white/60 rounded-md p-1.5">
                     <p class="text-xs text-gray-500">今日次数</p>
                     <p class="text-xs font-medium">3 次</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">电压</p>
+                    <p class="text-xs font-medium">220V</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">电流</p>
+                    <p class="text-xs font-medium">2.5A</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">功率</p>
+                    <p class="text-xs font-medium">0.55kW</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">运行状态</p>
+                    <p class="text-xs font-medium text-success">正常</p>
                   </div>
                 </div>
               </div>
@@ -1375,8 +1316,8 @@
                   </div>
                   <p class="text-xs text-gray-500 mt-1">范围: 22-26°C</p>
                 </div>
-                <div class="mt-2 px-1">
-                  <canvas id="waterTempChartSmall" class="w-full h-6"></canvas>
+                <div class="mt-2 px-1 pt-2">
+                  <canvas id="waterTempChartSmall1" class="w-full h-12"></canvas>
                 </div>
               </div>
 
@@ -1426,7 +1367,7 @@
                     ></div>
                   </div>
                 </div>
-                <div class="mt-1.5">
+                <div class="mt-8 px-1 pt-2">
                   <canvas id="airTempChart" class="w-full h-12"></canvas>
                 </div>
               </div>
@@ -1467,6 +1408,22 @@
                   <div class="bg-white/60 rounded-md p-1.5">
                     <p class="text-xs text-gray-500">运行时长</p>
                     <p class="text-xs font-medium">4.5 小时</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">电压</p>
+                    <p class="text-xs font-medium">380V</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">电流</p>
+                    <p class="text-xs font-medium">12.5A</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">功率</p>
+                    <p class="text-xs font-medium">4.8kW</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">效率</p>
+                    <p class="text-xs font-medium text-success">92%</p>
                   </div>
                 </div>
               </div>
@@ -1530,7 +1487,7 @@
                   <p class="text-xs text-gray-500 mt-1">范围: 5.0-8.0 mg/L</p>
                 </div>
                 <div class="mt-2 px-1">
-                  <canvas id="oxygenChartSmall" class="w-full h-6"></canvas>
+                  <canvas id="oxygenChartSmall1" class="w-full h-12"></canvas>
                 </div>
               </div>
 
@@ -1680,10 +1637,510 @@
                   </div>
                 </div>
               </div>
+
+              <!-- 液氧罐液位监测 -->
+              <div
+                class="border-l border-info p-3 bg-blue-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-info/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-flask-vial text-info text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">液氧罐液位</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-info mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">75%</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-down"></i> 2%
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-info h-1.5 rounded-full"
+                      style="width: 75%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">容量: 1000L</p>
+                </div>
+                <div class="grid grid-cols-2 gap-1 mt-1.5">
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">当前储量</p>
+                    <p class="text-xs font-medium">750L</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">预计可用</p>
+                    <p class="text-xs font-medium">5天</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 管网压力监测 -->
+              <div
+                class="border-l border-warning p-3 bg-yellow-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-warning/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-gauge text-warning text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">管网压力</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-warning mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">2.5</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.1
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-warning h-1.5 rounded-full"
+                      style="width: 50%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 2.0-3.0 MPa</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="pressureChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- 设备详情模块 -->
+          <!-- 循环水系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div
+                class="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 mr-2"
+              >
+                <i class="fas fa-recycle"></i>
+              </div>
+              <h6 class="text-md font-medium">循环水系统</h6>
+              <span
+                class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-success"
+                >正常</span
+              >
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <!-- 水流量监测 -->
+              <div
+                class="border-l border-cyan-500 p-3 bg-cyan-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-cyan-500/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-tachometer-alt text-cyan-600 text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">水流量</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-600 mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">125</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 5
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-cyan-600 h-1.5 rounded-full"
+                      style="width: 83%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 100-150 m³/h</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="flowRateChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
+              <!-- 水泵电压监测 -->
+              <div
+                class="border-l border-primary p-3 bg-blue-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-primary/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-bolt text-primary text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">水泵电压</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">380V</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-check"></i> 稳定
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-primary h-1.5 rounded-full"
+                      style="width: 95%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">标准: 380V±5%</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="pumpVoltageChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
+              <!-- 水泵电流监测 -->
+              <div
+                class="border-l border-warning p-3 bg-yellow-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-warning/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-wave-square text-warning text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">水泵电流</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-warning mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">18.5A</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.5A
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-warning h-1.5 rounded-full"
+                      style="width: 74%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 15-25A</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="pumpCurrentChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
+              <!-- 水泵功率监测 -->
+              <div
+                class="border-l border-success p-3 bg-green-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-success/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-plug text-success text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">水泵功率</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">11.2kW</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.3kW
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-success h-1.5 rounded-full"
+                      style="width: 75%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">额定: 15kW</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="pumpPowerChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 排污管理系统 -->
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div
+                class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-2"
+              >
+                <i class="fas fa-drain"></i>
+              </div>
+              <h6 class="text-md font-medium">排污管理系统</h6>
+              <span
+                class="ml-2 px-2 py-1 text-xs rounded-full bg-green-100 text-success"
+                >正常</span
+              >
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <!-- 电动阀通断状态 -->
+              <div
+                class="border-l border-orange-500 p-3 bg-orange-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-orange-500/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-valve text-orange-600 text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">电动阀状态</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1"
+                    ></span
+                    >开启
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold text-success">开启</span>
+                    <span class="text-xs text-gray-500">
+                      <i class="fas fa-clock"></i> 2小时前
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-success h-1.5 rounded-full"
+                      style="width: 100%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">开度: 100%</p>
+                </div>
+                <div class="grid grid-cols-2 gap-1 mt-1.5">
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">开启次数</p>
+                    <p class="text-xs font-medium">12次/天</p>
+                  </div>
+                  <div class="bg-white/60 rounded-md p-1.5">
+                    <p class="text-xs text-gray-500">累计时长</p>
+                    <p class="text-xs font-medium">4.5小时</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 排污泵电压 -->
+              <div
+                class="border-l border-primary p-3 bg-blue-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-primary/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-bolt text-primary text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">排污泵电压</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">220V</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-check"></i> 稳定
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-primary h-1.5 rounded-full"
+                      style="width: 95%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">标准: 220V±5%</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="drainPumpVoltageChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
+              <!-- 排污泵电流 -->
+              <div
+                class="border-l border-warning p-3 bg-yellow-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-warning/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-wave-square text-warning text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">排污泵电流</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-warning mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">8.5A</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.2A
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-warning h-1.5 rounded-full"
+                      style="width: 68%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">范围: 6-12A</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="drainPumpCurrentChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+
+              <!-- 排污泵功率 -->
+              <div
+                class="border-l border-success p-3 bg-green-50 rounded-md shadow-sm"
+              >
+                <div class="flex justify-between items-start">
+                  <div class="flex items-center">
+                    <div
+                      class="w-6 h-6 bg-success/20 rounded-md flex items-center justify-center mr-1"
+                    >
+                      <i class="fas fa-plug text-success text-xs"></i>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-bold">排污泵功率</h3>
+                      <p class="text-xs text-gray-500">实时监测</p>
+                    </div>
+                  </div>
+                  <span
+                    class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  >
+                    <span
+                      class="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1"
+                    ></span
+                    >正常
+                  </span>
+                </div>
+                <div class="mt-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold">1.8kW</span>
+                    <span class="text-success text-xs">
+                      <i class="fas fa-arrow-up"></i> 0.1kW
+                    </span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div
+                      class="bg-success h-1.5 rounded-full"
+                      style="width: 72%"
+                    ></div>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">额定: 2.5kW</p>
+                </div>
+                <div class="mt-2 px-1">
+                  <canvas id="drainPumpPowerChartSmall" class="w-full h-12"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 设备详情模块 --></div>
           <h5 class="text-lg font-medium mb-4">其他设备</h5>
 
           <div class="mb-6">
@@ -2185,7 +2642,7 @@
                     <p class="text-sm text-gray-500 mt-1">
                       AI模型: FeedingV2.0
                     </p>
-                    <p class="text-xs text-gray-400">上线时间: 2023-06-15</p>
+                    <p class="text-xs text-gray-400">上线时间: 2025-06-15</p>
                   </div>
                 </div>
                 <div class="mt-4">
@@ -2961,7 +3418,7 @@
                         >位置: 主排污系统</span
                       >
                       <span class="text-xs text-gray-500"
-                        >时间: 2023-07-15 08:32</span
+                        >时间: 2025-07-15 08:32</span
                       >
                     </div>
                   </div>
@@ -3003,7 +3460,7 @@
                         >当前值: 0.4mg/L</span
                       >
                       <span class="text-xs text-gray-500"
-                        >时间: 2023-07-15 10:15</span
+                        >时间: 2025-07-15 10:15</span
                       >
                     </div>
                   </div>
@@ -3045,7 +3502,7 @@
                         >当前负载: 78%</span
                       >
                       <span class="text-xs text-gray-500"
-                        >时间: 2023-07-15 11:05</span
+                        >时间: 2025-07-15 11:05</span
                       >
                     </div>
                   </div>
@@ -3085,7 +3542,7 @@
         return new Chart(ctx, {
           type: "line",
           data: {
-            labels: ["", "", "", "", "", "", ""],
+            labels: ["8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00"],
             datasets: [
               {
                 data: data,
@@ -3110,7 +3567,7 @@
             },
             scales: {
               x: {
-                display: false,
+                display: true,
               },
               y: {
                 display: false,
@@ -3136,26 +3593,26 @@
         [0.6, 0.55, 0.5, 0.45, 0.5, 0.5, 0.5],
         "#6366F1"
       );
-      createSmallChart(
+      /* createSmallChart(
         "turbidityChartSmall",
         [18, 17, 16, 15, 16, 15, 15],
         "#F59E0B"
-      );
+      ); */
       createSmallChart(
         "waterTempChartSmall",
         [24.0, 24.2, 24.3, 24.5, 24.4, 24.3, 24.5],
         "#6366F1"
       );
-      createSmallChart(
+      /* createSmallChart(
         "airTempChartSmall",
         [25.5, 25.8, 26.0, 26.2, 26.1, 26.2, 26.2],
         "#EF4444"
-      );
-      createSmallChart(
+      ); */
+      /* createSmallChart(
         "drainageChartSmall",
         [80, 82, 85, 83, 84, 85, 85],
         "#3B82F6"
-      );
+      ); */
       createSmallChart(
         "feedingChartSmall",
         [110, 115, 118, 120, 122, 124, 125],
@@ -3165,6 +3622,71 @@
         "fcrChartSmall",
         [1.3, 1.25, 1.22, 1.2, 1.21, 1.2, 1.2],
         "#3B82F6"
+      );
+      createSmallChart(
+        "salinityChartSmall",
+        [3.0, 3.1, 3.2, 3.3, 3.2, 3.1, 3.2],
+        "#F59E0B"
+      );
+      createSmallChart(
+        "nitriteChartSmall",
+        [0.10, 0.12, 0.13, 0.15, 0.14, 0.15, 0.15],
+        "#EF4444"
+      );
+      createSmallChart(
+        "waterTempChartSmall1",
+        [24.0, 24.2, 24.3, 24.5, 24.4, 24.3, 24.5],
+        "#6366F1"
+      );
+      createSmallChart(
+        "airTempChart",
+        [25.5, 25.8, 26.0, 26.2, 26.1, 26.2, 26.2],
+        "#EF4444"
+      );
+      createSmallChart(
+        "oxygenChartSmall1",
+        [6.2, 6.3, 6.4, 6.5, 6.3, 6.4, 6.5],
+        "#10B981"
+      );
+      createSmallChart(
+        "pressureChartSmall",
+        [1.01, 1.02, 1.01, 1.00, 1.01, 1.02, 1.01],
+        "#8B5CF6"
+      );
+      createSmallChart(
+        "flowRateChartSmall",
+        [120, 122, 125, 123, 124, 125, 125],
+        "#06B6D4"
+      );
+      createSmallChart(
+        "pumpVoltageChartSmall",
+        [378, 380, 381, 380, 379, 380, 380],
+        "#3B82F6"
+      );
+      createSmallChart(
+        "pumpCurrentChartSmall",
+        [18.0, 18.2, 18.5, 18.3, 18.4, 18.5, 18.5],
+        "#F59E0B"
+      );
+      createSmallChart(
+        "pumpPowerChartSmall",
+        [10.8, 11.0, 11.2, 11.1, 11.0, 11.2, 11.2],
+        "#10B981"
+      );
+      createSmallChart(
+        "drainPumpVoltageChartSmall",
+        [218, 220, 221, 220, 219, 220, 220],
+        "#3B82F6"
+      );
+      createSmallChart(
+        "drainPumpCurrentChartSmall",
+        [8.2, 8.3, 8.5, 8.4, 8.3, 8.5, 8.5],
+        "#F59E0B"
+      );
+      createSmallChart(
+        "drainPumpPowerChartSmall",
+        [1.7, 1.8, 1.8, 1.8, 1.7, 1.8, 1.8],
+        "#10B981"
       );
 
       // 监测数据雷达图

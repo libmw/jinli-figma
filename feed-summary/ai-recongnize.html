@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渔场管理系统 - AI智能识别</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="../static/all.min.css"
+    />
+    <script src="../static/chart.js"></script>
+
+    <!-- Tailwind配置 -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3b82f6",
+              secondary: "#10b981",
+              success: "#10b981",
+              warning: "#fbbf24",
+              danger: "#ef4444",
+              info: "#6366f1",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* 自定义样式 */
+      :root {
+        --color-primary: #3b82f6;
+        --color-secondary: #10b981;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-info: #6366f1;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+      }
+
+      .transition-all {
+        transition: all 0.3s ease;
+      }
+
+      .video-container {
+        position: relative;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        min-height: 24rem; /* 384px equivalent to h-96 */
+        height: 24rem;
+      }
+
+      .video-overlay {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .data-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .data-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        z-index: 0;
+      }
+
+      .data-card-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .disease-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+      }
+
+      .disease-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .disease-card.high-risk {
+        border-left-color: var(--color-danger);
+        background: #fef2f2;
+      }
+
+      .disease-card.medium-risk {
+        border-left-color: var(--color-warning);
+        background: #fffbeb;
+      }
+
+      .disease-card.low-risk {
+        border-left-color: var(--color-secondary);
+        background: #f0fdf4;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+
+      .modal-content {
+        position: relative;
+        margin: 5% auto;
+        padding: 20px;
+        width: 90%;
+        max-width: 800px;
+        background-color: white;
+        border-radius: 1rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #aaa;
+      }
+
+      .close:hover {
+        color: #000;
+      }
+
+      .trend-chart {
+        height: 60px;
+      }
+
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .number-animation {
+        animation: numberGlow 3s ease-in-out infinite;
+      }
+
+      @keyframes numberGlow {
+        0%, 100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); }
+        50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+      <div
+        class="container mx-auto px-4 py-3 flex justify-between items-center"
+      >
+        <div class="flex items-center space-x-4">
+          <a href="index.html" class="text-gray-500 hover:text-primary">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <span class="text-2xl font-bold text-primary">渔场管理系统</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-bell text-gray-600"></i>
+          </button>
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <i class="fas fa-cog text-gray-600"></i>
+          </button>
+          <div class="flex items-center space-x-2">
+            <div
+              class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white"
+            >
+              <i class="fas fa-user"></i>
+            </div>
+            <span class="text-sm font-medium">管理员</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">零数DeepFish鱼情识别系统</h1>
+        <div class="flex space-x-2">
+          <select class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700">
+            <option>今日</option>
+            <option>昨日</option>
+            <option>近7天</option>
+            <option>自定义时间</option>
+          </select>
+          <button
+            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 flex items-center"
+          >
+            <i class="fas fa-download mr-2"></i> 导出数据
+          </button>
+          <button
+            class="bg-primary text-white rounded-lg px-4 py-2 text-sm font-medium flex items-center"
+          >
+            <i class="fas fa-camera mr-2"></i> 截图保存
+          </button>
+        </div>
+      </div>
+
+      <!-- AI系统概览 -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <i class="fas fa-brain text-white text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-gray-800">A08号养殖池</h2>
+              <p class="text-sm text-gray-500">AI智能识别监控系统</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 bg-green-400 rounded-full pulse"></span>
+            <span class="text-sm font-medium text-green-600">系统运行正常</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- 系统版本 -->
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-code-branch text-blue-600"></i>
+              </div>
+              <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">最新版本</span>
+            </div>
+            <h4 class="text-sm font-medium text-gray-600 mb-1">系统版本</h4>
+            <p class="text-lg font-bold text-gray-800">v2.3.1</p>
+            <p class="text-xs text-gray-500 mt-1">更新时间: 2025-12-01</p>
+          </div>
+
+          <!-- 运行时长 -->
+          <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-clock text-green-600"></i>
+              </div>
+              <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">稳定运行</span>
+            </div>
+            <h4 class="text-sm font-medium text-gray-600 mb-1">连续运行时长</h4>
+            <p class="text-lg font-bold text-gray-800">127天 8小时</p>
+            <p class="text-xs text-gray-500 mt-1">启动时间: 2025-08-06</p>
+          </div>
+
+          <!-- 识别精度 -->
+          <div class="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-4 border border-purple-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-bullseye text-purple-600"></i>
+              </div>
+              <span class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">优秀</span>
+            </div>
+            <h4 class="text-sm font-medium text-gray-600 mb-1">识别精度</h4>
+            <p class="text-lg font-bold text-gray-800">96.8%</p>
+            <p class="text-xs text-gray-500 mt-1">基于近30天数据</p>
+          </div>
+
+          <!-- 处理速度 -->
+          <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-tachometer-alt text-orange-600"></i>
+              </div>
+              <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">实时</span>
+            </div>
+            <h4 class="text-sm font-medium text-gray-600 mb-1">处理速度</h4>
+            <p class="text-lg font-bold text-gray-800">30 FPS</p>
+            <p class="text-xs text-gray-500 mt-1">平均延迟: 33ms</p>
+          </div>
+        </div>
+
+        <!-- 系统详细信息 -->
+        <!-- <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-gray-50 rounded-xl p-4">
+            <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-server text-gray-600 mr-2"></i>
+              硬件配置
+            </h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600">AI处理器:</span>
+                <span class="font-medium">NVIDIA RTX 4080</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">内存:</span>
+                <span class="font-medium">32GB DDR5</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">存储:</span>
+                <span class="font-medium">2TB NVMe SSD</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">摄像头:</span>
+                <span class="font-medium">4K水下摄像头 x2</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-4">
+            <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-brain text-gray-600 mr-2"></i>
+              算法模型
+            </h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600">目标检测:</span>
+                <span class="font-medium">YOLOv8-Fish</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">疾病识别:</span>
+                <span class="font-medium">ResNet-Disease v2.1</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">重量估算:</span>
+                <span class="font-medium">DeepWeight-Net</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">训练数据:</span>
+                <span class="font-medium">50万+ 标注样本</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-4 text-white">
+          <h4 class="text-sm font-bold mb-3 flex items-center">
+            <i class="fas fa-chart-bar mr-2"></i>
+            今日统计概览
+          </h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <p class="text-2xl font-bold">1,247</p>
+              <p class="text-xs opacity-80">识别鱼类总数</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold">28</p>
+              <p class="text-xs opacity-80">疾病检测次数</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold">436.8kg</p>
+              <p class="text-xs opacity-80">估算总重量</p>
+            </div>
+            <div>
+              <p class="text-2xl font-bold">99.2%</p>
+              <p class="text-xs opacity-80">系统可用率</p>
+            </div>
+          </div>
+        </div> -->
+      </div>
+
+      <!-- 实时视频流和数据展示 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- 视频流展示 -->
+        <div class="lg:col-span-2">
+          <div class="video-container h-full">
+            <div class="video-overlay">
+              <div class="flex items-center space-x-4">
+                <span><i class="fas fa-video mr-1"></i>摄像头-01</span>
+                <span><i class="fas fa-clock mr-1"></i>2025-12-11 14:30:25</span>
+                <span class="flex items-center">
+                  <span class="w-2 h-2 bg-green-400 rounded-full mr-1 pulse"></span>
+                  在线
+                </span>
+              </div>
+            </div>
+            <div 
+              class="w-full h-full bg-cover bg-center bg-no-repeat cursor-pointer"
+              style="background-image: url('recongnize_weight_quantity.jpg')"
+              onclick="openFullscreen(this)"
+              data-src="recongnize_weight_quantity.jpg"
+              data-alt="AI识别实时画面"
+            ></div>
+            <div class="absolute bottom-4 left-4 flex space-x-2">
+              <button class="bg-black bg-opacity-50 text-white px-3 py-1 rounded-lg text-sm hover:bg-opacity-70">
+                <i class="fas fa-play mr-1"></i>播放
+              </button>
+              <button class="bg-black bg-opacity-50 text-white px-3 py-1 rounded-lg text-sm hover:bg-opacity-70">
+                <i class="fas fa-search-plus mr-1"></i>缩放
+              </button>
+              <button class="bg-black bg-opacity-50 text-white px-3 py-1 rounded-lg text-sm hover:bg-opacity-70">
+                <i class="fas fa-camera mr-1"></i>截图
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI识别数据卡片 -->
+        <div class="space-y-4">
+          <!-- 总数量卡片 -->
+          <div class="data-card">
+            <div class="data-card-content">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <p class="text-white text-opacity-80 text-sm">总数量</p>
+                  <h3 class="text-3xl font-bold number-animation">1,247 尾</h3>
+                  <p class="text-white text-opacity-60 text-xs mt-1">
+                    <i class="fas fa-clock mr-1"></i>实时更新
+                  </p>
+                </div>
+                <div class="card-icon bg-white bg-opacity-20 text-white">
+                  <i class="fas fa-fish text-xl"></i>
+                </div>
+              </div>
+              <div class="trend-chart">
+                <canvas id="quantityTrendChart"></canvas>
+              </div>
+              <div class="flex justify-between items-center mt-2 text-xs text-white text-opacity-70">
+                <span>近1天变化</span>
+                <span class="text-green-300"><i class="fas fa-arrow-up mr-1"></i>+23</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 总重量卡片 -->
+          <div class="data-card">
+            <div class="data-card-content">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <p class="text-white text-opacity-80 text-sm">总重量</p>
+                  <h3 class="text-3xl font-bold number-animation">436.8 kg</h3>
+                  <p class="text-white text-opacity-60 text-xs mt-1">
+                    <i class="fas fa-clock mr-1"></i>最后更新：14:30:25
+                  </p>
+                </div>
+                <div class="card-icon bg-white bg-opacity-20 text-white">
+                  <i class="fas fa-weight text-xl"></i>
+                </div>
+              </div>
+              <div class="trend-chart">
+                <canvas id="weightTrendChart"></canvas>
+              </div>
+              <div class="flex justify-between items-center mt-2 text-xs text-white text-opacity-70">
+                <span>近1天变化</span>
+                <span class="text-green-300"><i class="fas fa-arrow-up mr-1"></i>+8.2kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 疾病识别结果展示 -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-bold">疾病识别结果</h3>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-500">按识别概率排序</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- 红眼病 -->
+          <div class="disease-card high-risk p-4">
+            <div class="flex items-start space-x-4">
+              <img 
+                src="disease_eye.jpg" 
+                alt="红眼病识别图片" 
+                class="w-20 h-20 rounded-lg object-cover cursor-pointer"
+                onclick="openDiseaseModal('red-eye')"
+              />
+              <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="text-lg font-bold text-red-700">红眼病</h4>
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                    高风险
+                  </span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别概率:</span>
+                    <span class="font-bold text-red-600">98.5%</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">发生数量:</span>
+                    <span class="font-bold">12 尾</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别时间:</span>
+                    <span>14:28:15</span>
+                  </div>
+                </div>
+                <button 
+                  class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition-colors"
+                  onclick="showDiseaseDetails('red-eye')"
+                >
+                  查看详情
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 烂鳃病 -->
+          <div class="disease-card high-risk p-4">
+            <div class="flex items-start space-x-4">
+              <img 
+                src="disease_gill.jpg" 
+                alt="烂鳃病识别图片" 
+                class="w-20 h-20 rounded-lg object-cover cursor-pointer"
+                onclick="openDiseaseModal('gill-rot')"
+              />
+              <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="text-lg font-bold text-red-700">烂鳃病</h4>
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                    高风险
+                  </span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别概率:</span>
+                    <span class="font-bold text-red-600">95.2%</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">发生数量:</span>
+                    <span class="font-bold">8 尾</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别时间:</span>
+                    <span>14:25:42</span>
+                  </div>
+                </div>
+                <button 
+                  class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-600 transition-colors"
+                  onclick="showDiseaseDetails('gill-rot')"
+                >
+                  查看详情
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 水霉病 -->
+          <div class="disease-card medium-risk p-4">
+            <div class="flex items-start space-x-4">
+              <img 
+                src="disease_saprolegniasis.jpg" 
+                alt="水霉病识别图片" 
+                class="w-20 h-20 rounded-lg object-cover cursor-pointer"
+                onclick="openDiseaseModal('saprolegniasis')"
+              />
+              <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="text-lg font-bold text-yellow-700">水霉病</h4>
+                  <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                    中风险
+                  </span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别概率:</span>
+                    <span class="font-bold text-yellow-600">87.3%</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">发生数量:</span>
+                    <span class="font-bold">5 尾</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别时间:</span>
+                    <span>14:22:18</span>
+                  </div>
+                </div>
+                <button 
+                  class="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-yellow-600 transition-colors"
+                  onclick="showDiseaseDetails('saprolegniasis')"
+                >
+                  查看详情
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 烂尾病 -->
+          <div class="disease-card low-risk p-4">
+            <div class="flex items-start space-x-4">
+              <img 
+                src="disease_tail.jpg" 
+                alt="烂尾病识别图片" 
+                class="w-20 h-20 rounded-lg object-cover cursor-pointer"
+                onclick="openDiseaseModal('tail-rot')"
+              />
+              <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="text-lg font-bold text-green-700">烂尾病</h4>
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    低风险
+                  </span>
+                </div>
+                <div class="space-y-1 mb-3">
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别概率:</span>
+                    <span class="font-bold text-green-600">72.8%</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">发生数量:</span>
+                    <span class="font-bold">3 尾</span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">识别时间:</span>
+                    <span>14:20:05</span>
+                  </div>
+                </div>
+                <button 
+                  class="bg-green-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-600 transition-colors"
+                  onclick="showDiseaseDetails('tail-rot')"
+                >
+                  查看详情
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 疾病识别历史记录 -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-bold">疾病识别历史记录</h3>
+          <div class="flex items-center space-x-2">
+            <select class="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm">
+              <option>全部疾病</option>
+              <option>红眼病</option>
+              <option>烂鳃病</option>
+              <option>水霉病</option>
+              <option>烂尾病</option>
+            </select>
+            <select class="bg-white border border-gray-300 rounded-lg px-3 py-1 text-sm">
+              <option>今日</option>
+              <option>近3天</option>
+              <option>近7天</option>
+              <option>近30天</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 border-b">
+                <th class="text-left py-3 px-4 font-medium text-gray-700">识别时间</th>
+                <th class="text-left py-3 px-4 font-medium text-gray-700">疾病类型</th>
+                <th class="text-left py-3 px-4 font-medium text-gray-700">识别概率</th>
+                <th class="text-left py-3 px-4 font-medium text-gray-700">影响数量</th>
+                <th class="text-left py-3 px-4 font-medium text-gray-700">风险等级</th>
+                <th class="text-left py-3 px-4 font-medium text-gray-700">处理状态</th>
+                <th class="text-left py-3 px-4 font-medium text-gray-700">操作</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 14:28:15</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-eye text-red-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">红眼病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-red-600">98.5%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">12 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                    高风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                    处理中
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 14:25:42</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-lungs text-red-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">烂鳃病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-red-600">95.2%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">8 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                    高风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                    处理中
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 14:22:18</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-bacteria text-yellow-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">水霉病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-yellow-600">87.3%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">5 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                    中风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    已处理
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 14:20:05</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-fish text-green-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">烂尾病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-green-600">72.8%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">3 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    低风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    已处理
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 13:45:32</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-eye text-red-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">红眼病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-red-600">96.7%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">15 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                    高风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    已处理
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 13:28:17</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-bacteria text-yellow-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">水霉病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-yellow-600">89.1%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">7 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                    中风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    已处理
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 13:15:08</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-fish text-green-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">烂尾病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-green-600">75.4%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">2 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    低风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    已处理
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">2025-12-11 12:58:43</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-lungs text-red-600 text-xs"></i>
+                    </div>
+                    <span class="font-medium">烂鳃病</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-bold text-red-600">92.8%</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="font-medium">6 尾</span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
+                    高风险
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                    已处理
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <button class="text-primary hover:text-blue-700 text-xs">查看详情</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="flex justify-between items-center mt-6">
+          <div class="text-sm text-gray-500">
+            显示 1-8 条，共 24 条记录
+          </div>
+          <div class="flex space-x-1">
+            <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
+              上一页
+            </button>
+            <button class="px-3 py-1 text-sm bg-primary text-white rounded-lg">1</button>
+            <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">2</button>
+            <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">3</button>
+            <button class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+              下一页
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片放大模态框 -->""
+    <div id="imageModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img id="modalImage" src="" alt="" class="w-full h-auto rounded-lg" />
+        <div id="modalDescription" class="mt-4 p-4 bg-gray-50 rounded-lg">
+          <h4 class="font-bold mb-2">识别说明</h4>
+          <p id="modalDescriptionText"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 疾病详情模态框 -->
+    <div id="diseaseModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeDiseaseModal()">&times;</span>
+        <div id="diseaseDetails">
+          <!-- 疾病详情内容将通过JavaScript动态填充 -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 图片全屏显示
+      function openFullscreen(element) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalDesc = document.getElementById('modalDescriptionText');
+        
+        modal.style.display = 'block';
+        // Get image source from data attribute or background image
+        const imgSrc = element.dataset.src || element.style.backgroundImage.slice(5, -2);
+        modalImg.src = imgSrc;
+        modalDesc.textContent = 'AI识别实时画面：显示水下摄像头采集的鱼类活动情况，系统正在实时分析鱼类数量、重量和健康状况。';
+      }
+
+      // 打开疾病图片模态框
+      function openDiseaseModal(diseaseType) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalDesc = document.getElementById('modalDescriptionText');
+        
+        const diseaseInfo = {
+          'red-eye': {
+            img: 'disease_eye.jpg',
+            desc: '红眼病特征：眼部充血红肿，识别区域：鱼体头部。常见于水质恶化或细菌感染导致的眼部疾病。'
+          },
+          'gill-rot': {
+            img: 'disease_gill.jpg',
+            desc: '烂鳃病特征：鳃丝腐烂，颜色异常，识别区域：鱼体鳃部。通常由细菌或寄生虫感染引起。'
+          },
+          'saprolegniasis': {
+            img: 'disease_saprolegniasis.jpg',
+            desc: '水霉病特征：体表出现白色絮状物，识别区域：鱼体表面。多发生在水温较低或鱼体受伤时。'
+          },
+          'tail-rot': {
+            img: 'disease_tail.jpg',
+            desc: '烂尾病特征：尾鳍边缘腐烂，识别区域：鱼体尾部。常由水质不良或外伤感染引起。'
+          }
+        };
+        
+        modal.style.display = 'block';
+        modalImg.src = diseaseInfo[diseaseType].img;
+        modalDesc.textContent = diseaseInfo[diseaseType].desc;
+      }
+
+      // 显示疾病详情
+      function showDiseaseDetails(diseaseType) {
+        const modal = document.getElementById('diseaseModal');
+        const details = document.getElementById('diseaseDetails');
+        
+        const diseaseData = {
+          'red-eye': {
+            name: '红眼病',
+            symptoms: '眼部充血、红肿、分泌物增多',
+            causes: '水质恶化、细菌感染、营养不良',
+            treatment: '立即换水20%，投放抗菌药剂，控制水温在25℃左右，减少投饵量'
+          },
+          'gill-rot': {
+            name: '烂鳃病',
+            symptoms: '鳃丝腐烂、呼吸困难、游动缓慢',
+            causes: '细菌感染、寄生虫、水质污染',
+            treatment: '全池消毒，使用专用鳃病药物，改善水质，增加溶氧'
+          },
+          'saprolegniasis': {
+            name: '水霉病',
+            symptoms: '体表白色絮状物、食欲减退、活动力下降',
+            causes: '水温过低、鱼体受伤、免疫力下降',
+            treatment: '提高水温至28℃，使用抗真菌药物，加强营养'
+          },
+          'tail-rot': {
+            name: '烂尾病',
+            symptoms: '尾鳍边缘腐烂、游泳异常、食欲不振',
+            causes: '水质不良、外伤感染、密度过大',
+            treatment: '改善水质，使用抗菌药物，降低养殖密度'
+          }
+        };
+        
+        const data = diseaseData[diseaseType];
+        details.innerHTML = `
+          <h3 class="text-xl font-bold mb-4">${data.name} - 详细信息</h3>
+          <div class="space-y-4">
+            <div class="bg-red-50 p-4 rounded-lg">
+              <h4 class="font-bold text-red-700 mb-2">症状表现</h4>
+              <p class="text-gray-700">${data.symptoms}</p>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-lg">
+              <h4 class="font-bold text-yellow-700 mb-2">常见诱因</h4>
+              <p class="text-gray-700">${data.causes}</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+              <h4 class="font-bold text-green-700 mb-2">处理建议</h4>
+              <p class="text-gray-700">${data.treatment}</p>
+            </div>
+          </div>
+        `;
+        
+        modal.style.display = 'block';
+      }
+
+      // 关闭模态框
+      function closeModal() {
+        document.getElementById('imageModal').style.display = 'none';
+      }
+
+      function closeDiseaseModal() {
+        document.getElementById('diseaseModal').style.display = 'none';
+      }
+
+      // 点击模态框外部关闭
+      window.onclick = function(event) {
+        const imageModal = document.getElementById('imageModal');
+        const diseaseModal = document.getElementById('diseaseModal');
+        if (event.target === imageModal) {
+          imageModal.style.display = 'none';
+        }
+        if (event.target === diseaseModal) {
+          diseaseModal.style.display = 'none';
+        }
+      }
+
+      // 初始化图表
+      document.addEventListener('DOMContentLoaded', function() {
+        // 数量趋势图
+        const quantityCtx = document.getElementById('quantityTrendChart').getContext('2d');
+        new Chart(quantityCtx, {
+          type: 'line',
+          data: {
+            labels: ['13:30', '13:45', '14:00', '14:15', '14:30'],
+            datasets: [{
+              data: [1224, 1231, 1238, 1242, 1247],
+              borderColor: 'rgba(255, 255, 255, 0.8)',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: {
+              point: { radius: 0 }
+            }
+          }
+        });
+
+        // 重量趋势图
+        const weightCtx = document.getElementById('weightTrendChart').getContext('2d');
+        new Chart(weightCtx, {
+          type: 'line',
+          data: {
+            labels: ['13:30', '13:45', '14:00', '14:15', '14:30'],
+            datasets: [{
+              data: [428.6, 431.2, 433.8, 435.1, 436.8],
+              borderColor: 'rgba(255, 255, 255, 0.8)',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            elements: {
+              point: { radius: 0 }
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
