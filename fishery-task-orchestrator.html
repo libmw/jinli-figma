@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>渔场任务编排系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="./static/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#165DFF",
+              secondary: "#36CFC9",
+              success: "#52C41A",
+              warning: "#FAAD14",
+              danger: "#FF4D4F",
+              dark: "#1D2129",
+              "dark-2": "#4E5969",
+              "light-1": "#F2F3F5",
+              "light-2": "#E5E6EB",
+              "light-3": "#C9CDD4",
+            },
+            fontFamily: {
+              inter: ["Inter", "system-ui", "sans-serif"],
+            },
+            boxShadow: {
+              card: "0 4px 20px rgba(0, 0, 0, 0.08)",
+              "card-hover": "0 8px 30px rgba(0, 0, 0, 0.12)",
+            },
+          },
+        },
+      };
+    </script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .transition-height {
+          transition: max-height 0.3s ease-in-out;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="font-inter bg-gray-50 text-dark overflow-x-hidden">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="bg-primary text-white p-2 rounded-lg">
+            <i class="fa fa-tasks text-xl"></i>
+          </div>
+          <h1 class="text-xl font-bold text-primary">渔场任务编排系统</h1>
+        </div>
+        <div class="flex items-center space-x-6">
+          <button class="text-dark-2 hover:text-primary transition-colors duration-200">
+            <i class="fa fa-question-circle"></i>
+            <span class="ml-1 hidden md:inline">帮助</span>
+          </button>
+          <button class="text-dark-2 hover:text-primary transition-colors duration-200">
+            <i class="fa fa-history"></i>
+            <span class="ml-1 hidden md:inline">历史</span>
+          </button>
+          <button class="text-dark-2 hover:text-primary transition-colors duration-200">
+            <i class="fa fa-user-circle"></i>
+            <span class="ml-1 hidden md:inline">账户</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- 左侧面板 -->
+      <aside class="lg:col-span-2 space-y-6">
+        <!-- 任务信息卡片 -->
+        <div class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-lg">任务信息</h2>
+            <button class="text-primary hover:text-primary/80 transition-colors">
+              <i class="fa fa-pencil"></i>
+            </button>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">任务名称</label>
+              <input type="text" value="鲈鱼打样流程" class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200" />
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">描述</label>
+              <textarea rows="3" class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">鲈鱼打样完整流程，从发起任务到完成打样的关键步骤</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 任务节点库 -->
+        <div class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300">
+          <h2 class="font-bold text-lg mb-4">任务节点库</h2>
+          <div class="space-y-3">
+            <div class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200">
+              <div class="flex items-center">
+                <div class="bg-primary/10 p-2 rounded text-primary">
+                  <i class="fa fa-play-circle"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">发起任务</h3>
+                  <p class="text-dark-2 text-xs">管理者/AI助手创建任务</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-primary"></i>
+                </div>
+              </div>
+            </div>
+            <div class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-2 rounded text-secondary">
+                  <i class="fa fa-user"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">工人任务</h3>
+                  <p class="text-dark-2 text-xs">工人接受、执行任务</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-secondary"></i>
+                </div>
+              </div>
+            </div>
+            <div class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200">
+              <div class="flex items-center">
+                <div class="bg-warning/10 p-2 rounded text-warning">
+                  <i class="fa fa-code-fork"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">条件判断</h3>
+                  <p class="text-dark-2 text-xs">疾病检查、流程分支</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-warning"></i>
+                </div>
+              </div>
+            </div>
+            <div class="border border-light-2 rounded-lg p-3 hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all duration-200">
+              <div class="flex items-center">
+                <div class="bg-success/10 p-2 rounded text-success">
+                  <i class="fa fa-check-circle"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="font-medium">完成节点</h3>
+                  <p class="text-dark-2 text-xs">任务完成、提交数据</p>
+                </div>
+                <div class="ml-auto">
+                  <i class="fa fa-plus-circle text-success"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 中间编辑区 -->
+      <section class="lg:col-span-8 space-y-6">
+        <!-- 编辑工具栏 -->
+        <div class="bg-white rounded-xl shadow-card p-4 flex flex-wrap items-center justify-between">
+          <div class="flex items-center space-x-3 mb-2 sm:mb-0">
+            <button class="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center">
+              <i class="fa fa-save mr-2"></i>保存
+            </button>
+            <button class="px-3 py-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors flex items-center">
+              <i class="fa fa-undo mr-2"></i>撤销
+            </button>
+            <button class="px-3 py-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors flex items-center">
+              <i class="fa fa-repeat mr-2"></i>重做
+            </button>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <input type="text" placeholder="搜索节点..." class="pl-9 pr-3 py-1.5 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200" />
+              <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-3"></i>
+            </div>
+            <button class="p-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors">
+              <i class="fa fa-arrows-alt"></i>
+            </button>
+            <button class="p-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors">
+              <i class="fa fa-search-plus"></i>
+            </button>
+            <button class="p-1.5 bg-white text-dark-2 border border-light-2 rounded-lg hover:border-primary/50 hover:text-primary transition-colors">
+              <i class="fa fa-search-minus"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 编辑画布 -->
+        <div class="bg-white rounded-xl shadow-card p-6 h-[700px] overflow-auto relative" id="canvas">
+          <div class="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2UyZTRlNiIgb3BhY2l0eT0iMC4yIiBzdHJva2Utd2lkdGg9IjEiLz48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTJlNGU2IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"></div>
+          <!-- 内容容器，设置最小宽度和高度以支持滚动 -->
+          <div class="relative" style="min-width: 1200px; min-height: 1000px;">
+
+          <!-- 连接线SVG容器 -->
+          <svg class="absolute top-0 left-0 w-full h-full pointer-events-none" id="connection-svg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrowhead-primary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#165DFF" />
+              </marker>
+              <marker id="arrowhead-secondary" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#36CFC9" />
+              </marker>
+              <marker id="arrowhead-success" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#52C41A" />
+              </marker>
+              <marker id="arrowhead-warning" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#FAAD14" />
+              </marker>
+              <marker id="arrowhead-danger" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#FF4D4F" />
+              </marker>
+            </defs>
+            <path id="line-1-2" d="" fill="none" stroke="#165DFF" stroke-width="2" marker-end="url(#arrowhead-primary)" />
+            <path id="line-2-3" d="" fill="none" stroke="#165DFF" stroke-width="2" marker-end="url(#arrowhead-primary)" />
+            <path id="line-3-4" d="" fill="none" stroke="#36CFC9" stroke-width="2" marker-end="url(#arrowhead-secondary)" />
+            <path id="line-4-5" d="" fill="none" stroke="#36CFC9" stroke-width="2" marker-end="url(#arrowhead-secondary)" />
+            <path id="line-5-6" d="" fill="none" stroke="#36CFC9" stroke-width="2" marker-end="url(#arrowhead-secondary)" />
+            <path id="line-6-7" d="" fill="none" stroke="#FF4D4F" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead-danger)" />
+            <path id="line-6-8" d="" fill="none" stroke="#52C41A" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead-success)" />
+            <path id="line-7-8" d="" fill="none" stroke="#FF4D4F" stroke-width="2" marker-end="url(#arrowhead-danger)" />
+          </svg>
+
+          <!-- 任务节点1: 发起打样任务 -->
+          <div class="absolute bg-white border-2 border-primary rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="start" id="node-1" style="top: 20px; left: 20px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-primary/10 p-1 rounded text-primary mr-2 text-sm">
+                  <i class="fa fa-play-circle"></i>
+                </div>
+                <h3 class="font-medium text-sm">发起打样任务</h3>
+              </div>
+              <span class="text-xs">🤖</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">管理者或AI助手创建打样任务</div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-xs text-dark-2">指定目标鱼池</span>
+              <!-- 右侧输出连接点 -->
+              <div class="connector w-3 h-3 bg-primary rounded-full absolute right-0 top-1/2 transform translate-x-1/2" data-direction="out"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点2: 工人接受任务 -->
+          <div class="absolute bg-white border-2 border-secondary rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="worker" id="node-2" style="top: 20px; left: 320px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-1 rounded text-secondary mr-2 text-sm">
+                  <i class="fa fa-user"></i>
+                </div>
+                <h3 class="font-medium text-sm">工人接受任务</h3>
+              </div>
+              <span class="text-xs">👨‍🔧</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">工人确认并查看任务详情</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 左侧输入连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute left-0 top-1/2 transform -translate-x-1/2" data-direction="in"></div>
+              <span class="text-xs text-dark-2">准备相关工具</span>
+              <!-- 右侧输出连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute right-0 top-1/2 transform translate-x-1/2" data-direction="out"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点3: 前往鱼池 -->
+          <div class="absolute bg-white border-2 border-secondary rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="worker" id="node-3" style="top: 20px; left: 620px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-1 rounded text-secondary mr-2 text-sm">
+                  <i class="fa fa-map-marker"></i>
+                </div>
+                <h3 class="font-medium text-sm">前往鱼池</h3>
+              </div>
+              <span class="text-xs">🚶</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">定位目标鱼池，准备打样工具</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 左侧输入连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute left-0 top-1/2 transform -translate-x-1/2" data-direction="in"></div>
+              <span class="text-xs text-dark-2">检查鱼池状况</span>
+              <!-- 底部输出连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2" data-direction="out"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点4: 进行打样 -->
+          <div class="absolute bg-white border-2 border-secondary rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="worker" id="node-4" style="top: 200px; left: 620px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-1 rounded text-secondary mr-2 text-sm">
+                  <i class="fa fa-hand-paper-o"></i>
+                </div>
+                <h3 class="font-medium text-sm">进行打样</h3>
+              </div>
+              <span class="text-xs">🎣</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">捕捞样本鱼，记录基础数据</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 顶部输入连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2" data-direction="in"></div>
+              <span class="text-xs text-dark-2">初步观察鱼体</span>
+              <!-- 左侧输出连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute left-0 top-1/2 transform -translate-x-1/2" data-direction="out"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点5: 填写结果 -->
+          <div class="absolute bg-white border-2 border-secondary rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="worker" id="node-5" style="top: 200px; left: 320px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-1 rounded text-secondary mr-2 text-sm">
+                  <i class="fa fa-edit"></i>
+                </div>
+                <h3 class="font-medium text-sm">填写结果</h3>
+              </div>
+              <span class="text-xs">📝</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">记录长度重量，上传打样图片</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 右侧输入连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute right-0 top-1/2 transform translate-x-1/2" data-direction="in"></div>
+              <span class="text-xs text-dark-2">测量鱼体数据</span>
+              <!-- 左侧输出连接点 -->
+              <div class="connector w-3 h-3 bg-secondary rounded-full absolute left-0 top-1/2 transform -translate-x-1/2" data-direction="out"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点6: 疾病检查 -->
+          <div class="absolute bg-white border-2 border-warning rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="check" id="node-6" style="top: 200px; left: 20px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-warning/10 p-1 rounded text-warning mr-2 text-sm">
+                  <i class="fa fa-search"></i>
+                </div>
+                <h3 class="font-medium text-sm">疾病检查</h3>
+              </div>
+              <span class="px-1.5 py-0.5 bg-warning/10 text-warning text-xs rounded-full">条件</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">观察鱼体状况，记录异常情况</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 右侧输入连接点 -->
+              <div class="connector w-3 h-3 bg-warning rounded-full absolute right-0 top-1/2 transform translate-x-1/2" data-direction="in"></div>
+              <!-- 底部左侧输出连接点（发现疾病） -->
+              <div class="connector w-3 h-3 bg-danger rounded-full absolute bottom-0 left-1/3 transform -translate-x-1/2 translate-y-1/2" data-direction="out" data-output="disease"></div>
+              <!-- 底部右侧输出连接点（无疾病） -->
+              <div class="connector w-3 h-3 bg-success rounded-full absolute bottom-0 left-2/3 transform -translate-x-1/2 translate-y-1/2" data-direction="out" data-output="healthy"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点7: 创建解剖任务 -->
+          <div class="absolute bg-white border-2 border-danger rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="branch" id="node-7" style="top: 380px; left: 20px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-danger/10 p-1 rounded text-danger mr-2 text-sm">
+                  <i class="fa fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="font-medium text-sm">创建解剖任务</h3>
+              </div>
+              <span class="text-xs">🔪</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">系统自动创建解剖任务</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 顶部输入连接点 -->
+              <div class="connector w-3 h-3 bg-danger rounded-full absolute top-0 left-1/3 transform -translate-x-1/2 -translate-y-1/2" data-direction="in"></div>
+              <span class="text-xs text-dark-2">分配解剖专员</span>
+              <!-- 右侧输出连接点 -->
+              <div class="connector w-3 h-3 bg-danger rounded-full absolute right-0 top-1/2 transform translate-x-1/2" data-direction="out"></div>
+            </div>
+          </div>
+
+          <!-- 任务节点8: 完成打样 -->
+          <div class="absolute bg-white border-2 border-success rounded-lg shadow-lg p-3 w-52 z-10 node cursor-move" data-type="end" id="node-8" style="top: 380px; left: 320px;">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center">
+                <div class="bg-success/10 p-1 rounded text-success mr-2 text-sm">
+                  <i class="fa fa-check-circle"></i>
+                </div>
+                <h3 class="font-medium text-sm">完成打样</h3>
+              </div>
+              <span class="text-xs">✅</span>
+            </div>
+            <div class="text-xs text-dark-2 mb-2">提交所有数据，生成打样报告</div>
+            <div class="flex justify-between items-center text-xs">
+              <!-- 顶部输入连接点（从节点6来） -->
+              <div class="connector w-3 h-3 bg-success rounded-full absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2" data-direction="in"></div>
+              <!-- 左侧输入连接点（从节点7来） -->
+              <div class="connector w-3 h-3 bg-danger rounded-full absolute left-0 top-1/2 transform -translate-x-1/2" data-direction="in"></div>
+              <span class="text-xs text-dark-2">更新鱼池状态</span>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <!-- 节点属性面板 -->
+        <div class="bg-white rounded-xl shadow-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-lg">节点属性</h2>
+            <span class="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">发起打样任务</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">节点名称</label>
+              <input type="text" value="发起打样任务" class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200" />
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">节点类型</label>
+              <select class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">
+                <option>发起任务</option>
+                <option>工人任务</option>
+                <option>条件判断</option>
+                <option>完成任务</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">负责人</label>
+              <select class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">
+                <option>管理者</option>
+                <option>AI助手</option>
+                <option>工人</option>
+                <option>技术员</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">优先级</label>
+              <select class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">
+                <option>高</option>
+                <option>中</option>
+                <option>低</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-dark-2 text-sm block mb-1">任务描述</label>
+              <textarea rows="3" class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">管理者或AI助手创建打样任务，指定目标鱼池，设置打样要求</textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右侧面板 -->
+      <aside class="lg:col-span-2 space-y-6">
+        <!-- 任务流程统计 -->
+        <div class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-lg">流程统计</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-primary/5 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-primary/10 p-2 rounded text-primary mr-3">
+                  <i class="fa fa-tasks"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-dark-2">总节点数</p>
+                  <p class="text-lg font-bold text-dark">8</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-secondary/5 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-secondary/10 p-2 rounded text-secondary mr-3">
+                  <i class="fa fa-user"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-dark-2">工人任务</p>
+                  <p class="text-lg font-bold text-dark">5</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-warning/5 rounded-lg">
+              <div class="flex items-center">
+                <div class="bg-warning/10 p-2 rounded text-warning mr-3">
+                  <i class="fa fa-code-fork"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-dark-2">条件判断</p>
+                  <p class="text-lg font-bold text-dark">1</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 执行选项 -->
+        <div class="bg-white rounded-xl shadow-card p-5 hover:shadow-card-hover transition-shadow duration-300">
+          <h2 class="font-bold text-lg mb-4">执行选项</h2>
+          <div class="space-y-3">
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">执行环境</label>
+              <select class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">
+                <option>开发环境</option>
+                <option>测试环境</option>
+                <option>生产环境</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">通知方式</label>
+              <select class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">
+                <option>APP推送</option>
+                <option>短信通知</option>
+                <option>邮件通知</option>
+                <option>全部</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-dark-2 text-sm block mb-1">日志级别</label>
+              <select class="w-full px-3 py-2 border border-light-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200">
+                <option>调试 (Debug)</option>
+                <option>信息 (Info)</option>
+                <option>警告 (Warn)</option>
+                <option>错误 (Error)</option>
+              </select>
+            </div>
+            <div class="pt-2">
+              <button class="w-full py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center">
+                <i class="fa fa-rocket mr-2"></i>部署流程
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-light-2 mt-8 py-4">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row items-center justify-between">
+          <div class="text-dark-2 text-sm mb-2 md:mb-0">
+            © 2025 渔场任务编排系统 - 智能渔业管理平台
+          </div>
+          <div class="flex space-x-4">
+            <a href="#" class="text-dark-2 hover:text-primary transition-colors text-sm">文档</a>
+            <a href="#" class="text-dark-2 hover:text-primary transition-colors text-sm">API参考</a>
+            <a href="#" class="text-dark-2 hover:text-primary transition-colors text-sm">示例</a>
+            <a href="#" class="text-dark-2 hover:text-primary transition-colors text-sm">联系我们</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+      // 节点拖拽和连接线更新功能
+      document.addEventListener("DOMContentLoaded", function () {
+        const nodes = document.querySelectorAll(".node");
+        const canvas = document.getElementById("canvas");
+        let activeNode = null;
+        let initialX, initialY, offsetX, offsetY;
+
+        // 初始化连接线
+        updateConnections();
+
+        // 为每个节点添加拖拽事件
+        nodes.forEach((node) => {
+          node.addEventListener("mousedown", dragStart);
+          node.addEventListener("selectstart", function (e) {
+            e.preventDefault();
+          });
+        });
+
+        function dragStart(e) {
+          if (e.target.closest("button") || e.target.closest("input") || e.target.closest("select")) return;
+          
+          e.preventDefault();
+          activeNode = this;
+          
+          const rect = activeNode.getBoundingClientRect();
+          const canvasRect = canvas.getBoundingClientRect();
+          
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          
+          initialX = rect.left - canvasRect.left + canvas.scrollLeft;
+          initialY = rect.top - canvasRect.top + canvas.scrollTop;
+          
+          document.addEventListener("mousemove", drag);
+          document.addEventListener("mouseup", dragEnd);
+          
+          activeNode.style.cursor = "grabbing";
+          activeNode.style.zIndex = "1000";
+        }
+
+        function drag(e) {
+          if (!activeNode) return;
+          
+          e.preventDefault();
+          
+          const canvasRect = canvas.getBoundingClientRect();
+          let newX = e.clientX - canvasRect.left - offsetX + canvas.scrollLeft;
+          let newY = e.clientY - canvasRect.top - offsetY + canvas.scrollTop;
+          
+          newX = Math.max(0, Math.min(newX, canvas.scrollWidth - activeNode.offsetWidth));
+          newY = Math.max(0, Math.min(newY, canvas.scrollHeight - activeNode.offsetHeight));
+          
+          activeNode.style.left = newX + "px";
+          activeNode.style.top = newY + "px";
+          
+          updateConnections();
+        }
+
+        function dragEnd(e) {
+          if (!activeNode) return;
+          
+          document.removeEventListener("mousemove", drag);
+          document.removeEventListener("mouseup", dragEnd);
+          
+          activeNode.style.cursor = "move";
+          activeNode.style.zIndex = "10";
+          activeNode = null;
+        }
+
+        function updateConnections() {
+          const connections = [
+            { from: "node-1", to: "node-2", line: "line-1-2", fromSide: "right", toSide: "left" },
+            { from: "node-2", to: "node-3", line: "line-2-3", fromSide: "right", toSide: "left" },
+            { from: "node-3", to: "node-4", line: "line-3-4", fromSide: "bottom", toSide: "top" },
+            { from: "node-4", to: "node-5", line: "line-4-5", fromSide: "left", toSide: "right" },
+            { from: "node-5", to: "node-6", line: "line-5-6", fromSide: "left", toSide: "right" },
+            { from: "node-6", to: "node-7", line: "line-6-7", fromSide: "bottom-left", toSide: "top" },
+            { from: "node-6", to: "node-8", line: "line-6-8", fromSide: "bottom-right", toSide: "top" },
+            { from: "node-7", to: "node-8", line: "line-7-8", fromSide: "right", toSide: "left" }
+          ];
+
+          connections.forEach(conn => {
+            const fromNode = document.getElementById(conn.from);
+            const toNode = document.getElementById(conn.to);
+            const line = document.getElementById(conn.line);
+            
+            if (fromNode && toNode && line) {
+              // 获取节点的位置和尺寸
+              const fromLeft = parseFloat(fromNode.style.left) || 0;
+              const fromTop = parseFloat(fromNode.style.top) || 0;
+              const fromWidth = fromNode.offsetWidth;
+              const fromHeight = fromNode.offsetHeight;
+              
+              const toLeft = parseFloat(toNode.style.left) || 0;
+              const toTop = parseFloat(toNode.style.top) || 0;
+              const toWidth = toNode.offsetWidth;
+              const toHeight = toNode.offsetHeight;
+              
+              let x1, y1, x2, y2;
+              const arrowOffset = 10; // 箭头偏移量，避免被节点遮挡
+              
+              // 根据连接点位置计算起点
+              switch(conn.fromSide) {
+                case "right":
+                  x1 = fromLeft + fromWidth;
+                  y1 = fromTop + fromHeight / 2;
+                  break;
+                case "left":
+                  x1 = fromLeft;
+                  y1 = fromTop + fromHeight / 2;
+                  break;
+                case "top":
+                  x1 = fromLeft + fromWidth / 2;
+                  y1 = fromTop;
+                  break;
+                case "bottom":
+                  x1 = fromLeft + fromWidth / 2;
+                  y1 = fromTop + fromHeight;
+                  break;
+                case "bottom-left":
+                  x1 = fromLeft + fromWidth / 3;
+                  y1 = fromTop + fromHeight;
+                  break;
+                case "bottom-right":
+                  x1 = fromLeft + (fromWidth * 2 / 3);
+                  y1 = fromTop + fromHeight;
+                  break;
+              }
+              
+              // 根据连接点位置计算终点，并留出箭头空间
+              switch(conn.toSide) {
+                case "right":
+                  x2 = toLeft + toWidth - arrowOffset;
+                  y2 = toTop + toHeight / 2;
+                  break;
+                case "left":
+                  x2 = toLeft + arrowOffset;
+                  y2 = toTop + toHeight / 2;
+                  break;
+                case "top":
+                  x2 = toLeft + toWidth / 2;
+                  y2 = toTop + arrowOffset;
+                  break;
+                case "bottom":
+                  x2 = toLeft + toWidth / 2;
+                  y2 = toTop + toHeight - arrowOffset;
+                  break;
+              }
+              
+              const path = createCurvedPath(x1, y1, x2, y2);
+              line.setAttribute("d", path);
+            }
+          });
+        }
+
+        function createCurvedPath(x1, y1, x2, y2) {
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const curvature = Math.min(distance / 3, 50);
+          
+          if (Math.abs(dx) > Math.abs(dy)) {
+            const cx1 = x1 + curvature;
+            const cy1 = y1;
+            const cx2 = x2 - curvature;
+            const cy2 = y2;
+            return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+          } else {
+            const cx1 = x1;
+            const cy1 = y1 + curvature;
+            const cx2 = x2;
+            const cy2 = y2 - curvature;
+            return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+          }
+        }
+
+        // 窗口大小改变时更新连接线
+        window.addEventListener("resize", updateConnections);
+        canvas.addEventListener("scroll", updateConnections);
+
+        // 节点点击事件
+        nodes.forEach(node => {
+          node.addEventListener("click", function(e) {
+            if (e.target.closest("button") || e.target.closest("input") || e.target.closest("select")) return;
+            
+            nodes.forEach(n => n.style.boxShadow = "");
+            this.style.boxShadow = "0 0 0 3px rgba(22, 93, 255, 0.3)";
+            
+            const nodeName = this.querySelector("h3").textContent;
+            document.querySelector(".lg\\:col-span-3 .px-2").textContent = nodeName;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

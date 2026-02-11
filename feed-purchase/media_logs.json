@@ -1,0 +1,130 @@
+[
+  {
+    "fileName": "bgm.mp3",
+    "mediaType": "audio",
+    "timestamp": "2026-01-19T07:18:18.392Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/bgm.mp3",
+      "durationMs": 60000,
+      "prompt": "轻快明亮的卡通风格电子背景音乐，融入宇宙空间感的柔和合成器音色，节奏平稳舒缓，分镜切换处自然淡入淡出，适配科普视频轻松易懂的氛围，时长约60秒 纯音乐无歌词，时长60秒\n\n---\n\n\ngenre: Electronic\nmood: Happy\n\ntimbre: Bright",
+      "captions": "",
+      "requestedDuration": 60,
+      "timestamp": "2026-01-19T07:18:18.392Z"
+    }
+  },
+  {
+    "fileName": "sc01.mp4",
+    "mediaType": "video",
+    "timestamp": "2026-01-19T07:25:45.355Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/sc01.mp4",
+      "durationMs": 3000,
+      "prompt": "画外音（语调清晰、语速适中、温和亲切的女中音，发音标准，富有感染力，适合向全年龄段观众讲解科学知识，能有效提升内容的易懂性与接受度）：\"你知道吗？地球绕太阳的公转轨迹，造就了我们熟悉的四季与节气\"\n\n@太阳 位于画面中心散发暖黄色光芒，@地球 沿着椭圆形轨道缓慢移动，镜头为wide景别，eye level机位，center composition构图，3D卡通风格，明亮色彩，宇宙空间感氛围",
+      "timestamp": "2026-01-19T07:25:45.354Z",
+      "startFrame": "sc01_start.png",
+      "resolution": "720p",
+      "ratio": "16:9",
+      "usage": {
+        "completion_tokens": 87300,
+        "total_tokens": 87300
+      }
+    }
+  },
+  {
+    "fileName": "sc02.mp4",
+    "mediaType": "video",
+    "timestamp": "2026-01-19T07:41:02.349Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/sc02.mp4",
+      "durationMs": 3000,
+      "prompt": "画外音（语调清晰、语速适中、温和亲切的女中音，发音标准，富有感染力，适合向全年龄段观众讲解科学知识，能有效提升内容的易懂性与接受度）：“春分时节，地球赤道与黄道面平行，阳光直射赤道，南北半球昼夜等长”\n\n@地球 呈现春分位置，南北半球均匀被阳光照射，地表的植被逐渐抽芽复苏，镜头为medium景别，low angle机位，rule of thirds构图，3D卡通风格，柔和日光",
+      "timestamp": "2026-01-19T07:41:02.348Z",
+      "startFrame": "sc02_start.png",
+      "resolution": "720p",
+      "ratio": "16:9",
+      "usage": {
+        "completion_tokens": 87300,
+        "total_tokens": 87300
+      }
+    }
+  },
+  {
+    "fileName": "sc03.mp4",
+    "mediaType": "video",
+    "timestamp": "2026-01-19T07:27:41.937Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/sc03.mp4",
+      "durationMs": 3000,
+      "prompt": "画外音（语调清晰、语速适中、温和亲切的女中音，发音标准，富有感染力，适合向全年龄段观众讲解科学知识，能有效提升内容的易懂性与接受度）：\"夏至到来，北半球倾向太阳，阳光直射北回归线，这是北半球白昼最长的一天\"\n\n@地球 北半球朝向太阳，北极圈区域呈现极昼状态，地表植被繁茂，镜头为close-up景别，high angle机位，diagonal构图，3D卡通风格，暖色调强光",
+      "timestamp": "2026-01-19T07:27:41.936Z",
+      "startFrame": "sc03_start.png",
+      "resolution": "720p",
+      "ratio": "16:9",
+      "usage": {
+        "completion_tokens": 87300,
+        "total_tokens": 87300
+      }
+    }
+  },
+  {
+    "fileName": "sc04.mp4",
+    "mediaType": "video",
+    "timestamp": "2026-01-19T07:41:52.125Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/sc04.mp4",
+      "durationMs": 3000,
+      "prompt": "画外音（语调清晰、语速适中、温和亲切的女中音，发音标准，富有感染力，适合向全年龄段观众讲解科学知识，能有效提升内容的易懂性与接受度）：“秋分时刻，地球再次回到赤道与黄道面平行的位置，昼夜再次等长，大自然迎来收获季”\n\n@地球 呈现秋分位置，南北半球被阳光均匀覆盖，地表的田野呈现金黄色丰收景象，镜头为medium景别，eye level机位，rule of thirds构图，3D卡通风格，柔和暖日光",
+      "timestamp": "2026-01-19T07:41:52.124Z",
+      "startFrame": "sc04_start.png",
+      "resolution": "720p",
+      "ratio": "16:9",
+      "usage": {
+        "completion_tokens": 87300,
+        "total_tokens": 87300
+      }
+    }
+  },
+  {
+    "fileName": "sc05.mp4",
+    "mediaType": "video",
+    "timestamp": "2026-01-19T07:30:20.698Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/sc05.mp4",
+      "durationMs": 3000,
+      "prompt": "画外音（语调清晰、语速适中、温和亲切的女中音，发音标准，富有感染力，适合向全年龄段观众讲解科学知识，能有效提升内容的易懂性与接受度）：\"冬至来临，南半球朝向太阳，阳光直射南回归线，北半球进入一年中最寒冷的时段\"\n\n@地球 南半球朝向太阳，北极圈区域呈现极夜状态，北半球地表被冰雪覆盖，镜头为close-up景别，low angle机位，negative space构图，3D卡通风格，冷色调弱光",
+      "timestamp": "2026-01-19T07:30:20.698Z",
+      "startFrame": "sc05_start.png",
+      "resolution": "720p",
+      "ratio": "16:9",
+      "usage": {
+        "completion_tokens": 87300,
+        "total_tokens": 87300
+      }
+    }
+  },
+  {
+    "fileName": "sc06.mp4",
+    "mediaType": "video",
+    "timestamp": "2026-01-19T07:31:32.634Z",
+    "result": {
+      "success": true,
+      "uri": "/home/user/cerevox-zerocut/projects/default0/materials/sc06.mp4",
+      "durationMs": 3000,
+      "prompt": "画外音（语调清晰、语速适中、温和亲切的女中音，发音标准，富有感染力，适合向全年龄段观众讲解科学知识，能有效提升内容的易懂性与接受度）：“正是地球的持续公转，让我们拥有了四季更迭与丰富多彩的节气文化”\n\n@太阳 与@地球 的完整公转轨道全景展示，清晰呈现四季循环的逻辑，镜头为wide景别，top-down机位，center composition构图，3D卡通风格，明亮和谐色彩",
+      "timestamp": "2026-01-19T07:31:32.633Z",
+      "startFrame": "sc06_start.png",
+      "resolution": "720p",
+      "ratio": "16:9",
+      "usage": {
+        "completion_tokens": 87300,
+        "total_tokens": 87300
+      }
+    }
+  }
+]

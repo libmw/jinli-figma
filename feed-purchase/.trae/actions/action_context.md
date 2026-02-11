@@ -1,0 +1,6 @@
+- 做了什么：重新合并视频
+  - 用了什么工具：audio-video-sync
+  - 用了什么参数：videos=["sc01.mp4","sc02.mp4","sc03.mp4","sc04.mp4","sc05.mp4","sc06.mp4"], audio="bgm.mp3", audioVolume=0.177, saveToFileName="merged_video_new.mp4"
+  - 用了什么技能：素材创作
+- 执行的结果：成功生成合并后的视频文件merged_video_new.mp4
+- 其他注意事项：使用了默认的BGM音量-15db（audioVolume=0.177）
