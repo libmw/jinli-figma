@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>告警中心 · OpenClaw</title>
+  <link rel="stylesheet" href="../static/tailwind.min.css" />
+  <link rel="stylesheet" href="../static/all.min.css" />
+  <style>
+    :root {
+      --oc-primary: #e03a2f;
+      --oc-primary-dark: #b52a21;
+      --oc-primary-light: #f87171;
+      --oc-accent: #ff6b35;
+      --oc-bg: #0f0f0f;
+      --oc-surface: #1a1a1a;
+      --oc-surface2: #242424;
+      --oc-border: #2e2e2e;
+      --oc-text: #f0f0f0;
+      --oc-text-muted: #888;
+      --oc-green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--oc-bg); color: var(--oc-text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;
+      min-height: 100vh;
+    }
+    .oc-card {
+      background: var(--oc-surface); border: 1px solid var(--oc-border);
+      border-radius: 14px;
+    }
+    .section-title {
+      font-size: 13px; font-weight: 700; color: var(--oc-text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+    }
+    .divider { height: 1px; background: var(--oc-border); }
+    .agent-pulse {
+      width: 7px; height: 7px; background: var(--oc-primary);
+      border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.4; transform:scale(1.4); }
+    }
+    .bottom-nav {
+      background: var(--oc-surface); border-top: 1px solid var(--oc-border);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    }
+    /* 告警卡片 */
+    .alert-card {
+      border-radius: 12px; padding: 12px 14px;
+      transition: opacity 0.3s;
+    }
+    .alert-card.resolved { opacity: 0.45; }
+    .alert-card.high {
+      background: rgba(224,58,47,0.07);
+      border: 1px solid rgba(224,58,47,0.25);
+    }
+    .alert-card.medium {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.22);
+    }
+    .alert-card.low {
+      background: rgba(59,130,246,0.07);
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+    .alert-card.info {
+      background: rgba(168,85,247,0.07);
+      border: 1px solid rgba(168,85,247,0.2);
+    }
+    /* 优先级点 */
+    .level-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+    }
+    /* 操作按钮 */
+    .act-btn {
+      border-radius: 7px; padding: 5px 12px; font-size: 11px; font-weight: 600;
+      cursor: pointer; border: none; transition: opacity 0.15s;
+    }
+    .act-btn:active { opacity: 0.7; }
+    /* tab 筛选 */
+    .filter-tab {
+      padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s;
+      color: var(--oc-text-muted); border: 1px solid transparent;
+    }
+    .filter-tab.active {
+      background: rgba(224,58,47,0.12); color: var(--oc-primary-light);
+      border-color: rgba(224,58,47,0.3);
+    }
+    .scroll-x { overflow-x: auto; scrollbar-width: none; }
+    .scroll-x::-webkit-scrollbar { display: none; }
+    /* 统计数字 */
+    .stat-num { font-size: 22px; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1a0a0a 0%,#2d0f0f 50%,#1a0a0a 100%);border-bottom:1px solid var(--oc-border);position:relative;overflow:hidden;" class="px-4 pt-5 pb-4">
+    <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(224,58,47,0.22) 0%,transparent 70%);border-radius:50%;pointer-events:none;"></div>
+    <div class="flex items-center gap-3 relative z-10 mb-4">
+      <a href="boss-index.html" style="color:var(--oc-text-muted);font-size:18px;"><i class="fas fa-arrow-left"></i></a>
+      <div class="flex items-center gap-2">
+        <div style="width:32px;height:32px;background:rgba(224,58,47,0.15);border:1px solid rgba(224,58,47,0.35);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-bell" style="color:var(--oc-primary-light);font-size:14px;"></i>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:#fff;">Claw 告警中心</div>
+          <div style="font-size:11px;color:var(--oc-text-muted);">实时预警 · 自动处置 · 人工决策</div>
+        </div>
+      </div>
+      <div class="ml-auto flex items-center gap-1" style="font-size:11px;color:var(--oc-primary-light);">
+        <span class="agent-pulse"></span>
+        <span>11 条活跃</span>
+      </div>
+    </div>
+    <!-- 统计概览 -->
+    <div class="grid grid-cols-4 gap-2 relative z-10">
+      <div style="background:rgba(224,58,47,0.1);border:1px solid rgba(224,58,47,0.25);border-radius:10px;padding:8px;text-align:center;">
+        <div class="stat-num" style="color:#f87171;">4</div>
+        <div style="font-size:10px;color:var(--oc-text-muted);margin-top:1px;">高危</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:8px;text-align:center;">
+        <div class="stat-num" style="color:#fbbf24;">5</div>
+        <div style="font-size:10px;color:var(--oc-text-muted);margin-top:1px;">中危</div>
+      </div>
+      <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:8px;text-align:center;">
+        <div class="stat-num" style="color:#60a5fa;">2</div>
+        <div style="font-size:10px;color:var(--oc-text-muted);margin-top:1px;">低危</div>
+      </div>
+      <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:8px;text-align:center;">
+        <div class="stat-num" style="color:#4ade80;">8</div>
+        <div style="font-size:10px;color:var(--oc-text-muted);margin-top:1px;">已处置</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Claw 自动处置摘要 -->
+  <div class="px-4 pt-4 pb-2">
+    <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;">
+      <span style="font-size:18px;flex-shrink:0;">🦞</span>
+      <div style="font-size:11px;color:#ccc;line-height:1.7;">
+        今日 Claw 已<span style="color:#4ade80;font-weight:600;">自动处置 8 条</span>告警，包括 A5号池换水、B区增氧补偿、C区pH自动调节等。
+        当前 <span style="color:#f87171;font-weight:600;">3 条</span>需要你来决策。
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选 tab -->
+  <div class="px-4 pt-3 pb-2 scroll-x">
+    <div style="display:flex;gap:6px;width:max-content;">
+      <div class="filter-tab active" onclick="filterAlerts('all', this)">全部 11</div>
+      <div class="filter-tab" onclick="filterAlerts('high', this)">高危 4</div>
+      <div class="filter-tab" onclick="filterAlerts('medium', this)">中危 5</div>
+      <div class="filter-tab" onclick="filterAlerts('low', this)">低危 2</div>
+      <div class="filter-tab" onclick="filterAlerts('resolved', this)">已处置 8</div>
+    </div>
+  </div>
+
+  <!-- 告警列表 -->
+  <div class="px-4 pb-28 pt-2" id="alertList" style="display:flex;flex-direction:column;gap:10px;">
+
+    <!-- ① 高危：采购紧急 -->
+    <div class="alert-card high" data-level="high" data-id="1">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#f87171;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#f87171;">饲料库存告急</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">采购 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">09:02</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            鲈鱼饲料库存仅剩 <span style="color:#f87171;font-weight:600;">0.8 吨</span>，按当前消耗速率预计 <span style="color:#f87171;font-weight:600;">3天后断货</span>。采购 Claw 已生成 3 份报价单，最优方案可节省 ¥4,800。
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#aaa;">
+            🦞 Claw 建议：立即审批采购单，选择方案A（¥18,200），预计明日到货。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:linear-gradient(135deg,var(--oc-primary),var(--oc-accent));color:#fff;flex:1;" onclick="resolveAlert(1, this)">审批采购单</button>
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);" onclick="window.location='ai-chat.html'">问 Claw</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 高危：氨氮超标 -->
+    <div class="alert-card high" data-level="high" data-id="2">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#f87171;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#f87171;">水质异常 · A5号池</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">水质 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">09:02</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            氨氮浓度 <span style="color:#f87171;font-weight:600;">0.8 mg/L</span>，超出安全阈值 60%。已自动触发换水 15% 和增氧机提速，预计 11:00 恢复。
+          </div>
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#4ade80;">
+            ✓ Claw 已自动处置：换水指令已下发，增氧机提速至 1600 rpm
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:rgba(224,58,47,0.12);color:#f87171;border:1px solid rgba(224,58,47,0.25);flex:1;" onclick="window.location='water-quality-agent.html'">查看水质详情</button>
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);" onclick="resolveAlert(2, this)">知道了</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ 高危：疾病疑似 -->
+    <div class="alert-card high" data-level="high" data-id="3">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#f87171;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#f87171;">疑似烂尾病 · D2号池</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">疾病 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">08:47</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            图像识别检测到 D区2号池鱼群尾部异常，疑似 <span style="color:#f87171;font-weight:600;">烂尾病</span>，置信度 <span style="color:#f87171;font-weight:600;">83%</span>。建议人工复核后决定是否用药。
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#aaa;">
+            🦞 Claw 建议：安排技术员今日下午前往复核，如确认则启动隔离+用药方案。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:linear-gradient(135deg,var(--oc-primary),var(--oc-accent));color:#fff;flex:1;" onclick="resolveAlert(3, this)">安排复核</button>
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);" onclick="window.location='ai-chat.html'">问 Claw</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 高危：协同决策进行中 -->
+    <div class="alert-card high" data-level="high" data-id="4">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#f87171;animation:pulse 1s infinite;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#f87171;">Claw 协同决策进行中</span>
+              <span style="font-size:10px;color:#4ade80;margin-left:6px;background:rgba(34,197,94,0.1);padding:1px 5px;border-radius:4px;">实时</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">09:04</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            5个 Claw 正在就 A5号池氨氮超标处置方案进行协同决策，已全票通过，执行中。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.25);flex:1;" onclick="window.location='claw-council.html'">查看会议室</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分隔 -->
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+      <div style="flex:1;height:1px;background:var(--oc-border);"></div>
+      <span style="font-size:11px;color:var(--oc-text-muted);">中危告警</span>
+      <div style="flex:1;height:1px;background:var(--oc-border);"></div>
+    </div>
+
+    <!-- ⑤ 中危：设备保养 -->
+    <div class="alert-card medium" data-level="medium" data-id="5">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#fbbf24;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#fbbf24;">增氧机保养超期</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">设备 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">08:00</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            A区 5 台增氧机累计运行时长超出保养周期，设备 Claw 建议本周六统一保养，预计停机 4 小时。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.25);flex:1;" onclick="resolveAlert(5, this)">确认周六保养</button>
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);" onclick="window.location='ai-chat.html'">调整时间</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ 中危：排水阀老化 -->
+    <div class="alert-card medium" data-level="medium" data-id="6">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#fbbf24;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#fbbf24;">排水阀待检 · A5-V03</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">设备 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">09:04</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            A5号池排水阀 V-03 上次保养距今 45 天，本次换水操作后建议安排检查，避免阀门老化影响后续操作。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.25);flex:1;" onclick="resolveAlert(6, this)">加入保养计划</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑦ 中危：投喂超量 -->
+    <div class="alert-card medium" data-level="medium" data-id="7">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#fbbf24;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#fbbf24;">投喂量偏差 · A区</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">投喂 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">昨日</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            04-01 和 04-02 A区投喂量连续超出计划 18%，操作员手动调整未同步策略参数，已导致氨氮积累。
+          </div>
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#4ade80;">
+            ✓ 投喂 Claw 已更新策略：水温与氨氮联动纳入自动调节逻辑
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);flex:1;" onclick="resolveAlert(7, this)">知道了</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑧ 中危：鳜鱼生长偏慢 -->
+    <div class="alert-card medium" data-level="medium" data-id="8">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#fbbf24;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#fbbf24;">生长偏慢 · 鳜鱼批次</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">投喂 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">08:00</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            鳜鱼批次当前生长速率较预期低 <span style="color:#fbbf24;font-weight:600;">4%</span>，若不干预预计出塘延迟 5–7 天。投喂 Claw 已推送高蛋白配方调整方案。
+          </div>
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#4ade80;">
+            ✓ 已审批：蛋白含量提升至 42%，今日 14:00 起执行
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);flex:1;" onclick="resolveAlert(8, this)">知道了</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑨ 中危：pH传感器离线 -->
+    <div class="alert-card medium" data-level="medium" data-id="9">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#fbbf24;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#fbbf24;">传感器离线 · pH × 2</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">水质 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">07:30</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            C区 2 台 pH 传感器离线，水质 Claw 已切换至相邻节点估算，精度下降约 12%，建议尽快排查。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.25);flex:1;" onclick="resolveAlert(9, this)">派人排查</button>
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);" onclick="window.location='water-quality-agent.html'">查看详情</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分隔 -->
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+      <div style="flex:1;height:1px;background:var(--oc-border);"></div>
+      <span style="font-size:11px;color:var(--oc-text-muted);">低危告警</span>
+      <div style="flex:1;height:1px;background:var(--oc-border);"></div>
+    </div>
+
+    <!-- ⑩ 低危：采购计划更新 -->
+    <div class="alert-card low" data-level="low" data-id="10">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#60a5fa;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#60a5fa;">采购计划已更新</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">采购 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">09:04</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            因鳜鱼批次投喂策略调整，本月鲈鱼饲料采购量已自动下调 8%，预计节省 ¥3,200。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);flex:1;" onclick="resolveAlert(10, this)">知道了</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑪ 低危：氨氮传感器离线 -->
+    <div class="alert-card low" data-level="low" data-id="11">
+      <div class="flex items-start gap-3">
+        <div class="level-dot" style="background:#60a5fa;margin-top:5px;"></div>
+        <div style="flex:1;min-width:0;">
+          <div class="flex justify-between items-start mb-1">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#60a5fa;">传感器离线 · 氨氮 × 2</span>
+              <span style="font-size:10px;color:var(--oc-text-muted);margin-left:6px;">水质 Claw</span>
+            </div>
+            <span style="font-size:10px;color:var(--oc-text-muted);flex-shrink:0;">06:15</span>
+          </div>
+          <div style="font-size:12px;color:#ccc;line-height:1.6;margin-bottom:8px;">
+            D区 2 台氨氮传感器离线，水质 Claw 已标记为待维护，不影响当前监测覆盖率。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="act-btn" style="background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);flex:1;" onclick="resolveAlert(11, this)">加入维护计划</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 已处置分隔 -->
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;" id="resolvedDivider" style="display:none;">
+      <div style="flex:1;height:1px;background:var(--oc-border);"></div>
+      <span style="font-size:11px;color:var(--oc-text-muted);">已处置</span>
+      <div style="flex:1;height:1px;background:var(--oc-border);"></div>
+    </div>
+
+  </div><!-- end alertList -->
+
+  <!-- 底部导航 -->
+  <nav class="fixed bottom-0 left-0 right-0 z-10" style="background:var(--oc-surface);border-top:1px solid var(--oc-border);box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+    <div class="flex justify-around items-end px-1 pt-2 pb-3">
+      <a href="boss-index.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-satellite-dish" style="font-size:15px;"></i>
+        </div>
+        <span style="font-size:9px;font-weight:600;">总览</span>
+      </a>
+      <a href="water-quality-agent.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-project-diagram" style="font-size:15px;"></i>
+        </div>
+        <span style="font-size:9px;font-weight:600;">Claw矩阵</span>
+      </a>
+      <a href="ai-chat.html" class="flex flex-col items-center gap-1" style="margin-bottom:4px;">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--oc-primary),var(--oc-accent));border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(224,58,47,0.5);margin-top:-18px;">
+          <span style="font-size:22px;line-height:1;">🦞</span>
+        </div>
+        <span style="font-size:9px;font-weight:700;color:var(--oc-primary-light);">问 Claw</span>
+      </a>
+      <a href="claw-council.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-comments" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid var(--oc-bg);"></span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">协同决策</span>
+      </a>
+      <!-- 告警（当前页激活） -->
+      <a href="alerts.html" class="flex flex-col items-center gap-1" style="color:var(--oc-primary-light);">
+        <div style="width:32px;height:32px;background:rgba(224,58,47,0.15);border:1px solid rgba(224,58,47,0.35);border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-bell" style="font-size:13px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;min-width:14px;height:14px;background:var(--oc-primary);border-radius:7px;border:2px solid var(--oc-bg);font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 2px;" id="badgeCount">11</span>
+        </div>
+        <span style="font-size:9px;font-weight:700;letter-spacing:0.02em;">告警</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    let activeFilter = 'all';
+    let resolvedIds = new Set();
+
+    function filterAlerts(level, el) {
+      activeFilter = level;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.alert-card').forEach(card => {
+        const cardLevel = card.dataset.level;
+        const isResolved = resolvedIds.has(Number(card.dataset.id));
+        if (level === 'all') {
+          card.style.display = isResolved ? 'none' : 'block';
+        } else if (level === 'resolved') {
+          card.style.display = isResolved ? 'block' : 'none';
+        } else {
+          card.style.display = (!isResolved && cardLevel === level) ? 'block' : 'none';
+        }
+      });
+      // 分隔线显隐
+      document.querySelectorAll('[style*="flex:1;height:1px"]').forEach(d => {
+        d.parentElement.style.display = level === 'all' ? 'flex' : 'none';
+      });
+    }
+
+    function resolveAlert(id, btn) {
+      resolvedIds.add(id);
+      const card = document.querySelector(`[data-id="${id}"]`);
+      card.classList.add('resolved');
+      // 替换按钮区为已处置标签
+      btn.closest('div').innerHTML = '<span style="font-size:11px;color:#4ade80;">✓ 已处置</span>';
+      // 更新角标
+      const remaining = document.querySelectorAll('.alert-card:not(.resolved)').length;
+      document.getElementById('badgeCount').textContent = remaining;
+      // 更新 header 计数
+      const activeEl = document.querySelector('[style*="color:var(--oc-primary-light)"] span:last-child');
+      if (activeEl) activeEl.textContent = remaining + ' 条活跃';
+    }
+  </script>
+</body>
+</html>

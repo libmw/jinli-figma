@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FishClaw 智慧渔业 - 总览</title>
+  <link rel="stylesheet" href="../static/tailwind.min.css" />
+  <link rel="stylesheet" href="../static/all.min.css" />
+  <script src="../static/chart.js"></script>
+  <style>
+    :root {
+      --oc-primary: #e03a2f;
+      --oc-primary-dark: #b52a21;
+      --oc-primary-light: #f87171;
+      --oc-accent: #ff6b35;
+      --oc-bg: #0f0f0f;
+      --oc-surface: #1a1a1a;
+      --oc-surface2: #242424;
+      --oc-border: #2e2e2e;
+      --oc-text: #f0f0f0;
+      --oc-text-muted: #888;
+      --oc-green: #22c55e;
+      --oc-yellow: #f59e0b;
+      --oc-blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--oc-bg);
+      color: var(--oc-text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+      min-height: 100vh;
+    }
+
+    .oc-header {
+      background: linear-gradient(135deg, #1a0a0a 0%, #2d0f0f 50%, #1a0a0a 100%);
+      border-bottom: 1px solid var(--oc-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .oc-header::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(224, 58, 47, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .oc-header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 20px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .oc-card {
+      background: var(--oc-surface);
+      border: 1px solid var(--oc-border);
+      border-radius: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .oc-card:active {
+      transform: scale(0.98);
+    }
+
+    .oc-badge-red {
+      background: rgba(224, 58, 47, 0.15);
+      color: var(--oc-primary-light);
+      border: 1px solid rgba(224, 58, 47, 0.3);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .oc-badge-green {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .oc-badge-yellow {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .oc-badge-blue {
+      background: rgba(59, 130, 246, 0.12);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .agent-pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--oc-green);
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.3);
+      }
+    }
+
+    .oc-progress {
+      height: 4px;
+      background: var(--oc-border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .oc-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--oc-primary), var(--oc-accent));
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    .oc-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .oc-icon-red {
+      background: rgba(224, 58, 47, 0.15);
+      color: var(--oc-primary-light);
+    }
+
+    .oc-icon-green {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+    }
+
+    .oc-icon-yellow {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+    }
+
+    .oc-icon-blue {
+      background: rgba(59, 130, 246, 0.12);
+      color: #60a5fa;
+    }
+
+    .oc-icon-purple {
+      background: rgba(168, 85, 247, 0.12);
+      color: #c084fc;
+    }
+
+    .oc-icon-orange {
+      background: rgba(255, 107, 53, 0.12);
+      color: #fb923c;
+    }
+
+    .bottom-nav {
+      background: var(--oc-surface);
+      border-top: 1px solid var(--oc-border);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .nav-active {
+      color: var(--oc-primary-light) !important;
+    }
+
+    .agent-chat-btn {
+      background: linear-gradient(135deg, rgba(224, 58, 47, 0.2), rgba(255, 107, 53, 0.2));
+      color: var(--oc-accent);
+      border-radius: 50%;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -20px;
+      box-shadow: 0 4px 16px rgba(224, 58, 47, 0.5);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--oc-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--oc-border);
+      margin: 4px 0;
+    }
+
+    .agent-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(224, 58, 47, 0.1);
+      border: 1px solid rgba(224, 58, 47, 0.2);
+      color: var(--oc-primary-light);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    canvas {
+      max-height: 130px;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .module-item {
+      aspect-ratio: 1/1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .scroll-x {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .scroll-x::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 顶部 Header -->
+  <div class="oc-header px-4 pt-5 pb-6 relative z-10">
+    <div class="flex justify-between items-center mb-4 relative z-10">
+      <div class="flex items-center gap-2">
+        <div
+          style="width:32px;height:32px;background:linear-gradient(135deg,rgba(224,58,47,0.2),rgba(255,107,53,0.2));color:var(--oc-accent);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:14px;">🦞</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-1">
+            <span style="font-size:15px;font-weight:800;color:#fff;">FishClaw</span>
+            <span
+              style="font-size:10px;color:var(--oc-primary-light);background:rgba(224,58,47,0.2);padding:1px 5px;border-radius:4px;border:1px solid rgba(224,58,47,0.3);">AGENT</span>
+          </div>
+          <div style="font-size:11px;color:var(--oc-text-muted);">1号养殖基地 · 智慧渔业平台</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1" style="font-size:11px;color:var(--oc-text-muted);">
+          <span class="agent-pulse"></span>
+          <span>Claw 运行中</span>
+        </div>
+        <a href="#" style="color:var(--oc-text-muted);font-size:16px;"><i class="fas fa-bell"></i></a>
+      </div>
+    </div>
+
+    <!-- Claw 状态条 -->
+    <div
+      style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px;"
+      class="relative z-10">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="" style="color:var(--oc-primary-light);font-size:13px;">🦞</span>
+          <span style="font-size:12px;font-weight:600;color:#fff;">FishClaw 今日巡检报告</span>
+        </div>
+        <span style="font-size:10px;color:var(--oc-text-muted);">04-03 08:32</span>
+      </div>
+      <p style="font-size:11px;color:#ccc;line-height:1.6;">
+        已完成 <span style="color:var(--oc-primary-light);font-weight:600;">18</span> 项自动巡检，检测到
+        <span style="color:#fbbf24;font-weight:600;">5</span> 条异常，
+        <span style="color:#4ade80;font-weight:600;">36</span> 个养殖池水质正常，建议关注 <span
+          style="color:var(--oc-primary-light);">A区5号池</span> 氨氮偏高。
+      </p>
+    </div>
+  </div>
+
+  <!-- 快捷入口 -->
+  <div class="px-4 -mt-3 relative z-20 mb-4">
+    <div class="oc-card p-3">
+      <div class="grid grid-cols-4 gap-1 text-center">
+        <a href="#" class="flex flex-col items-center gap-1 py-1">
+          <div class="oc-icon-box oc-icon-red"><i class="fas fa-exclamation-triangle"></i></div>
+          <span style="font-size:11px;color:var(--oc-text-muted);">告警</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 py-1">
+          <div class="oc-icon-box oc-icon-blue"><i class="fas fa-tasks"></i></div>
+          <span style="font-size:11px;color:var(--oc-text-muted);">任务</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 py-1">
+          <div class="oc-icon-box oc-icon-green"><i class="fas fa-chart-bar"></i></div>
+          <span style="font-size:11px;color:var(--oc-text-muted);">数据</span>
+        </a>
+        <a href="ai-chat.html" class="flex flex-col items-center gap-1 py-1">
+          <div class="oc-icon-box oc-icon-orange"
+            style="background:linear-gradient(135deg,rgba(224,58,47,0.2),rgba(255,107,53,0.2));color:var(--oc-accent);">
+            🦞
+          </div>
+          <span style="font-size:11px;color:var(--oc-primary-light);">问 Claw</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="px-4 pb-24">
+
+    <!-- Claw 核心数据概览 -->
+    <div class="section-title">Claw 实时感知</div>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="oc-card p-3">
+        <div class="flex justify-between items-start">
+          <div>
+            <div style="font-size:11px;color:var(--oc-text-muted);">养殖面积</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin:4px 0;">98,500 <span
+                style="font-size:11px;font-weight:400;color:var(--oc-text-muted);">m²</span></div>
+            <div class="agent-tag">🦞 利用率 91%</div>
+          </div>
+          <div class="oc-icon-box oc-icon-blue"><i class="fas fa-water"></i></div>
+        </div>
+      </div>
+      <div class="oc-card p-3">
+        <div class="flex justify-between items-start">
+          <div>
+            <div style="font-size:11px;color:var(--oc-text-muted);">生物量</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin:4px 0;">63.2 <span
+                style="font-size:11px;font-weight:400;color:var(--oc-text-muted);">吨</span></div>
+            <div class="agent-tag">🦞 较上月 +8%</div>
+          </div>
+          <div class="oc-icon-box oc-icon-green"><i class="fas fa-fish"></i></div>
+        </div>
+      </div>
+      <div class="oc-card p-3">
+        <div class="flex justify-between items-start">
+          <div>
+            <div style="font-size:11px;color:var(--oc-text-muted);">渔需品库存</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin:4px 0;">11.3 <span
+                style="font-size:11px;font-weight:400;color:var(--oc-text-muted);">吨</span></div>
+            <div class="agent-tag"
+              style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);color:#fbbf24;">🦞 ¥98,600</div>
+          </div>
+          <div class="oc-icon-box oc-icon-yellow"><i class="fas fa-boxes"></i></div>
+        </div>
+      </div>
+      <div class="oc-card p-3">
+        <div class="flex justify-between items-start">
+          <div>
+            <div style="font-size:11px;color:var(--oc-text-muted);">在岗人员</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;margin:4px 0;">35 <span
+                style="font-size:11px;font-weight:400;color:var(--oc-text-muted);">人</span></div>
+            <div class="agent-tag">🦞 出勤率 97%</div>
+          </div>
+          <div class="oc-icon-box oc-icon-purple"><i class="fas fa-users"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FishClaw Claw 状态 -->
+    <div class="section-title">FishClaw Claw 矩阵</div>
+    <div class="oc-card p-4 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2">
+          🦞
+          <span style="font-size:14px;font-weight:700;">Claw 运行状态</span>
+        </div>
+        <span class="oc-badge-green"><span class="agent-pulse"
+            style="width:6px;height:6px;margin-right:3px;"></span>全部在线</span>
+      </div>
+      <div class="space-y-2">
+        <!-- 水质监测 Claw -->
+        <a href="water-quality-agent.html"
+          style="display:block;background:var(--oc-surface2);border-radius:10px;padding:10px 12px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+              <div class="oc-icon-box oc-icon-blue" style="width:28px;height:28px;border-radius:7px;font-size:11px;"><i
+                  class="fas fa-tint"></i></div>
+              <div>
+                <div style="font-size:12px;font-weight:600;">水质监测 Claw</div>
+                <div style="font-size:10px;color:var(--oc-text-muted);">实时采集 · 异常预警 · 自动调控</div>
+              </div>
+            </div>
+            <span class="oc-badge-green">运行中</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px;padding-left:36px;">
+            已监测 <span style="color:#60a5fa;">36</span> 个水质节点，A区5号池氨氮 <span style="color:#fbbf24;">0.8mg/L</span>
+            偏高，已触发换水指令
+          </div>
+        </a>
+        <!-- 投喂决策 Claw -->
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:10px 12px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+              <div class="oc-icon-box oc-icon-green" style="width:28px;height:28px;border-radius:7px;font-size:11px;"><i
+                  class="fas fa-utensils"></i></div>
+              <div>
+                <div style="font-size:12px;font-weight:600;">投喂决策 Claw</div>
+                <div style="font-size:10px;color:var(--oc-text-muted);">智能配方 · 精准投喂 · 成本优化</div>
+              </div>
+            </div>
+            <span class="oc-badge-green">运行中</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px;padding-left:36px;">
+            今日已完成 <span style="color:#4ade80;">5</span> 次投喂，节省饲料约 <span style="color:#4ade80;">18kg</span>，投喂准确率 <span
+              style="color:#4ade80;">98.6%</span>
+          </div>
+        </div>
+        <!-- 疾病预警 Claw -->
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:10px 12px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+              <div class="oc-icon-box oc-icon-yellow" style="width:28px;height:28px;border-radius:7px;font-size:11px;">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;">疾病预警 Claw</div>
+                <div style="font-size:10px;color:var(--oc-text-muted);">图像识别 · 行为分析 · 早期预警</div>
+              </div>
+            </div>
+            <span class="oc-badge-yellow">1条预警</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px;padding-left:36px;">
+            D区2号池检测到疑似 <span style="color:#fbbf24;">烂尾病</span> 特征，置信度 83%，建议人工复核
+          </div>
+        </div>
+        <!-- 采购调度 Claw -->
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:10px 12px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+              <div class="oc-icon-box oc-icon-orange" style="width:28px;height:28px;border-radius:7px;font-size:11px;">
+                <i class="fas fa-shopping-cart"></i>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600;">采购调度 Claw</div>
+                <div style="font-size:10px;color:var(--oc-text-muted);">库存预测 · 自动询价 · 订单管理</div>
+              </div>
+            </div>
+            <span class="oc-badge-red">待审批</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px;padding-left:36px;">
+            已生成 <span style="color:#f87171;">3</span> 份采购建议单，鲈鱼饲料库存预计 <span style="color:#f87171;">3天</span> 后不足，等待您审批
+          </div>
+        </div>
+      </div>
+      <div class="divider mt-3"></div>
+      <a href="ai-chat.html" class="flex items-center justify-center gap-1 mt-3"
+        style="color:var(--oc-primary-light);font-size:12px;font-weight:600;">
+        与 FishClaw 对话 <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+      </a>
+    </div>
+
+    <!-- 预警信息 -->
+    <div class="section-title">Claw 预警推送</div>
+    <div class="oc-card p-4 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-bell" style="color:var(--oc-primary-light);"></i>
+          <span style="font-size:14px;font-weight:700;">预警信息</span>
+        </div>
+        <span class="oc-badge-red">11 条</span>
+      </div>
+      <div class="space-y-2">
+        <div
+          style="background:rgba(224,58,47,0.08);border:1px solid rgba(224,58,47,0.2);border-radius:10px;padding:10px 12px;">
+          <div class="flex items-start gap-2">
+            <i class="fas fa-exclamation-circle"
+              style="color:var(--oc-primary-light);margin-top:2px;font-size:13px;"></i>
+            <div style="flex:1;">
+              <div class="flex justify-between">
+                <span style="font-size:12px;font-weight:600;color:#f87171;">饲料库存预警</span>
+                <span style="font-size:10px;color:var(--oc-text-muted);">高</span>
+              </div>
+              <div style="font-size:11px;color:#ccc;margin-top:2px;">采购 Claw 检测到 5 种饲料库存低于安全线，已自动生成补货建议</div>
+            </div>
+          </div>
+        </div>
+        <div
+          style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 12px;">
+          <div class="flex items-start gap-2">
+            <i class="fas fa-tools" style="color:#fbbf24;margin-top:2px;font-size:13px;"></i>
+            <div style="flex:1;">
+              <div class="flex justify-between">
+                <span style="font-size:12px;font-weight:600;color:#fbbf24;">设备保养预警</span>
+                <span style="font-size:10px;color:var(--oc-text-muted);">中</span>
+              </div>
+              <div style="font-size:11px;color:#ccc;margin-top:2px;">设备 Claw 识别 5 台增氧机运行时长超标，建议本周内安排保养</div>
+            </div>
+          </div>
+        </div>
+        <div
+          style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:10px 12px;">
+          <div class="flex items-start gap-2">
+            <i class="fas fa-tint" style="color:#60a5fa;margin-top:2px;font-size:13px;"></i>
+            <div style="flex:1;">
+              <div class="flex justify-between">
+                <span style="font-size:12px;font-weight:600;color:#60a5fa;">水质异常预警</span>
+                <span style="font-size:10px;color:var(--oc-text-muted);">中</span>
+              </div>
+              <div style="font-size:11px;color:#ccc;margin-top:2px;">A区5号池氨氮持续偏高，水质 Claw 已启动自动换水，请关注后续变化</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider mt-3"></div>
+      <a href="#" class="flex items-center justify-center gap-1 mt-3"
+        style="color:var(--oc-primary-light);font-size:12px;font-weight:600;">
+        查看全部预警 <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+      </a>
+    </div>
+
+    <!-- 养殖区域 -->
+    <div class="section-title">养殖区域概览</div>
+    <div class="oc-card p-4 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-map-marked-alt" style="color:var(--oc-primary-light);"></i>
+          <span style="font-size:14px;font-weight:700;">养殖区域</span>
+        </div>
+        <div class="flex gap-1">
+          <span class="oc-badge-green">36 活跃</span>
+          <span
+            style="background:rgba(255,255,255,0.06);color:var(--oc-text-muted);font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--oc-border);">4
+            闲置</span>
+        </div>
+      </div>
+      <div class="mb-3" style="height:120px;position:relative;">
+        <canvas id="pondStatusChart"></canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#fff;">91%</div>
+          <div style="font-size:10px;color:var(--oc-text-muted);">使用率</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--oc-text-muted);">养殖棚</div>
+          <div style="font-size:16px;font-weight:800;color:#fff;margin:2px 0;">12 / 14</div>
+          <div style="font-size:10px;color:#4ade80;">使用率 86%</div>
+        </div>
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:10px;text-align:center;">
+          <div style="font-size:11px;color:var(--oc-text-muted);">养殖池</div>
+          <div style="font-size:16px;font-weight:800;color:#fff;margin:2px 0;">36 / 40</div>
+          <div style="font-size:10px;color:#4ade80;">使用率 90%</div>
+        </div>
+      </div>
+      <div class="divider mt-3"></div>
+      <a href="#" class="flex items-center justify-center gap-1 mt-3"
+        style="color:var(--oc-primary-light);font-size:12px;font-weight:600;">
+        查看区域详情 <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+      </a>
+    </div>
+
+    <!-- 养殖批次 -->
+    <div class="section-title">Claw 批次追踪</div>
+    <div class="oc-card p-4 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-layer-group" style="color:var(--oc-primary-light);"></i>
+          <span style="font-size:14px;font-weight:700;">养殖批次</span>
+        </div>
+        <span class="oc-badge-blue">6 个活跃</span>
+      </div>
+      <div class="space-y-3">
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:12px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+              <span style="font-size:12px;font-weight:600;">鲈鱼养殖批次</span>
+              <div class="agent-tag" style="font-size:9px;">🦞 AI追踪
+              </div>
+            </div>
+            <span style="font-size:11px;color:#4ade80;">进行中</span>
+          </div>
+          <div class="flex justify-between" style="font-size:11px;color:var(--oc-text-muted);margin-bottom:6px;">
+            <span>已养殖 52 天</span>
+            <span>预计出塘 128 天后</span>
+          </div>
+          <div class="oc-progress">
+            <div class="oc-progress-bar" style="width:29%;"></div>
+          </div>
+          <div style="font-size:10px;color:var(--oc-text-muted);margin-top:4px;">Claw 预测：当前生长曲线正常，预计出塘重量 <span
+              style="color:#4ade80;">1.5kg/尾</span></div>
+        </div>
+        <div style="background:var(--oc-surface2);border-radius:10px;padding:12px;">
+          <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+              <span style="font-size:12px;font-weight:600;">鳜鱼养殖批次</span>
+              <div class="agent-tag" style="font-size:9px;">🦞 AI追踪
+              </div>
+            </div>
+            <span style="font-size:11px;color:#4ade80;">进行中</span>
+          </div>
+          <div class="flex justify-between" style="font-size:11px;color:var(--oc-text-muted);margin-bottom:6px;">
+            <span>已养殖 118 天</span>
+            <span>预计出塘 32 天后</span>
+          </div>
+          <div class="oc-progress">
+            <div class="oc-progress-bar" style="width:79%;"></div>
+          </div>
+          <div style="font-size:10px;color:var(--oc-text-muted);margin-top:4px;">Claw 预测：生长略低于预期，建议调整投喂策略，已推送方案</div>
+        </div>
+      </div>
+      <div class="divider mt-3"></div>
+      <a href="#" class="flex items-center justify-center gap-1 mt-3"
+        style="color:var(--oc-primary-light);font-size:12px;font-weight:600;">
+        查看批次详情 <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+      </a>
+    </div>
+
+    <!-- 功能导航 -->
+    <div class="section-title">功能导航</div>
+
+    <!-- FishClaw 智能体模块 -->
+    <div class="oc-card p-4 mb-3">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          style="width:28px;height:28px;background:linear-gradient(135deg,rgba(224,58,47,0.2),rgba(255,107,53,0.2));color:var(--oc-accent);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:14px;">🦞</span>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--oc-primary-light);">FishClaw 智能体</span>
+      </div>
+      <div class="module-grid">
+        <a href="ai-chat.html" class="oc-card module-item p-2" style="border-color:rgba(224,58,47,0.2);">
+          <div class="oc-icon-box oc-icon-red" style="width:32px;height:32px;font-size:16px;">🦞</div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">Claw 对话</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-blue" style="width:32px;height:32px;"><i class="fas fa-tachometer-alt"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">监测面板</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-orange" style="width:32px;height:32px;"><i class="fas fa-brain"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">决策中心</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-purple" style="width:32px;height:32px;"><i class="fas fa-cogs"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">策略管理</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-red" style="width:32px;height:32px;"><i class="fas fa-bell"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">智能预警</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-chart-pie"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">数据分析</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 养殖数据仓 -->
+    <div class="oc-card p-4 mb-3">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          style="width:28px;height:28px;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-database" style="color:#4ade80;font-size:12px;"></i>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:#4ade80;">养殖数据仓</span>
+      </div>
+      <div class="module-grid">
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-water"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">循环水养殖</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-history"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">历史数据</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-chart-line"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">生长模型</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-flask"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">水质分析</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-utensils"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">饲料投喂</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-green" style="width:32px;height:32px;"><i class="fas fa-shield-alt"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">疾病防控</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 供销服务 -->
+    <div class="oc-card p-4 mb-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div
+          style="width:28px;height:28px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-shopping-basket" style="color:#fbbf24;font-size:12px;"></i>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:#fbbf24;">供销服务</span>
+      </div>
+      <div class="module-grid">
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-yellow" style="width:32px;height:32px;"><i class="fas fa-file-alt"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">基本资料</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-yellow" style="width:32px;height:32px;"><i class="fas fa-box"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">商品管理</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-yellow" style="width:32px;height:32px;"><i class="fas fa-shopping-cart"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">采购管理</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-yellow" style="width:32px;height:32px;"><i class="fas fa-warehouse"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">仓库管理</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-yellow" style="width:32px;height:32px;"><i class="fas fa-store"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">销售管理</span>
+        </a>
+        <a href="#" class="oc-card module-item p-2">
+          <div class="oc-icon-box oc-icon-yellow" style="width:32px;height:32px;"><i class="fas fa-money-bill-wave"
+              style="font-size:13px;"></i></div>
+          <span style="font-size:11px;font-weight:600;text-align:center;color:var(--oc-text);">财务管理</span>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- end main content -->
+
+  <!-- 底部导航 -->
+  <nav class="fixed bottom-0 left-0 right-0 z-10" style="background:var(--oc-surface);border-top:1px solid var(--oc-border);box-shadow:0 -4px 20px rgba(0,0,0,0.4);">
+    <div class="flex justify-around items-end px-1 pt-2 pb-3">
+      <!-- 总览（当前页激活） -->
+      <a href="boss-index.html" class="flex flex-col items-center gap-1" style="color:var(--oc-primary-light);">
+        <div style="width:32px;height:32px;background:rgba(224,58,47,0.15);border:1px solid rgba(224,58,47,0.35);border-radius:9px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-satellite-dish" style="font-size:13px;"></i>
+        </div>
+        <span style="font-size:9px;font-weight:700;letter-spacing:0.02em;">总览</span>
+      </a>
+      <!-- Claw矩阵 -->
+      <a href="water-quality-agent.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-project-diagram" style="font-size:15px;"></i>
+        </div>
+        <span style="font-size:9px;font-weight:600;">Claw矩阵</span>
+      </a>
+      <!-- 中间：问Claw -->
+      <a href="ai-chat.html" class="flex flex-col items-center gap-1" style="margin-bottom:4px;">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--oc-primary),var(--oc-accent));border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(224,58,47,0.5);margin-top:-18px;">
+          <span style="font-size:22px;line-height:1;">🦞</span>
+        </div>
+        <span style="font-size:9px;font-weight:700;color:var(--oc-primary-light);">问 Claw</span>
+      </a>
+      <!-- 协同决策 -->
+      <a href="claw-council.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-comments" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid var(--oc-bg);"></span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">协同决策</span>
+      </a>
+      <!-- 告警 -->
+      <a href="alerts.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-bell" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;min-width:14px;height:14px;background:var(--oc-primary);border-radius:7px;border:2px solid var(--oc-bg);font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 2px;">11</span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">告警</span>
+      </a>
+    </div>
+  </nav>
+      <!-- 协同决策 -->
+      <a href="claw-council.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-comments" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid var(--oc-bg);"></span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">协同决策</span>
+      </a>
+      <!-- 告警 -->
+      <a href="#" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-bell" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;min-width:14px;height:14px;background:var(--oc-primary);border-radius:7px;border:2px solid var(--oc-bg);font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 2px;">11</span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">告警</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    // 养殖区域环形图
+    const ctx = document.getElementById('pondStatusChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['活跃养殖池', '闲置养殖池'],
+        datasets: [{
+          data: [36, 4],
+          backgroundColor: ['#e03a2f', '#2e2e2e'],
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+</body>
+
+</html>

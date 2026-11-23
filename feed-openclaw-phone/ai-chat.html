@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>问 Claw · OpenClaw</title>
+  <link rel="stylesheet" href="../static/tailwind.min.css" />
+  <link rel="stylesheet" href="../static/all.min.css" />
+  <style>
+    :root {
+      --oc-primary: #e03a2f;
+      --oc-primary-dark: #b52a21;
+      --oc-primary-light: #f87171;
+      --oc-accent: #ff6b35;
+      --oc-bg: #0f0f0f;
+      --oc-surface: #1a1a1a;
+      --oc-surface2: #242424;
+      --oc-border: #2e2e2e;
+      --oc-text: #f0f0f0;
+      --oc-text-muted: #888;
+      --oc-green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--oc-bg); color: var(--oc-text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      height: 100vh; display: flex; flex-direction: column;
+      overscroll-behavior: none;
+    }
+    /* 顶部固定 */
+    .chat-header {
+      background: linear-gradient(135deg, #1a0a0a 0%, #2d0f0f 50%, #1a0a0a 100%);
+      border-bottom: 1px solid var(--oc-border);
+      padding: 14px 16px 12px;
+      flex-shrink: 0;
+      position: relative; overflow: hidden;
+    }
+    .chat-header::before {
+      content: '';
+      position: absolute; top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(224,58,47,0.2) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    /* 消息区域 */
+    .chat-body {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 16px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .chat-body::-webkit-scrollbar { display: none; }
+    /* 底部输入区 */
+    .chat-footer {
+      background: var(--oc-surface);
+      border-top: 1px solid var(--oc-border);
+      padding: 10px 12px 24px;
+      flex-shrink: 0;
+    }
+    /* 气泡 */
+    .bubble-user {
+      background: linear-gradient(135deg, var(--oc-primary), var(--oc-accent));
+      color: #fff; border-radius: 16px 16px 4px 16px;
+      padding: 10px 14px; font-size: 13px; line-height: 1.6;
+      max-width: 78%; align-self: flex-end;
+    }
+    .bubble-claw {
+      background: var(--oc-surface2);
+      border: 1px solid var(--oc-border);
+      color: var(--oc-text); border-radius: 16px 16px 16px 4px;
+      padding: 12px 14px; font-size: 13px; line-height: 1.7;
+      max-width: 88%;
+    }
+    .bubble-claw a { color: var(--oc-primary-light); text-decoration: underline; }
+    /* Claw 头像行 */
+    .claw-row { display: flex; gap: 8px; align-items: flex-end; }
+    .claw-avatar {
+      width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(224,58,47,0.25), rgba(255,107,53,0.2));
+      border: 1px solid rgba(224,58,47,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+    }
+    /* 用户行 */
+    .user-row { display: flex; justify-content: flex-end; }
+    /* 时间戳 */
+    .ts { font-size: 10px; color: var(--oc-text-muted); text-align: center; }
+    /* 数据卡片（内嵌在气泡里） */
+    .data-card {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 12px; margin-top: 8px; font-size: 12px;
+    }
+    .data-row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .data-row + .data-row { border-top: 1px solid rgba(255,255,255,0.05); }
+    /* 快捷问题 */
+    .quick-chip {
+      display: inline-block; background: rgba(224,58,47,0.1);
+      border: 1px solid rgba(224,58,47,0.25); color: var(--oc-primary-light);
+      border-radius: 20px; padding: 5px 12px; font-size: 12px;
+      white-space: nowrap; cursor: pointer; transition: background 0.15s;
+    }
+    .quick-chip:active { background: rgba(224,58,47,0.2); }
+    /* 输入框 */
+    .input-wrap {
+      display: flex; align-items: flex-end; gap: 8px;
+      background: var(--oc-surface2); border: 1px solid var(--oc-border);
+      border-radius: 14px; padding: 8px 8px 8px 14px;
+    }
+    .input-wrap textarea {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--oc-text); font-size: 14px; resize: none;
+      line-height: 1.5; max-height: 100px; font-family: inherit;
+    }
+    .input-wrap textarea::placeholder { color: var(--oc-text-muted); }
+    .send-btn {
+      width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--oc-primary), var(--oc-accent));
+      border: none; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(224,58,47,0.4);
+    }
+    /* 打字动画 */
+    .typing { display: flex; gap: 4px; align-items: center; padding: 4px 2px; }
+    .typing span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--oc-text-muted); animation: blink 1.2s infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%,60%,100% { opacity: 0.3; transform: scale(1); }
+      30% { opacity: 1; transform: scale(1.3); }
+    }
+    /* agent-tag */
+    .agent-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: rgba(224,58,47,0.1); border: 1px solid rgba(224,58,47,0.2);
+      color: var(--oc-primary-light); font-size: 10px;
+      padding: 1px 6px; border-radius: 4px;
+    }
+    .agent-pulse {
+      width: 6px; height: 6px; background: var(--oc-green);
+      border-radius: 50%; display: inline-block; animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.5; transform:scale(1.3); }
+    }
+    /* 底部 nav */
+    .bottom-nav {
+      background: var(--oc-surface); border-top: 1px solid var(--oc-border);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4); flex-shrink: 0;
+    }
+    /* 引用卡 */
+    .ref-card {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 8px; padding: 7px 10px; margin-top: 8px; font-size: 11px;
+      color: #60a5fa; cursor: pointer;
+    }
+    .scroll-x { overflow-x: auto; scrollbar-width: none; }
+    .scroll-x::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部 Header -->
+  <div class="chat-header">
+    <div class="flex items-center gap-3 relative z-10">
+      <a href="boss-index.html" style="color:var(--oc-text-muted);font-size:18px;flex-shrink:0;"><i class="fas fa-arrow-left"></i></a>
+      <div style="width:38px;height:38px;background:linear-gradient(135deg,rgba(224,58,47,0.25),rgba(255,107,53,0.2));border:1px solid rgba(224,58,47,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <span style="font-size:20px;line-height:1;">🦞</span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="flex items-center gap-2">
+          <span style="font-size:15px;font-weight:800;color:#fff;">OpenClaw</span>
+          <span style="font-size:10px;color:var(--oc-primary-light);background:rgba(224,58,47,0.2);padding:1px 5px;border-radius:4px;border:1px solid rgba(224,58,47,0.3);">AGENT</span>
+        </div>
+        <div class="flex items-center gap-1" style="font-size:11px;color:#4ade80;margin-top:1px;">
+          <span class="agent-pulse"></span>
+          <span>在线 · 已接入渔场实时数据</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3" style="flex-shrink:0;">
+        <a href="claw-council.html" style="color:var(--oc-text-muted);font-size:15px;position:relative;">
+          <i class="fas fa-comments"></i>
+          <span style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid var(--oc-bg);"></span>
+        </a>
+        <a href="#" style="color:var(--oc-text-muted);font-size:15px;"><i class="fas fa-ellipsis-v"></i></a>
+      </div>
+    </div>
+    <!-- 上下文感知条 -->
+    <div style="margin-top:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px;" class="relative z-10">
+      <i class="fas fa-database" style="color:var(--oc-text-muted);font-size:11px;flex-shrink:0;"></i>
+      <span style="font-size:11px;color:var(--oc-text-muted);">已加载：</span>
+      <div class="scroll-x flex gap-2" style="flex:1;">
+        <span class="agent-tag">水质数据</span>
+        <span class="agent-tag">投喂记录</span>
+        <span class="agent-tag">设备状态</span>
+        <span class="agent-tag">批次信息</span>
+        <span class="agent-tag">预警 11条</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 消息区域 -->
+  <div class="chat-body" id="chatBody">
+
+    <!-- 时间戳 -->
+    <div class="ts">今天 09:00</div>
+
+    <!-- Claw 开场 -->
+    <div class="claw-row">
+      <div class="claw-avatar">🦞</div>
+      <div class="bubble-claw">
+        你好，我是 <span style="color:var(--oc-primary-light);font-weight:700;">OpenClaw</span>，你的渔场智能大脑。<br><br>
+        我已实时接入 <span style="color:#4ade80;font-weight:600;">1号养殖基地</span> 的全部数据，包括 36 个水质节点、4 类 Claw 智能体运行状态、当前 11 条预警信息。<br><br>
+        有什么我可以帮你分析或决策的？
+      </div>
+    </div>
+
+    <!-- 快捷问题 -->
+    <div class="scroll-x" style="padding-bottom:2px;">
+      <div style="display:flex;gap:8px;width:max-content;">
+        <div class="quick-chip" onclick="sendQuick(this)">今日水质怎么样？</div>
+        <div class="quick-chip" onclick="sendQuick(this)">A5号池氨氮超标怎么处理？</div>
+        <div class="quick-chip" onclick="sendQuick(this)">鳜鱼批次什么时候出塘？</div>
+        <div class="quick-chip" onclick="sendQuick(this)">本周需要采购什么？</div>
+      </div>
+    </div>
+
+    <!-- 时间戳 -->
+    <div class="ts">09:02</div>
+
+    <!-- 用户提问 -->
+    <div class="user-row">
+      <div class="bubble-user">A5号池氨氮超标怎么处理？</div>
+    </div>
+
+    <!-- Claw 回答 -->
+    <div class="claw-row">
+      <div class="claw-avatar">🦞</div>
+      <div class="bubble-claw">
+        我已调取 A5号池的完整数据，分析如下：<br><br>
+        <span style="color:#fbbf24;font-weight:600;">根因：</span>04-01 和 04-02 连续两天投喂量超出计划 18%，残饵分解导致氨氮持续积累。<br><br>
+        <span style="color:#4ade80;font-weight:600;">已执行：</span>
+        <div class="data-card">
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">换水指令</span>
+            <span style="color:#4ade80;">✓ 已下发，换水 15%</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">增氧机</span>
+            <span style="color:#4ade80;">✓ 提速至 1600 rpm</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">今日投喂</span>
+            <span style="color:#fbbf24;">↓ 削减 30%</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">预计恢复</span>
+            <span style="color:#60a5fa;">11:00 前</span>
+          </div>
+        </div>
+        <div class="ref-card" onclick="window.location='water-quality-agent.html'">
+          <i class="fas fa-tint" style="font-size:12px;"></i>
+          <span>查看水质监测 Claw 详情</span>
+          <i class="fas fa-arrow-right" style="font-size:10px;margin-left:auto;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- 时间戳 -->
+    <div class="ts">09:04</div>
+
+    <!-- 用户提问 -->
+    <div class="user-row">
+      <div class="bubble-user">鳜鱼批次什么时候出塘？</div>
+    </div>
+
+    <!-- Claw 回答 -->
+    <div class="claw-row">
+      <div class="claw-avatar">🦞</div>
+      <div class="bubble-claw">
+        根据当前生长数据，鳜鱼批次预计 <span style="color:#4ade80;font-weight:700;">5月5日</span> 前后出塘，还有约 32 天。<br><br>
+        <div class="data-card">
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">已养殖</span>
+            <span>118 天</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">当前均重</span>
+            <span style="color:#4ade80;">约 0.85 kg/尾</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">目标出塘重</span>
+            <span>1.0–1.2 kg/尾</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">生长进度</span>
+            <span style="color:#fbbf24;">略低于预期 −4%</span>
+          </div>
+        </div>
+        <br>
+        <span style="color:#fbbf24;">⚠ 建议：</span>当前生长略低于预期，投喂 Claw 已推送调整方案，建议本周将蛋白含量提升至 42%，预计可追回进度。是否需要我帮你审批这份方案？
+      </div>
+    </div>
+
+    <!-- 用户回复 -->
+    <div class="user-row">
+      <div class="bubble-user">好的，帮我审批</div>
+    </div>
+
+    <!-- Claw 执行 -->
+    <div class="claw-row">
+      <div class="claw-avatar">🦞</div>
+      <div class="bubble-claw">
+        <span style="color:#4ade80;font-weight:600;">✓ 已审批通过</span>，投喂 Claw 将从今日下午 14:00 起执行新配方。<br><br>
+        <div class="data-card">
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">调整内容</span>
+            <span>蛋白含量 38% → 42%</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">执行时间</span>
+            <span style="color:#4ade80;">今日 14:00 起</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">预计效果</span>
+            <span style="color:#4ade80;">+4% 生长速率</span>
+          </div>
+          <div class="data-row">
+            <span style="color:var(--oc-text-muted);">额外成本</span>
+            <span style="color:#fbbf24;">+¥1,200 / 周</span>
+          </div>
+        </div>
+        <br>
+        我会在 3 天后复核生长数据，如有偏差及时通知你。
+      </div>
+    </div>
+
+    <!-- 时间戳 -->
+    <div class="ts">09:08</div>
+
+    <!-- 用户提问 -->
+    <div class="user-row">
+      <div class="bubble-user">现在有哪些事情需要我来决策？</div>
+    </div>
+
+    <!-- Claw 汇报 -->
+    <div class="claw-row">
+      <div class="claw-avatar">🦞</div>
+      <div class="bubble-claw">
+        当前有 <span style="color:#f87171;font-weight:700;">3 件事</span> 需要你来拍板：<br><br>
+
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:rgba(224,58,47,0.08);border:1px solid rgba(224,58,47,0.2);border-radius:10px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:4px;">① 采购审批 · 紧急</div>
+            <div style="font-size:12px;color:#ccc;">鲈鱼饲料库存仅剩 3 天，采购 Claw 已生成 3 份报价单，最优方案节省 ¥4,800。</div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button onclick="this.parentElement.parentElement.style.opacity='0.5'" style="flex:1;background:linear-gradient(135deg,var(--oc-primary),var(--oc-accent));color:#fff;border:none;border-radius:8px;padding:6px 0;font-size:12px;font-weight:600;cursor:pointer;">审批通过</button>
+              <button style="flex:1;background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);border-radius:8px;padding:6px 0;font-size:12px;cursor:pointer;">查看详情</button>
+            </div>
+          </div>
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:4px;">② 设备保养排期 · 本周</div>
+            <div style="font-size:12px;color:#ccc;">5 台增氧机运行超时，设备 Claw 建议周六统一保养，预计停机 4 小时。</div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button onclick="this.parentElement.parentElement.style.opacity='0.5'" style="flex:1;background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:6px 0;font-size:12px;font-weight:600;cursor:pointer;">确认排期</button>
+              <button style="flex:1;background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);border-radius:8px;padding:6px 0;font-size:12px;cursor:pointer;">调整时间</button>
+            </div>
+          </div>
+          <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:10px 12px;">
+            <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:4px;">③ 疾病复核 · 待确认</div>
+            <div style="font-size:12px;color:#ccc;">D区2号池疑似烂尾病，置信度 83%，疾病 Claw 建议人工复核后决定是否用药。</div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button onclick="this.parentElement.parentElement.style.opacity='0.5'" style="flex:1;background:rgba(168,85,247,0.15);color:#c084fc;border:1px solid rgba(168,85,247,0.3);border-radius:8px;padding:6px 0;font-size:12px;font-weight:600;cursor:pointer;">安排复核</button>
+              <button style="flex:1;background:var(--oc-surface2);color:var(--oc-text-muted);border:1px solid var(--oc-border);border-radius:8px;padding:6px 0;font-size:12px;cursor:pointer;">查看图像</button>
+            </div>
+          </div>
+        </div>
+        <div class="ref-card" onclick="window.location='claw-council.html'" style="margin-top:10px;">
+          <i class="fas fa-comments" style="font-size:12px;"></i>
+          <span>查看 Claw 协同决策会议室</span>
+          <i class="fas fa-arrow-right" style="font-size:10px;margin-left:auto;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- 打字中占位（默认隐藏） -->
+    <div class="claw-row" id="typingIndicator" style="display:none;">
+      <div class="claw-avatar">🦞</div>
+      <div class="bubble-claw" style="padding:10px 14px;">
+        <div class="typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end chat-body -->
+
+  <!-- 底部输入区 -->
+  <div class="chat-footer">
+    <!-- 快捷操作行 -->
+    <div class="scroll-x mb-2">
+      <div style="display:flex;gap:6px;width:max-content;">
+        <div class="quick-chip" onclick="sendQuick(this)">今日水质怎么样？</div>
+        <div class="quick-chip" onclick="sendQuick(this)">本周需要采购什么？</div>
+        <div class="quick-chip" onclick="sendQuick(this)">生成今日工作报告</div>
+        <div class="quick-chip" onclick="sendQuick(this)">预测本月产量</div>
+      </div>
+    </div>
+    <div class="input-wrap">
+      <textarea id="msgInput" rows="1" placeholder="问问 Claw…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" onclick="sendMsg()">
+        <i class="fas fa-paper-plane" style="color:#fff;font-size:13px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav">
+    <div class="flex justify-around items-end px-1 pt-2 pb-3">
+      <a href="boss-index.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-satellite-dish" style="font-size:15px;"></i>
+        </div>
+        <span style="font-size:9px;font-weight:600;">总览</span>
+      </a>
+      <a href="water-quality-agent.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-project-diagram" style="font-size:15px;"></i>
+        </div>
+        <span style="font-size:9px;font-weight:600;">Claw矩阵</span>
+      </a>
+      <!-- 中间：问Claw（当前页激活） -->
+      <a href="ai-chat.html" class="flex flex-col items-center gap-1" style="margin-bottom:4px;">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--oc-primary),var(--oc-accent));border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(224,58,47,0.6);margin-top:-18px;border:2px solid rgba(255,255,255,0.15);">
+          <span style="font-size:22px;line-height:1;">🦞</span>
+        </div>
+        <span style="font-size:9px;font-weight:700;color:var(--oc-primary-light);">问 Claw</span>
+      </a>
+      <a href="claw-council.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-comments" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#22c55e;border-radius:50%;border:2px solid var(--oc-bg);"></span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">协同决策</span>
+      </a>
+      <a href="alerts.html" class="flex flex-col items-center gap-1" style="color:var(--oc-text-muted);">
+        <div style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;">
+          <i class="fas fa-bell" style="font-size:15px;"></i>
+          <span style="position:absolute;top:-3px;right:-3px;min-width:14px;height:14px;background:var(--oc-primary);border-radius:7px;border:2px solid var(--oc-bg);font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 2px;">11</span>
+        </div>
+        <span style="font-size:9px;font-weight:600;">告警</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    const chatBody = document.getElementById('chatBody');
+    const msgInput = document.getElementById('msgInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    // 预设回复
+    const replies = {
+      '今日水质怎么样？': '今日整体水质评分 <span style="color:#4ade80;font-weight:700;">87分</span>，36个节点中 35个正常，1个预警。<br><br>A区5号池氨氮 0.8 mg/L 偏高，水质 Claw 已启动换水处置，预计 11:00 恢复正常。其余区域溶氧、pH、水温均在安全范围内。',
+      '本周需要采购什么？': '采购 Claw 汇总了本周需求：<br><br>① <span style="color:#f87171;">鲈鱼饲料</span> 2.5吨（紧急，3天后断货）<br>② <span style="color:#fbbf24;">增氧机润滑油</span> 20L（配合周六保养）<br>③ <span style="color:#60a5fa;">水质检测试剂</span> 1套（月度补充）<br><br>总预算约 <span style="color:#4ade80;">¥18,600</span>，已生成采购单，是否审批？',
+      '生成今日工作报告': '正在汇总各 Claw 数据，生成今日报告…<br><br><span style="color:#4ade80;font-weight:600;">【1号养殖基地 · 04-03 日报】</span><br>• 水质：87分，1处异常已处置<br>• 投喂：完成5次，节省饲料18kg<br>• 设备：运行正常，5台待保养<br>• 批次：鲈鱼52天/鳜鱼118天<br>• 预警：11条，3条需人工决策<br><br>报告已同步至管理后台。',
+      '预测本月产量': '根据当前批次数据，Claw 预测本月产量：<br><br><span style="color:#4ade80;font-weight:700;">预计出塘：约 18.5 吨</span><br><br>• 鳜鱼批次：约 12 吨（5月5日）<br>• 鲈鱼批次：本月不出塘<br>• 其他批次：约 6.5 吨<br><br>按当前市价估算，本月预计收入 <span style="color:#4ade80;font-weight:700;">¥74 万</span>。',
+      'A5号池氨氮超标怎么处理？': '已调取 A5号池完整数据。根因是近两日投喂量超标 18%，残饵分解导致氨氮积累至 0.8 mg/L。<br><br>水质 Claw 已自动执行：换水 15%、增氧机提速至 1600 rpm、今日投喂削减 30%。预计 11:00 前恢复正常。',
+      '鳜鱼批次什么时候出塘？': '鳜鱼批次预计 <span style="color:#4ade80;font-weight:700;">5月5日</span> 出塘，还有约 32 天。当前均重约 0.85 kg/尾，目标 1.0–1.2 kg，生长略低于预期 4%。投喂 Claw 已推送高蛋白配方调整方案，是否审批？',
+    };
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+    }
+
+    function sendQuick(el) {
+      msgInput.value = el.textContent;
+      sendMsg();
+    }
+
+    function sendMsg() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      appendUser(text);
+      msgInput.value = '';
+      msgInput.style.height = 'auto';
+      showTyping();
+      setTimeout(() => {
+        hideTyping();
+        const reply = replies[text] || '我已收到你的问题，正在分析渔场数据…<br><br>这个问题涉及多个 Claw 的数据，我会综合水质、投喂、设备状态给你一个完整的答案。稍等片刻。';
+        appendClaw(reply);
+      }, 1200 + Math.random() * 600);
+    }
+
+    function appendUser(text) {
+      const row = document.createElement('div');
+      row.className = 'user-row';
+      row.innerHTML = `<div class="bubble-user">${escHtml(text)}</div>`;
+      typingIndicator.before(row);
+      scrollBottom();
+    }
+
+    function appendClaw(html) {
+      const row = document.createElement('div');
+      row.className = 'claw-row';
+      row.innerHTML = `<div class="claw-avatar">🦞</div><div class="bubble-claw">${html}</div>`;
+      typingIndicator.before(row);
+      scrollBottom();
+    }
+
+    function showTyping() {
+      typingIndicator.style.display = 'flex';
+      scrollBottom();
+    }
+
+    function hideTyping() {
+      typingIndicator.style.display = 'none';
+    }
+
+    function scrollBottom() {
+      setTimeout(() => chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: 'smooth' }), 50);
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // 初始滚动到底部
+    scrollBottom();
+  </script>
+</body>
+</html>
